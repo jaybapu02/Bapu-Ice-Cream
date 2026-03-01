@@ -1,0 +1,281 @@
+{% extends "page.html" %}
+{% block title %}Our Services{% endblock title %}
+{% block body %}
+
+<style>
+  body {
+    background: linear-gradient(135deg, #ffe6ea, #f7d9ff);
+  }
+
+  /* Animations */
+  @keyframes float {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+    100% { transform: translateY(0); }
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+    100% { transform: scale(1); }
+  }
+
+  .floating {
+    animation: float 5s ease-in-out infinite;
+  }
+
+  .service-card {
+    border-radius: 22px;
+    transition: all 0.4s ease;
+  }
+
+  .service-card:hover {
+    transform: translateY(-10px) scale(1.03);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.25);
+  }
+
+  .glow-btn {
+    background: linear-gradient(135deg, #ff6f91, #845ec2);
+    border: none;
+    color: white;
+    padding: 12px 28px;
+    border-radius: 40px;
+    font-weight: bold;
+    box-shadow: 0 0 18px rgba(255,111,145,0.7);
+    transition: all 0.3s ease;
+  }
+
+  .glow-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 35px rgba(255,111,145,1);
+  }
+
+  .offer-strip {
+    background: linear-gradient(90deg, #ff758c, #ff7eb3);
+    animation: pulse 2.5s infinite;
+  }
+
+  .icon-big {
+    font-size: 52px;
+  }
+  .hero-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 420px;
+}
+
+.btn-primary-hero {
+  background: linear-gradient(135deg, #ff6f91, #845ec2);
+  color: #fff;
+  padding: 16px;
+  border-radius: 50px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 700;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+  transition: all 0.3s ease;
+}
+
+.btn-primary-hero:hover {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 25px 50px rgba(0,0,0,0.35);
+}
+
+.secondary-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.btn-outline-hero {
+  flex: 1 1 calc(50% - 12px);
+  border: 2px solid rgba(227, 86, 86, 0.8);
+  color: #533030;
+  padding: 12px;
+  border-radius: 40px;
+  text-align: center;
+  font-weight: 600;
+  backdrop-filter: blur(6px);
+  transition: all 0.25s ease;
+}
+
+.btn-outline-hero:hover {
+  background: rgba(228, 137, 137, 0.25);
+  transform: translateY(10px);
+}
+a {
+  text-decoration: none !important;
+}
+</style>
+
+<!-- HERO -->
+<section class="py-5">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-md-6">
+        <span class="badge bg-warning text-dark mb-3">🍦 Freshly Made Every Day</span>
+        <h1 class="display-5 fw-bold">
+          Our Services
+        </h1>
+        <p class="lead">
+          Ice cream isn’t just dessert — it’s an experience.
+          And we serve it perfectly.
+        </p>
+
+        <div class="hero-actions mt-4">
+          <a href="{% url 'order' %}" class="btn-primary-hero">
+            🛒 Order Now
+          </a>
+
+          <div class="secondary-actions">
+            <a href="{% url 'cart' %}" class="btn-outline-hero">🛍 Cart</a>
+            <a href="/catering" class="btn-outline-hero">🎉 Catering</a>
+            <a href="{% url 'products' %}" class="btn-outline-hero">🍨 Products</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6 text-center floating">
+        <img src="/static/hero-icecream.jpg" class="img-fluid rounded-4 shadow-lg">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- OFFER -->
+<div class="offer-strip text-white text-center py-2 fw-bold">
+  🎉 Buy Family Pack & Get 2 Cones FREE — Use Code <b>SCOOP25</b>
+</div>
+
+<!-- SERVICES -->
+<section class="container py-5">
+  <div class="text-center mb-5">
+    <h2 class="fw-bold">What We Offer</h2>
+    <p class="text-muted">Crafted for individuals, families & celebrations</p>
+  </div>
+
+  <div class="row g-4">
+
+    <div class="col-md-4">
+      <div class="card service-card text-center p-4">
+        <div class="icon-big">🍦</div>
+        <span class="badge bg-danger mb-2">Best Seller</span>
+        <h4>Scooped Ice Cream</h4>
+        <p class="text-muted">20+ premium hand-scooped flavours.</p>
+        <a href="{% url 'order' %}?type=Scooped Ice Cream" class="glow-btn w-100">
+          Order Now
+        </a>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card service-card text-center p-4">
+        <div class="icon-big">🍦</div>
+        <span class="badge bg-success mb-2">Kids Favourite</span>
+        <h4>Softy & Cones</h4>
+        <p class="text-muted">Creamy soft-serve cones & toppings.</p>
+        <a href="{% url 'order' %}?type=Softy Cone" class="glow-btn w-100">
+          Order Now
+        </a>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card service-card text-center p-4">
+        <div class="icon-big">🍨</div>
+        <span class="badge bg-warning text-dark mb-2">Today’s Offer</span>
+        <h4>Family / Party Packs</h4>
+        <p class="text-muted">Perfect for parties & celebrations.</p>
+        <a href="{% url 'order' %}?type=Family Pack" class="glow-btn w-100">
+          Book Now
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="text-center mt-5">
+    <a href="{% url 'cart' %}" class="glow-btn">🛍 View Cart</a>
+  </div>
+</section>
+
+<!-- DELIVERY -->
+<section class="py-5">
+  <div class="container">
+    <h2 class="text-center fw-bold mb-4">Delivery & Availability</h2>
+
+    <div class="row g-4 text-center">
+
+      <div class="col-md-4">
+        <div class="service-card bg-white p-4">
+          🚚
+          <h5 class="mt-2">Home Delivery</h5>
+          <p class="text-muted">Free delivery above ₹500</p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="service-card bg-white p-4">
+          ⏰
+          <h5 class="mt-2">Store Hours</h5>
+          <p class="text-muted">10 AM – 10 PM (All Days)</p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="service-card bg-white p-4">
+          📍
+          <h5 class="mt-2">Service Area</h5>
+          <p class="text-muted">City-wide catering available</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="container py-5">
+  <h2 class="text-center fw-bold mb-4">FAQs</h2>
+
+  <div class="accordion" id="faq">
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button" data-bs-toggle="collapse" data-bs-target="#q1">
+          What are your ordering hours?
+        </button>
+      </h2>
+      <div id="q1" class="accordion-collapse collapse show">
+        <div class="accordion-body">
+          Orders accepted daily from 10 AM – 10 PM.
+        </div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#q2">
+          Do you offer sugar-free options?
+        </button>
+      </h2>
+      <div id="q2" class="accordion-collapse collapse">
+        <div class="accordion-body">
+          Yes, sugar-free & vegan options are available.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="py-5 text-center">
+  <h2 class="fw-bold mb-3">Let’s Make Your Day Sweeter 🍨</h2>
+  <div class="d-flex justify-content-center gap-3 flex-wrap">
+    <a href="/contact" class="glow-btn">📞 Contact Us</a>
+    <a href="/catering" class="glow-btn">🎉 Catering</a>
+    <a href="{% url 'cart' %}" class="glow-btn">🛍 Cart</a>
+  </div>
+</section>
+
+{% endblock body %}

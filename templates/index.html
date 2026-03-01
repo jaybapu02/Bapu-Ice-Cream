@@ -1,0 +1,141 @@
+{% extends "page.html" %}
+{% block title %}Home{% endblock title %}
+
+{% block body %}
+
+<!-- Tailwind CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- NAVBAR -->
+<nav class="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur shadow">
+  <div class="max-w-7xl mx-auto px-4 md:px-6 h-16 md:h-20 flex items-center justify-between">
+
+    <!-- Logo -->
+    <h1 class="text-2xl md:text-3xl font-bold bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">
+      Bapu Ice-Cream
+    </h1>
+
+    <!-- Desktop Menu -->
+    <div class="hidden md:flex gap-8 text-gray-700 font-medium">
+      <a href="/" class="hover:text-pink-500">Home</a>
+      <a href="/services" class="hover:text-pink-500">Service</a>
+      <a href="/about" class="hover:text-pink-500">About</a>
+      <a href="/contact" class="hover:text-pink-500">Contact</a>
+    </div>
+
+    <!-- Mobile Button -->
+    <button class="md:hidden text-3xl" onclick="toggleMenu()">☰</button>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div id="mobileMenu" class="hidden md:hidden bg-white shadow-lg">
+    <div class="flex flex-col px-6 py-4 gap-4 text-gray-700 font-medium">
+      <a href="/" class="hover:text-pink-500">Home</a>
+      <a href="/services" class="hover:text-pink-500">Service</a>
+      <a href="/about" class="hover:text-pink-500">About</a>
+      <a href="/contact" class="hover:text-pink-500">Contact</a>
+    </div>
+  </div>
+</nav>
+
+<script>
+  function toggleMenu() {
+    document.getElementById("mobileMenu").classList.toggle("hidden");
+  }
+</script>
+
+<!-- HERO -->
+<section class="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 via-purple-50 to-yellow-50 pt-20 px-4">
+  <div class="text-center max-w-4xl">
+    <h1 class="text-4xl sm:text-5xl md:text-7xl font-extrabold bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">
+      Scoop Into Happiness
+    </h1>
+
+    <p class="text-base sm:text-lg md:text-xl mt-6 text-gray-700">
+      Handcrafted artisan ice cream made with love and premium ingredients 🍨
+    </p>
+
+    <div class="flex flex-wrap gap-4 justify-center mt-10">
+      <a href="{% url 'order' %}"
+         class="bg-gradient-to-r from-pink-500 to-purple-500 text-white px-6 py-3 rounded-full shadow hover:scale-105 transition">
+        🛒 Order Now
+      </a>
+
+      <a href="{% url 'cart' %}"
+         class="bg-white border px-6 py-3 rounded-full shadow hover:scale-105 transition">
+        🛍 View Cart
+      </a>
+
+      <a href="{% url 'products' %}"
+         class="bg-gradient-to-r from-pink-500 to-purple-500 text-white px-6 py-3 rounded-full shadow hover:scale-105 transition">
+        🍦 Products
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="py-16 bg-white">
+  <div class="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 px-4 text-center">
+    <div class="p-6 bg-gray-50 rounded-2xl shadow hover:-translate-y-1 transition">
+      🌿
+      <h3 class="text-lg mt-3">Natural Ingredients</h3>
+    </div>
+    <div class="p-6 bg-gray-50 rounded-2xl shadow hover:-translate-y-1 transition">
+      ❤️
+      <h3 class="text-lg mt-3">Made with Love</h3>
+    </div>
+    <div class="p-6 bg-gray-50 rounded-2xl shadow hover:-translate-y-1 transition">
+      ⏰
+      <h3 class="text-lg mt-3">Fresh Daily</h3>
+    </div>
+    <div class="p-6 bg-gray-50 rounded-2xl shadow hover:-translate-y-1 transition">
+      ⭐
+      <h3 class="text-lg mt-3">Award Winning</h3>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="py-16 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
+  <div class="max-w-7xl mx-auto px-4">
+    <h2 class="text-3xl md:text-5xl font-bold text-center mb-12">
+      Our Services
+    </h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div class="bg-white rounded-3xl shadow overflow-hidden">
+        <img src="/static/10.avif" class="h-56 w-full object-cover">
+        <div class="p-6">
+          <h3 class="text-xl font-semibold">Custom Orders</h3>
+          <p class="text-gray-600 mt-2">Personalized ice creams for every occasion</p>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-3xl shadow overflow-hidden">
+        <img src="/static/11.avif" class="h-56 w-full object-cover">
+        <div class="p-6">
+          <h3 class="text-xl font-semibold">Event Catering</h3>
+          <p class="text-gray-600 mt-2">Ice cream carts for weddings & parties</p>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-3xl shadow overflow-hidden">
+        <img src="/static/12.avif" class="h-56 w-full object-cover">
+        <div class="p-6">
+          <h3 class="text-xl font-semibold">Home Delivery</h3>
+          <p class="text-gray-600 mt-2">Fresh ice cream delivered to your door</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-gray-900 text-white py-10">
+  <p class="text-center text-gray-400 text-sm">
+    © 2026 Bapu Ice-Cream. Made with ❤️ in India
+  </p>
+</footer>
+
+{% endblock body %}

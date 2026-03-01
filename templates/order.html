@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Order Ice Cream | Bapu Ice Cream</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    body {
+      background: linear-gradient(135deg, #fff7ed, #e3f2fd);
+    }
+
+    .order-card {
+      border-radius: 24px;
+    }
+
+    .section-title {
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .form-control,
+    .form-select {
+      border-radius: 12px;
+      padding: 12px 14px;
+    }
+
+    .price-box {
+      background: linear-gradient(135deg, #f5ced7, #bdaadc);
+      color: #440606;
+      border-radius: 16px;
+      padding: 16px;
+      text-align: center;
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+
+    .btn-primary-action {
+      background: linear-gradient(135deg, #ff6f91, #845ec2);
+      border: none;
+      color: white;
+      font-weight: 700;
+      padding: 14px;
+      border-radius: 40px;
+    }
+
+    .btn-primary-action:hover {
+      opacity: 0.95;
+    }
+
+    @media (max-width: 768px) {
+      .card-body {
+        padding: 24px !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-9 col-md-11">
+
+      <div class="card shadow-lg border-0 order-card">
+        <div class="card-body p-5">
+
+          <!-- HEADER -->
+          <div class="text-center mb-5">
+            <h2 class="fw-bold">🍦 Order Your Ice Cream</h2>
+            <p class="text-muted mb-0">
+              Freshly made, delivered with love ❤️
+            </p>
+          </div>
+
+          <form method="POST">
+            {% csrf_token %}
+
+            <!-- CUSTOMER DETAILS -->
+            <h5 class="section-title">Customer Details</h5>
+            <div class="row g-4 mb-4">
+              <div class="col-md-6">
+                <label class="form-label">Name</label>
+                <input type="text" name="name" class="form-control" required>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Phone</label>
+                <input type="tel" name="phone" class="form-control" required>
+              </div>
+
+              <div class="col-12">
+                <label class="form-label">Delivery Address</label>
+                <textarea name="address" class="form-control" rows="2" required></textarea>
+              </div>
+            </div>
+
+            <!-- ORDER DETAILS -->
+            <h5 class="section-title">Order Details</h5>
+            <div class="row g-4 mb-4">
+
+              <div class="col-md-4">
+                <label class="form-label">Ice Cream Type</label>
+                <select name="ice_cream_type" class="form-select">
+                  <option value="Scooped Ice Cream" {% if selected_type == "Scooped Ice Cream" %}selected{% endif %}>Scooped Ice Cream</option>
+                  <option value="Softy Cone" {% if selected_type == "Softy Cone" %}selected{% endif %}>Softy Cone</option>
+                  <option value="Family Pack" {% if selected_type == "Family Pack" %}selected{% endif %}>Family Pack</option>
+                </select>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label">Flavour</label>
+                <select name="flavour" class="form-select">
+                  <option>Mango Magic</option>
+                  <option>Vanilla Classic</option>
+                  <option>Chocolate Delight</option>
+                  <option>Strawberry Bliss</option>
+                  <option>Butterscotch Crunch</option>
+                  <option>Kesar Pista Royal</option>
+                  <option>Black Currant Twist</option>
+                  <option>Dry Fruit Special</option>
+                  <option>Cookies & Cream</option>
+                  <option>Tender Coconut Fresh</option>
+                  <option>Coffee Mocha</option>
+                  <option>Rainbow Fantasy</option>
+                </select>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label">Quantity</label>
+                <input type="number" name="quantity" class="form-control" value="1" min="1">
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Size</label>
+                <select name="size" class="form-select">
+                  <option>Single Scoop</option>
+                  <option>Double Scoop</option>
+                  <option>500 ml</option>
+                  <option>1 Liter</option>
+                </select>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Toppings</label>
+                <select name="toppings" class="form-select">
+                  <option>No Toppings</option>
+                  <option>Choco Chips</option>
+                  <option>Nuts</option>
+                  <option>Caramel Syrup</option>
+                </select>
+              </div>
+
+            </div>
+
+            <!-- DELIVERY & PAYMENT -->
+            <h5 class="section-title">Delivery & Payment</h5>
+            <div class="row g-4 mb-4">
+              <div class="col-md-6">
+                <label class="form-label">Delivery Type</label>
+                <select name="delivery_type" class="form-select">
+                  <option>Home Delivery</option>
+                  <option>Takeaway</option>
+                </select>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Payment Mode</label>
+                <select name="payment_mode" class="form-select">
+                  <option>Cash on Delivery</option>
+                  <option>UPI</option>
+                  <option>Card</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- HIDDEN TOTAL -->
+            <input type="hidden" name="total_price" value="0">
+
+            <!-- PRICE -->
+            <div class="price-box mb-4">
+              Total Price: ₹<span id="totalPrice">0</span>
+            </div>
+
+            <!-- ACTION BUTTONS -->
+            <div class="row g-3">
+              <div class="col-md-4">
+                <button type="submit"
+                        class="btn btn-outline-primary w-100"
+                        onclick="setAction('add_to_cart')">
+                  ➕ Add to Cart
+                </button>
+              </div>
+
+              <div class="col-md-4">
+                <a href="{% url 'products' %}" class="btn btn-light w-100">
+                  🍨 Explore Products
+                </a>
+              </div>
+
+              <div class="col-md-4">
+                <button type="submit"
+                        class="btn btn-primary-action w-100"
+                        onclick="setAction('direct_checkout')">
+                  Pay Now 💳
+                </button>
+              </div>
+            </div>
+
+          </form>
+
+        </div>
+      </div>
+
+      <p class="text-center text-muted mt-4">
+        🚚 Delivery within 45 minutes | Free delivery above ₹500
+      </p>
+
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- PRICE LOGIC -->
+<script>
+  const prices = {
+    iceCream: {
+      "Scooped Ice Cream": 120,
+      "Softy Cone": 80,
+      "Family Pack": 350
+    },
+    size: {
+      "Single Scoop": 0,
+      "Double Scoop": 40,
+      "500 ml": 150,
+      "1 Liter": 280
+    },
+    toppings: {
+      "No Toppings": 0,
+      "Choco Chips": 30,
+      "Nuts": 40,
+      "Caramel Syrup": 25
+    }
+  };
+
+  function calculatePrice() {
+    const type = document.querySelector('[name="ice_cream_type"]').value;
+    const size = document.querySelector('[name="size"]').value;
+    const topping = document.querySelector('[name="toppings"]').value;
+    const quantity = parseInt(document.querySelector('[name="quantity"]').value);
+
+    const total =
+      (prices.iceCream[type] +
+       prices.size[size] +
+       prices.toppings[topping]) * quantity;
+
+    document.getElementById("totalPrice").innerText = total;
+    document.querySelector('[name="total_price"]').value = total;
+  }
+
+  document.querySelectorAll("select, input[name='quantity']")
+    .forEach(el => el.addEventListener("change", calculatePrice));
+
+  calculatePrice();
+
+  function setAction(action) {
+    const form = document.querySelector("form");
+    if (action === "add_to_cart") {
+      form.action = "{% url 'add_to_cart' %}";
+    } else if (action === "direct_checkout") {
+      form.action = "{% url 'direct_checkout' %}";
+    }
+  }
+</script>
+
+</body>
+</html>

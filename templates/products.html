@@ -1,0 +1,208 @@
+{% extends "page.html" %}
+{% block title %}Our Ice Creams{% endblock title %}
+{% block body %}
+
+<style>
+  .product-card {
+    transition: transform .3s ease, box-shadow .3s ease;
+  }
+  .product-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 14px 30px rgba(0,0,0,.15);
+  }
+</style>
+
+<section class="container py-5">
+  <h1 class="text-center fw-bold mb-3">🍦 Our Ice Cream Collection</h1>
+  <p class="text-center text-muted mb-5">
+    Handcrafted flavours made with love & premium ingredients
+  </p>
+
+  <div class="row g-4">
+
+    <!-- Product 1 -->
+    <div class="col-md-4">
+      <div class="card h-100 text-center product-card">
+        <img src="/static/product1.png" class="card-img-top" alt="Mango">
+        <div class="card-body">
+          <h5 class="card-title">Mango Magic</h5>
+          <p class="text-muted">Seasonal Alphonso mango</p>
+          <h6 class="fw-bold text-success">₹140</h6>
+          <a href="{% url 'order' %}?flavour=Mango Magic" class="btn btn-primary w-100 mt-2">
+            Order Now
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product 2 -->
+    <div class="col-md-4">
+      <div class="card h-100 text-center product-card">
+        <img src="/static/3.avif" class="card-img-top" alt="Mango">
+        <div class="card-body">
+          <h5 class="card-title">Vanilla Classic</h5>
+          <p class="text-muted">Pure creamy vanilla beans</p>
+          <h6 class="fw-bold text-success">₹120</h6>
+          <a href="{% url 'order' %}?flavour=Vanilla Classic" class="btn btn-primary w-100 mt-2">
+            Order Now
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product 3 -->
+    <div class="col-md-4">
+      <div class="card h-100 text-center product-card">
+        <img src="/static/product2.png" class="card-img-top" alt="Mango">
+        <div class="card-body">
+          <h5 class="card-title">Chocolate Delight</h5>
+          <p class="text-muted">Rich Belgian chocolate</p>
+          <h6 class="fw-bold text-success">₹160</h6>
+          <a href="{% url 'order' %}?flavour=Chocolate Delight" class="btn btn-primary w-100 mt-2">
+            Order Now
+          </a>
+        </div>
+      </div>
+    </div>
+    <!-- Product 4 -->
+    <div class="col-md-4">
+      <div class="card h-100 text-center product-card">
+        <img src="/static/product4.png" class="card-img-top" alt="Mango">
+        <div class="card-body">
+          <h5 class="card-title">Strawberry Bliss</h5>
+          <p class="text-muted">Fresh strawberry pulp</p>
+          <h6 class="fw-bold text-success">₹130</h6>
+          <a href="{% url 'order' %}?flavour=Strawberry Bliss" class="btn btn-primary w-100 mt-2">
+            Order Now
+          </a>
+        </div>
+      </div>
+    </div>
+    <!-- Product 5 -->
+    <div class="col-md-4">
+      <div class="card h-100 text-center product-card">
+        <img src="/static/product5.png" class="card-img-top" alt="Mango">
+        <div class="card-body">
+          <h5 class="card-title">Butterscotch Crunch</h5>
+          <p class="text-muted">Caramel flavor with crunchy nuts</p>
+          <h6 class="fw-bold text-success">₹150</h6>
+          <a href="{% url 'order' %}?flavour=Butterscotch Crunch" class="btn btn-primary w-100 mt-2">
+            Order Now
+          </a>
+        </div>
+      </div>
+    </div>
+    <!-- Product 6 -->
+    <div class="col-md-4">
+      <div class="card h-100 text-center product-card">
+        <img src="/static/product6.jpeg" class="card-img-top" alt="Mango">
+        <div class="card-body">
+          <h5 class="card-title">Kesar Pista Royal</h5>
+          <p class="text-muted">Saffron infused with pista</p>
+          <h6 class="fw-bold text-success">₹170</h6>
+          <a href="{% url 'order' %}?flavour=Kesar Pista Royal" class="btn btn-primary w-100 mt-2">
+            Order Now
+          </a>
+        </div>
+      </div>
+    </div>
+    <!-- Product 7 -->
+    <div class="col-md-4">
+      <div class="card h-100 text-center product-card">
+        <img src="/static/product7.png" class="card-img-top" alt="Mango">
+        <div class="card-body">
+          <h5 class="card-title">Black Currant Twist</h5>
+          <p class="text-muted">Tangy black currant flavor</p>
+          <h6 class="fw-bold text-success">₹145</h6>
+          <a href="{% url 'order' %}?flavour=Black Currant Twist" class="btn btn-primary w-100 mt-2">
+            Order Now
+          </a>
+        </div>
+      </div>
+    </div>
+    <!-- Product 8 -->
+    <div class="col-md-4">
+      <div class="card h-100 text-center product-card">
+        <img src="/static/product8.png" class="card-img-top" alt="Mango">
+        <div class="card-body">
+          <h5 class="card-title">Dry Fruit Special</h5>
+          <p class="text-muted">Loaded with premium dry fruits</p>
+          <h6 class="fw-bold text-success">₹180</h6>
+          <a href="{% url 'order' %}?flavour=Dry Fruit Special" class="btn btn-primary w-100 mt-2">
+            Order Now
+          </a>
+        </div>
+      </div>
+    </div>
+    <!-- Product 9 -->
+    <div class="col-md-4">
+      <div class="card h-100 text-center product-card">
+        <img src="/static/product9.png" class="card-img-top" alt="Mango">
+        <div class="card-body">
+          <h5 class="card-title">Cookies & Cream</h5>
+          <p class="text-muted">Crunchy cookies in creamy milk</p>
+          <h6 class="fw-bold text-success">₹155</h6>
+          <a href="{% url 'order' %}?flavour=Cookies & Cream" class="btn btn-primary w-100 mt-2">
+            Order Now
+          </a>
+        </div>
+      </div>
+    </div>
+    <!-- Product 10 -->
+    <div class="col-md-4">
+      <div class="card h-100 text-center product-card">
+        <img src="/static/product10.jpeg" class="card-img-top" alt="Mango">
+        <div class="card-body">
+          <h5 class="card-title">Tender Coconut Fresh</h5>
+          <p class="text-muted">Natural coconut flavor</p>
+          <h6 class="fw-bold text-success">₹150</h6>
+          <a href="{% url 'order' %}?flavour=Tender Coconut Fresh" class="btn btn-primary w-100 mt-2">
+            Order Now
+          </a>
+        </div>
+      </div>
+    </div>
+    <!-- Product 11 -->
+    <div class="col-md-4">
+      <div class="card h-100 text-center product-card">
+        <img src="/static/3.avif" class="card-img-top" alt="Mango">
+        <div class="card-body">
+          <h5 class="card-title">Coffee Mocha</h5>
+          <p class="text-muted">Strong coffee with chocolate touch</p>
+          <h6 class="fw-bold text-success">₹165</h6>
+          <a href="{% url 'order' %}?flavour=Coffee Mocha" class="btn btn-primary w-100 mt-2">
+            Order Now
+          </a>
+        </div>
+      </div>
+    </div>
+    <!-- Product 12 -->
+    <div class="col-md-4">
+      <div class="card h-100 text-center product-card">
+        <img src="/static/3.avif" class="card-img-top" alt="Mango">
+        <div class="card-body">
+          <h5 class="card-title">Rainbow Fantasy</h5>
+          <p class="text-muted">Colorful mix of fruity flavors</p>
+          <h6 class="fw-bold text-success">₹140</h6>
+          <a href="{% url 'order' %}?flavour=Rainbow Fantasy" class="btn btn-primary w-100 mt-2">
+            Order Now
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Cart CTA -->
+  <div class="text-center mt-5">
+    <a href="/" class="btn btn-outline-dark btn-lg">
+        ← Back to Home
+    </a>
+    <a href="{% url 'cart' %}" class="btn btn-outline-dark btn-lg">
+      🛍 View Cart
+    </a>
+  </div>
+
+</section>
+
+{% endblock body %}

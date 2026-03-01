@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Payment | Bapu Ice Cream</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      background: linear-gradient(135deg, #e0f7fa, #fff3e0);
+    }
+    .payment-card {
+      border-radius: 22px;
+      animation: fadeUp 0.7s ease;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .amount {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #2e7d32;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+
+      <div class="card shadow-lg border-0 payment-card">
+        <div class="card-body p-5">
+
+          <h3 class="fw-bold text-center mb-4">💳 Secure Payment</h3>
+
+          <!-- Order Summary -->
+          <h5 class="mb-3">Order Summary</h5>
+          <ul class="list-group mb-4">
+            {% for item in items %}
+              <li class="list-group-item d-flex justify-content-between">
+                <span>
+                  🍦 {{ item.flavour }} <br>
+                  <small class="text-muted">
+                    {{ item.type }} | {{ item.size }} | {{ item.quantity }} qty
+                  </small>
+                </span>
+                <strong>₹{{ item.total }}</strong>
+              </li>
+            {% endfor %}
+          </ul>
+
+          <div class="d-flex justify-content-between mb-4">
+            <h5>Total Amount</h5>
+            <div class="amount">₹{{ grand_total }}</div>
+          </div>
+
+          <!-- Razorpay Button -->
+          <button id="rzp-button" class="btn btn-success btn-lg w-100">
+            Pay ₹{{ grand_total }} 💳
+          </button>
+
+          <p class="text-center text-muted mt-3">
+            🔒 Powered by Razorpay (Test Mode)
+          </p>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Razorpay JS -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+  var options = {
+    "key": "{{ razorpay_key }}",
+    "amount": "{{ amount }}",   // amount in paise
+    "currency": "INR",
+    "name": "Bapu Ice Cream",
+    "description": "Ice Cream Order Payment",
+    "order_id": "{{ razorpay_order_id }}",
+    "handler": function (response) {
+
+      fetch("{% url 'razorpay_success' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: JSON.stringify(response)
+      }).then(() => {
+        window.location.href = "{% url 'payment_success' %}";
+      });
+    },
+    "prefill": {
+      "name": "{{ customer.name }}",
+      "contact": "{{ customer.phone }}"
+    },
+    "theme": {
+      "color": "#2e7d32"
+    }
+  };
+
+  var rzp1 = new Razorpay(options);
+
+  document.getElementById('rzp-button').onclick = function(e){
+    rzp1.open();
+    e.preventDefault();
+  }
+</script>
+
+</body>
+</html>
