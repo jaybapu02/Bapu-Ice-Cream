@@ -119,18 +119,23 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = '/static/'
+# Local development
+STATICFILES_DIRS = [
+    BASE_DIR / "static"
+]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+if not DEBUG:
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-#added manually
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR,"static")
-]
+# #added manually
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR,"static")
+# ]
 
 RAZORPAY_KEY_ID = "rzp_test_SLrPmeIWHPhTLf"
 RAZORPAY_KEY_SECRET = "2s4HddfKtKCakQjOc25VwYeh"

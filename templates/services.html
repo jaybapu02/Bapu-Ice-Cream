@@ -1,6 +1,7 @@
 {% extends "page.html" %}
 {% block title %}Our Services{% endblock title %}
 {% block body %}
+{% load static %}
 
 <style>
   body {
@@ -137,7 +138,7 @@ a {
       </div>
 
       <div class="col-md-6 text-center floating">
-        <img src="/static/hero-icecream.jpg" class="img-fluid rounded-4 shadow-lg">
+        <img src="{% static 'hero-icecream.jpg' %}" class="img-fluid rounded-4 shadow-lg">
       </div>
     </div>
   </div>
