@@ -14,6 +14,11 @@ from django.views.decorators.cache import cache_page
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView, FormView
 from django_ratelimit.decorators import ratelimit
+from django.contrib.auth.models import User
+from django.contrib.auth import login
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from .models import Order
 
 from .models import Order, OrderItem
 from .forms import ContactForm, CateringEnquiryForm, OrderCustomerForm
@@ -303,3 +308,22 @@ class RazorpaySuccessWebhookView(View):
         except Exception as e:
             logger.error(f"Webhook signature mismatch: {e}")
             return HttpResponse(status=400)
+
+def register(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        email = request.POST['email']
+        password = request.POST['password']
+
+        user = User.objects.create_user(username=username, email=email, password=password)
+        login(request, user)
+        return redirect('index')
+
+    return render(request, 'register.html')
+@login_required
+def order(request):
+    return render(request, 'order.html')
+@login_required
+def profile(request):
+    orders = Order.objects.filter(user=request.user)
+    return render(request, 'profile.html', {'orders': orders})

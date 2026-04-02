@@ -3,6 +3,7 @@ from home import views
 
 urlpatterns = [
     path("", views.IndexView.as_view(), name="home"),
+    path('register/', views.register, name='register'),
     path("about/", views.AboutView.as_view(), name="about"),
     path("services/", views.ServicesView.as_view(), name="services"),
     path("contact/", views.ContactView.as_view(), name="contact"),
@@ -16,4 +17,5 @@ urlpatterns = [
     path("payment/", views.PaymentPageView.as_view(), name="payment"),
     path("payment/success/", views.PaymentSuccessView.as_view(), name="payment_success"),
     path("payment/webhook/", views.RazorpaySuccessWebhookView.as_view(), name="razorpay_success"),
+    path('profile/', views.profile, name='profile'),
 ]
