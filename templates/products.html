@@ -1,208 +1,84 @@
-{% extends "page.html" %}
-{% block title %}Our Ice Creams{% endblock title %}
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Our Ice Creams{% endblock %}
 {% block body %}
 
-<style>
-  .product-card {
-    transition: transform .3s ease, box-shadow .3s ease;
-  }
-  .product-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 14px 30px rgba(0,0,0,.15);
-  }
-</style>
+<section class="py-5">
+  <div class="container">
+    <h1 class="text-center fw-bold mb-2">🍦 Our Ice Cream Collection</h1>
+    <p class="text-center text-muted mb-4">Handcrafted flavours made with love & premium ingredients</p>
 
-<section class="container py-5">
-  <h1 class="text-center fw-bold mb-3">🍦 Our Ice Cream Collection</h1>
-  <p class="text-center text-muted mb-5">
-    Handcrafted flavours made with love & premium ingredients
-  </p>
-
-  <div class="row g-4">
-
-    <!-- Product 1 -->
-    <div class="col-md-4">
-      <div class="card h-100 text-center product-card">
-        <img src="/static/product1.png" class="card-img-top" alt="Mango">
-        <div class="card-body">
-          <h5 class="card-title">Mango Magic</h5>
-          <p class="text-muted">Seasonal Alphonso mango</p>
-          <h6 class="fw-bold text-success">₹140</h6>
-          <a href="{% url 'order' %}?flavour=Mango Magic" class="btn btn-primary w-100 mt-2">
-            Order Now
-          </a>
-        </div>
+    <!-- Search & Filter -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-6">
+        <form method="get" class="input-group">
+          <input type="text" name="q" class="form-control" placeholder="Search flavours..." value="{{ search_query }}">
+          <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
+        </form>
+      </div>
+      <div class="col-md-4">
+        <select class="form-select" onchange="window.location.href=this.value">
+          <option value="{% url 'products' %}">All Categories</option>
+          {% for cat in categories %}
+            <option value="{% url 'products' %}?category={{ cat.slug }}" {% if selected_category == cat.slug %}selected{% endif %}>{{ cat.name }}</option>
+          {% endfor %}
+        </select>
       </div>
     </div>
 
-    <!-- Product 2 -->
-    <div class="col-md-4">
-      <div class="card h-100 text-center product-card">
-        <img src="/static/3.avif" class="card-img-top" alt="Mango">
-        <div class="card-body">
-          <h5 class="card-title">Vanilla Classic</h5>
-          <p class="text-muted">Pure creamy vanilla beans</p>
-          <h6 class="fw-bold text-success">₹120</h6>
-          <a href="{% url 'order' %}?flavour=Vanilla Classic" class="btn btn-primary w-100 mt-2">
-            Order Now
-          </a>
-        </div>
+    {% if products %}
+      <div class="row g-4">
+        {% for product in products %}
+          <div class="col-md-4 col-lg-3 col-6">
+            <div class="card border-0 shadow-sm h-100 product-card">
+              <div class="product-img-wrapper">
+                {% if product.image %}
+                  <img src="{{ product.image.url }}" class="card-img-top product-img" alt="{{ product.name }}">
+                {% else %}
+                  <div class="card-img-top product-img d-flex align-items-center justify-content-center bg-light text-muted">
+                    <i class="bi bi-image fs-1"></i>
+                  </div>
+                {% endif %}
+                {% if product.is_featured %}
+                  <span class="badge bg-warning text-dark position-absolute top-0 end-0 m-2">Featured</span>
+                {% endif %}
+              </div>
+              <div class="card-body text-center d-flex flex-column">
+                <h6 class="fw-bold mb-1">{{ product.name }}</h6>
+                <p class="text-muted small mb-2">{{ product.description|truncatewords:10 }}</p>
+                <p class="text-success fw-bold fs-5 mb-3">₹{{ product.price }}</p>
+                <div class="mt-auto">
+                  <a href="{% url 'product_detail' product.slug %}" class="btn btn-outline-primary btn-sm w-100 mb-1">View Details</a>
+                  <a href="{% url 'order' %}?flavour={{ product.name|urlencode }}" class="btn btn-primary btn-sm w-100">Order Now</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
       </div>
-    </div>
 
-    <!-- Product 3 -->
-    <div class="col-md-4">
-      <div class="card h-100 text-center product-card">
-        <img src="/static/product2.png" class="card-img-top" alt="Mango">
-        <div class="card-body">
-          <h5 class="card-title">Chocolate Delight</h5>
-          <p class="text-muted">Rich Belgian chocolate</p>
-          <h6 class="fw-bold text-success">₹160</h6>
-          <a href="{% url 'order' %}?flavour=Chocolate Delight" class="btn btn-primary w-100 mt-2">
-            Order Now
-          </a>
-        </div>
-      </div>
-    </div>
-    <!-- Product 4 -->
-    <div class="col-md-4">
-      <div class="card h-100 text-center product-card">
-        <img src="/static/product4.png" class="card-img-top" alt="Mango">
-        <div class="card-body">
-          <h5 class="card-title">Strawberry Bliss</h5>
-          <p class="text-muted">Fresh strawberry pulp</p>
-          <h6 class="fw-bold text-success">₹130</h6>
-          <a href="{% url 'order' %}?flavour=Strawberry Bliss" class="btn btn-primary w-100 mt-2">
-            Order Now
-          </a>
-        </div>
-      </div>
-    </div>
-    <!-- Product 5 -->
-    <div class="col-md-4">
-      <div class="card h-100 text-center product-card">
-        <img src="/static/product5.png" class="card-img-top" alt="Mango">
-        <div class="card-body">
-          <h5 class="card-title">Butterscotch Crunch</h5>
-          <p class="text-muted">Caramel flavor with crunchy nuts</p>
-          <h6 class="fw-bold text-success">₹150</h6>
-          <a href="{% url 'order' %}?flavour=Butterscotch Crunch" class="btn btn-primary w-100 mt-2">
-            Order Now
-          </a>
-        </div>
-      </div>
-    </div>
-    <!-- Product 6 -->
-    <div class="col-md-4">
-      <div class="card h-100 text-center product-card">
-        <img src="/static/product6.jpeg" class="card-img-top" alt="Mango">
-        <div class="card-body">
-          <h5 class="card-title">Kesar Pista Royal</h5>
-          <p class="text-muted">Saffron infused with pista</p>
-          <h6 class="fw-bold text-success">₹170</h6>
-          <a href="{% url 'order' %}?flavour=Kesar Pista Royal" class="btn btn-primary w-100 mt-2">
-            Order Now
-          </a>
-        </div>
-      </div>
-    </div>
-    <!-- Product 7 -->
-    <div class="col-md-4">
-      <div class="card h-100 text-center product-card">
-        <img src="/static/product7.png" class="card-img-top" alt="Mango">
-        <div class="card-body">
-          <h5 class="card-title">Black Currant Twist</h5>
-          <p class="text-muted">Tangy black currant flavor</p>
-          <h6 class="fw-bold text-success">₹145</h6>
-          <a href="{% url 'order' %}?flavour=Black Currant Twist" class="btn btn-primary w-100 mt-2">
-            Order Now
-          </a>
-        </div>
-      </div>
-    </div>
-    <!-- Product 8 -->
-    <div class="col-md-4">
-      <div class="card h-100 text-center product-card">
-        <img src="/static/product8.png" class="card-img-top" alt="Mango">
-        <div class="card-body">
-          <h5 class="card-title">Dry Fruit Special</h5>
-          <p class="text-muted">Loaded with premium dry fruits</p>
-          <h6 class="fw-bold text-success">₹180</h6>
-          <a href="{% url 'order' %}?flavour=Dry Fruit Special" class="btn btn-primary w-100 mt-2">
-            Order Now
-          </a>
-        </div>
-      </div>
-    </div>
-    <!-- Product 9 -->
-    <div class="col-md-4">
-      <div class="card h-100 text-center product-card">
-        <img src="/static/product9.png" class="card-img-top" alt="Mango">
-        <div class="card-body">
-          <h5 class="card-title">Cookies & Cream</h5>
-          <p class="text-muted">Crunchy cookies in creamy milk</p>
-          <h6 class="fw-bold text-success">₹155</h6>
-          <a href="{% url 'order' %}?flavour=Cookies & Cream" class="btn btn-primary w-100 mt-2">
-            Order Now
-          </a>
-        </div>
-      </div>
-    </div>
-    <!-- Product 10 -->
-    <div class="col-md-4">
-      <div class="card h-100 text-center product-card">
-        <img src="/static/product10.jpeg" class="card-img-top" alt="Mango">
-        <div class="card-body">
-          <h5 class="card-title">Tender Coconut Fresh</h5>
-          <p class="text-muted">Natural coconut flavor</p>
-          <h6 class="fw-bold text-success">₹150</h6>
-          <a href="{% url 'order' %}?flavour=Tender Coconut Fresh" class="btn btn-primary w-100 mt-2">
-            Order Now
-          </a>
-        </div>
-      </div>
-    </div>
-    <!-- Product 11 -->
-    <div class="col-md-4">
-      <div class="card h-100 text-center product-card">
-        <img src="/static/3.avif" class="card-img-top" alt="Mango">
-        <div class="card-body">
-          <h5 class="card-title">Coffee Mocha</h5>
-          <p class="text-muted">Strong coffee with chocolate touch</p>
-          <h6 class="fw-bold text-success">₹165</h6>
-          <a href="{% url 'order' %}?flavour=Coffee Mocha" class="btn btn-primary w-100 mt-2">
-            Order Now
-          </a>
-        </div>
-      </div>
-    </div>
-    <!-- Product 12 -->
-    <div class="col-md-4">
-      <div class="card h-100 text-center product-card">
-        <img src="/static/3.avif" class="card-img-top" alt="Mango">
-        <div class="card-body">
-          <h5 class="card-title">Rainbow Fantasy</h5>
-          <p class="text-muted">Colorful mix of fruity flavors</p>
-          <h6 class="fw-bold text-success">₹140</h6>
-          <a href="{% url 'order' %}?flavour=Rainbow Fantasy" class="btn btn-primary w-100 mt-2">
-            Order Now
-          </a>
-        </div>
-      </div>
-    </div>
+      {% if is_paginated %}
+        <nav class="mt-4">
+          <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+              <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}">Previous</a></li>
+            {% endif %}
+            <li class="page-item active"><span class="page-link">{{ page_obj.number }}</span></li>
+            {% if page_obj.has_next %}
+              <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}">Next</a></li>
+            {% endif %}
+          </ul>
+        </nav>
+      {% endif %}
 
+    {% else %}
+      <div class="text-center py-5">
+        <i class="bi bi-emoji-frown fs-1 text-muted"></i>
+        <p class="text-muted mt-2">No products found.</p>
+        <a href="{% url 'products' %}" class="btn btn-primary">View All</a>
+      </div>
+    {% endif %}
   </div>
-
-  <!-- Cart CTA -->
-  <div class="text-center mt-5">
-    <a href="/" class="btn btn-outline-dark btn-lg">
-        ← Back to Home
-    </a>
-    <a href="{% url 'cart' %}" class="btn btn-outline-dark btn-lg">
-      🛍 View Cart
-    </a>
-  </div>
-
 </section>
 
-{% endblock body %}
+{% endblock %}

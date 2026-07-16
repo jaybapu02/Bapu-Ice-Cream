@@ -1,141 +1,153 @@
-{% extends "page.html" %}
-{% block title %}Home{% endblock title %}
-
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Home{% endblock %}
 {% block body %}
 
-<!-- Tailwind CDN -->
-<script src="https://cdn.tailwindcss.com"></script>
-
-<!-- NAVBAR -->
-<nav class="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur shadow">
-  <div class="max-w-7xl mx-auto px-4 md:px-6 h-16 md:h-20 flex items-center justify-between">
-
-    <!-- Logo -->
-    <h1 class="text-2xl md:text-3xl font-bold bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">
-      Bapu Ice-Cream
-    </h1>
-
-    <!-- Desktop Menu -->
-    <div class="hidden md:flex gap-8 text-gray-700 font-medium">
-      <a href="/" class="hover:text-pink-500">Home</a>
-      <a href="/services" class="hover:text-pink-500">Service</a>
-      <a href="/about" class="hover:text-pink-500">About</a>
-      <a href="/contact" class="hover:text-pink-500">Contact</a>
-    </div>
-
-    <!-- Mobile Button -->
-    <button class="md:hidden text-3xl" onclick="toggleMenu()">☰</button>
-  </div>
-
-  <!-- Mobile Menu -->
-  <div id="mobileMenu" class="hidden md:hidden bg-white shadow-lg">
-    <div class="flex flex-col px-6 py-4 gap-4 text-gray-700 font-medium">
-      <a href="/" class="hover:text-pink-500">Home</a>
-      <a href="/services" class="hover:text-pink-500">Service</a>
-      <a href="/about" class="hover:text-pink-500">About</a>
-      <a href="/contact" class="hover:text-pink-500">Contact</a>
-    </div>
-  </div>
-</nav>
-
-<script>
-  function toggleMenu() {
-    document.getElementById("mobileMenu").classList.toggle("hidden");
-  }
-</script>
-
 <!-- HERO -->
-<section class="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 via-purple-50 to-yellow-50 pt-20 px-4">
-  <div class="text-center max-w-4xl">
-    <h1 class="text-4xl sm:text-5xl md:text-7xl font-extrabold bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">
-      Scoop Into Happiness
-    </h1>
-
-    <p class="text-base sm:text-lg md:text-xl mt-6 text-gray-700">
-      Handcrafted artisan ice cream made with love and premium ingredients 🍨
-    </p>
-
-    <div class="flex flex-wrap gap-4 justify-center mt-10">
-      <a href="{% url 'order' %}"
-         class="bg-gradient-to-r from-pink-500 to-purple-500 text-white px-6 py-3 rounded-full shadow hover:scale-105 transition">
-        🛒 Order Now
-      </a>
-
-      <a href="{% url 'cart' %}"
-         class="bg-white border px-6 py-3 rounded-full shadow hover:scale-105 transition">
-        🛍 View Cart
-      </a>
-
-      <a href="{% url 'products' %}"
-         class="bg-gradient-to-r from-pink-500 to-purple-500 text-white px-6 py-3 rounded-full shadow hover:scale-105 transition">
-        🍦 Products
-      </a>
+<section class="hero-section d-flex align-items-center">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6 text-center text-lg-start">
+        <span class="badge bg-warning text-dark mb-3 fs-6">🍦 Freshly Made Every Day</span>
+        <h1 class="display-3 fw900 mb-3">Scoop Into <span class="text-gradient">Happiness</span></h1>
+        <p class="lead text-muted mb-4">Handcrafted artisan ice cream made with love and premium ingredients. 50+ flavours to choose from!</p>
+        <div class="d-flex flex-wrap gap-3 justify-content-center justify-content-lg-start">
+          <a href="{% url 'order' %}" class="btn btn-lg btn-primary px-4 py-3 rounded-pill">
+            <i class="bi bi-cart-plus"></i> Order Now
+          </a>
+          <a href="{% url 'products' %}" class="btn btn-lg btn-outline-dark px-4 py-3 rounded-pill">
+            <i class="bi bi-grid"></i> Explore Products
+          </a>
+        </div>
+      </div>
+      <div class="col-lg-6 text-center hero-image-col">
+        <img src="{% static 'hero-icecream.jpg' %}" alt="Ice Cream" class="img-fluid hero-img rounded-4 shadow-lg">
+      </div>
     </div>
   </div>
 </section>
 
-<!-- FEATURES -->
-<section class="py-16 bg-white">
-  <div class="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 px-4 text-center">
-    <div class="p-6 bg-gray-50 rounded-2xl shadow hover:-translate-y-1 transition">
-      🌿
-      <h3 class="text-lg mt-3">Natural Ingredients</h3>
-    </div>
-    <div class="p-6 bg-gray-50 rounded-2xl shadow hover:-translate-y-1 transition">
-      ❤️
-      <h3 class="text-lg mt-3">Made with Love</h3>
-    </div>
-    <div class="p-6 bg-gray-50 rounded-2xl shadow hover:-translate-y-1 transition">
-      ⏰
-      <h3 class="text-lg mt-3">Fresh Daily</h3>
-    </div>
-    <div class="p-6 bg-gray-50 rounded-2xl shadow hover:-translate-y-1 transition">
-      ⭐
-      <h3 class="text-lg mt-3">Award Winning</h3>
+<!-- FEATURES STRIP -->
+<section class="py-4 bg-white shadow-sm">
+  <div class="container">
+    <div class="row text-center g-3">
+      <div class="col-6 col-md-3">
+        <div class="p-3">
+          <i class="bi bi-flower1 fs-1 text-pink"></i>
+          <h6 class="mt-2 fw-bold">Natural Ingredients</h6>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="p-3">
+          <i class="bi bi-heart fs-1 text-danger"></i>
+          <h6 class="mt-2 fw-bold">Made with Love</h6>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="p-3">
+          <i class="bi bi-clock fs-1 text-success"></i>
+          <h6 class="mt-2 fw-bold">Fresh Daily</h6>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="p-3">
+          <i class="bi bi-award fs-1 text-warning"></i>
+          <h6 class="mt-2 fw-bold">Award Winning</h6>
+        </div>
+      </div>
     </div>
   </div>
 </section>
+
+<!-- CATEGORIES -->
+{% if categories %}
+<section class="py-5">
+  <div class="container">
+    <h2 class="text-center fw-bold mb-2">Our Categories</h2>
+    <p class="text-center text-muted mb-4">Explore our range of ice creams</p>
+    <div class="row g-3 justify-content-center">
+      {% for cat in categories %}
+        <div class="col-6 col-md-3">
+          <a href="{% url 'products' %}?category={{ cat.slug }}" class="text-decoration-none">
+            <div class="card border-0 shadow-sm text-center p-4 category-card">
+              <div class="fs-1">{{ cat.name|slice:":1" }}</div>
+              <h6 class="mt-2 fw-bold text-dark">{{ cat.name }}</h6>
+            </div>
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- FEATURED PRODUCTS -->
+{% if featured_products %}
+<section class="py-5 bg-light">
+  <div class="container">
+    <h2 class="text-center fw-bold mb-2">Featured Flavours</h2>
+    <p class="text-center text-muted mb-4">Our most loved ice creams</p>
+    <div class="row g-4">
+      {% for product in featured_products %}
+        <div class="col-md-4 col-lg-2 col-6">
+          <div class="card border-0 shadow-sm h-100 product-card">
+            <div class="product-img-wrapper">
+              {% if product.image %}
+                <img src="{{ product.image.url }}" class="card-img-top product-img" alt="{{ product.name }}">
+              {% else %}
+                <div class="card-img-top product-img d-flex align-items-center justify-content-center bg-light text-muted">
+                  <i class="bi bi-image fs-1"></i>
+                </div>
+              {% endif %}
+            </div>
+            <div class="card-body text-center">
+              <h6 class="fw-bold mb-1">{{ product.name }}</h6>
+              <p class="text-success fw-bold mb-2">₹{{ product.price }}</p>
+              <a href="{% url 'product_detail' product.slug %}" class="btn btn-sm btn-outline-primary w-100">View</a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+    <div class="text-center mt-4">
+      <a href="{% url 'products' %}" class="btn btn-primary rounded-pill px-5">View All Products</a>
+    </div>
+  </div>
+</section>
+{% endif %}
 
 <!-- SERVICES -->
-<section class="py-16 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
-  <div class="max-w-7xl mx-auto px-4">
-    <h2 class="text-3xl md:text-5xl font-bold text-center mb-12">
-      Our Services
-    </h2>
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-      <div class="bg-white rounded-3xl shadow overflow-hidden">
-        <img src="/static/10.avif" class="h-56 w-full object-cover">
-        <div class="p-6">
-          <h3 class="text-xl font-semibold">Custom Orders</h3>
-          <p class="text-gray-600 mt-2">Personalized ice creams for every occasion</p>
+<section class="py-5">
+  <div class="container">
+    <h2 class="text-center fw-bold mb-2">Our Services</h2>
+    <p class="text-center text-muted mb-4">Something for every occasion</p>
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm text-center p-4 service-card h-100">
+          <i class="bi bi-cup-straw fs-1 text-pink"></i>
+          <h5 class="fw-bold mt-3">Custom Orders</h5>
+          <p class="text-muted small">Personalized ice creams for every occasion</p>
+          <a href="{% url 'order' %}" class="btn btn-outline-primary rounded-pill">Order Now</a>
         </div>
       </div>
-
-      <div class="bg-white rounded-3xl shadow overflow-hidden">
-        <img src="/static/11.avif" class="h-56 w-full object-cover">
-        <div class="p-6">
-          <h3 class="text-xl font-semibold">Event Catering</h3>
-          <p class="text-gray-600 mt-2">Ice cream carts for weddings & parties</p>
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm text-center p-4 service-card h-100">
+          <i class="bi bi-gem fs-1 text-warning"></i>
+          <h5 class="fw-bold mt-3">Event Catering</h5>
+          <p class="text-muted small">Ice cream carts for weddings & parties</p>
+          <a href="{% url 'catering' %}" class="btn btn-outline-primary rounded-pill">Book Now</a>
         </div>
       </div>
-
-      <div class="bg-white rounded-3xl shadow overflow-hidden">
-        <img src="/static/12.avif" class="h-56 w-full object-cover">
-        <div class="p-6">
-          <h3 class="text-xl font-semibold">Home Delivery</h3>
-          <p class="text-gray-600 mt-2">Fresh ice cream delivered to your door</p>
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm text-center p-4 service-card h-100">
+          <i class="bi bi-truck fs-1 text-success"></i>
+          <h5 class="fw-bold mt-3">Home Delivery</h5>
+          <p class="text-muted small">Free delivery above ₹500</p>
+          <a href="{% url 'order' %}" class="btn btn-outline-primary rounded-pill">Order Now</a>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- FOOTER -->
-<footer class="bg-gray-900 text-white py-10">
-  <p class="text-center text-gray-400 text-sm">
-    © 2026 Bapu Ice-Cream. Made with ❤️ in India
-  </p>
-</footer>
-
-{% endblock body %}
+{% endblock %}

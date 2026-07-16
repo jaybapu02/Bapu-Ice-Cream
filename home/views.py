@@ -3,47 +3,89 @@ import razorpay
 from django.conf import settings
 from django.contrib import messages
 from django.db import transaction, IntegrityError, DatabaseError
-from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
-from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
-from django.utils.decorators import method_decorator
 from django.utils.crypto import get_random_string
 from django.views import View
+from django.views.generic import TemplateView, FormView, DetailView, ListView
+from django.contrib.auth import login, authenticate
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import TemplateView, FormView
+from django.http import HttpResponse, JsonResponse
 from django_ratelimit.decorators import ratelimit
-from django.contrib.auth.models import User
-from django.contrib.auth import login
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from .models import Order
 
-from .models import Order, OrderItem
-from .forms import ContactForm, CateringEnquiryForm, OrderCustomerForm
-from .exceptions import OrderProcessingError, PaymentFailedError
+from .models import Order, OrderItem, Product, Category, Review, Newsletter, Wishlist
+from .forms import (
+    ContactForm, CateringEnquiryForm, OrderCustomerForm,
+    ReviewForm, NewsletterForm, RegisterForm
+)
+from .exceptions import OrderProcessingError
 
 logger = logging.getLogger('home.views')
 
-# ------------------ BASIC PAGES (CBV) ------------------
 
-@method_decorator(cache_page(60 * 15), name='dispatch')
 class IndexView(TemplateView):
     template_name = "index.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['featured_products'] = Product.objects.filter(
+            is_available=True, is_featured=True
+        )[:6]
+        context['categories'] = Category.objects.all()
+        return context
+
 
 class AboutView(TemplateView):
     template_name = "about.html"
 
+
 class ServicesView(TemplateView):
     template_name = "services.html"
 
-@method_decorator(cache_page(60 * 15), name='dispatch')
-class ProductsView(TemplateView):
+
+class ProductsView(ListView):
+    model = Product
     template_name = "products.html"
+    context_object_name = "products"
+    paginate_by = 12
+
+    def get_queryset(self):
+        qs = Product.objects.filter(is_available=True)
+        category_slug = self.request.GET.get('category')
+        search_q = self.request.GET.get('q')
+        if category_slug:
+            qs = qs.filter(category__slug=category_slug)
+        if search_q:
+            qs = qs.filter(name__icontains=search_q)
+        return qs.select_related('category')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categories'] = Category.objects.all()
+        context['selected_category'] = self.request.GET.get('category', '')
+        context['search_query'] = self.request.GET.get('q', '')
+        return context
 
 
-# ------------------ FORMS (CBV) ------------------
+class ProductDetailView(DetailView):
+    model = Product
+    template_name = "product_detail.html"
+    context_object_name = "product"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        product = self.get_object()
+        context['reviews'] = product.reviews.all()[:10]
+        context['review_form'] = ReviewForm()
+        context['related_products'] = Product.objects.filter(
+            category=product.category, is_available=True
+        ).exclude(id=product.id)[:4]
+        return context
+
 
 @method_decorator(ratelimit(key='ip', rate='5/m', block=True), name='dispatch')
 class ContactView(FormView):
@@ -75,7 +117,7 @@ class CateringView(FormView):
     def form_valid(self, form):
         try:
             form.save()
-            messages.success(self.request, "🎉 Thank you! We will contact you shortly.")
+            messages.success(self.request, "Thank you! We will contact you shortly.")
             logger.info(f"New catering enquiry from {form.cleaned_data['phone']}")
         except DatabaseError as e:
             logger.error(f"Database error saving catering enquiry: {e}")
@@ -87,24 +129,62 @@ class CateringView(FormView):
         return super().form_invalid(form)
 
 
-# ------------------ ORDER & CART ------------------
-
 class OrderView(View):
+    template_name = "order.html"
+
     def get(self, request):
-        return render(request, "order.html", {
+        return render(request, self.template_name, {
             "selected_flavour": request.GET.get("flavour", ""),
             "selected_type": request.GET.get("type", "")
         })
 
     def post(self, request):
         form = OrderCustomerForm(request.POST)
-        if form.is_valid():
-            request.session["customer"] = form.cleaned_data
-            messages.info(request, "Proceed to payment to complete your order.")
-            return redirect("payment")
-        else:
+        if not form.is_valid():
             messages.error(request, "Invalid details. Check phone number and retry.")
-            return render(request, "order.html", {"form": form})
+            return render(request, self.template_name, {"form": form})
+
+        request.session["customer"] = form.cleaned_data
+        action = request.POST.get("action", "direct_checkout")
+
+        if action == "add_to_cart":
+            cart = request.session.get("cart", [])
+            cart.append({
+                "type": request.POST.get("ice_cream_type"),
+                "flavour": request.POST.get("flavour"),
+                "size": request.POST.get("size"),
+                "toppings": request.POST.get("toppings", ""),
+                "quantity": int(request.POST.get("quantity", 1)),
+                "total": float(request.POST.get("total_price", 0)),
+            })
+            request.session["cart"] = cart
+            messages.success(request, "Added to cart successfully!")
+            return redirect("cart")
+        else:
+            try:
+                request.session["checkout_item"] = {
+                    "type": request.POST.get("ice_cream_type"),
+                    "flavour": request.POST.get("flavour"),
+                    "size": request.POST.get("size"),
+                    "toppings": request.POST.get("toppings", ""),
+                    "quantity": int(request.POST.get("quantity", 1)),
+                    "total": float(request.POST.get("total_price", 0)),
+                }
+                return redirect("payment")
+            except (ValueError, TypeError):
+                messages.error(request, "Invalid quantities or price. Please try again.")
+                return redirect("order")
+
+
+class CartView(TemplateView):
+    template_name = "cart.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        cart = self.request.session.get("cart", [])
+        context['cart'] = cart
+        context['grand_total'] = sum(item["total"] for item in cart)
+        return context
 
 
 class AddToCartView(View):
@@ -120,23 +200,12 @@ class AddToCartView(View):
                 "total": float(request.POST.get("total_price", 0)),
             })
             request.session["cart"] = cart
-            messages.success(request, "🍦 Added to cart successfully!")
+            messages.success(request, "Added to cart successfully!")
             logger.info("Item added to cart.")
         except Exception as e:
             logger.error(f"Error adding to cart: {e}")
             messages.error(request, "Could not add item to cart.")
         return redirect("cart")
-
-
-class CartView(TemplateView):
-    template_name = "cart.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        cart = self.request.session.get("cart", [])
-        context['cart'] = cart
-        context['grand_total'] = sum(item["total"] for item in cart)
-        return context
 
 
 class RemoveFromCartView(View):
@@ -148,32 +217,6 @@ class RemoveFromCartView(View):
             messages.success(request, "Item removed from cart.")
         return redirect("cart")
 
-
-class DirectCheckoutView(View):
-    def post(self, request):
-        form = OrderCustomerForm(request.POST)
-        if not form.is_valid():
-            messages.error(request, "Invalid user details provided.")
-            return redirect("order")
-
-        request.session["customer"] = form.cleaned_data
-        
-        try:
-            request.session["checkout_item"] = {
-                "type": request.POST.get("ice_cream_type"),
-                "flavour": request.POST.get("flavour"),
-                "size": request.POST.get("size"),
-                "toppings": request.POST.get("toppings", ""),
-                "quantity": int(request.POST.get("quantity", 1)),
-                "total": float(request.POST.get("total_price", 0)),
-            }
-            return redirect("payment")
-        except ValueError:
-            messages.error(request, "Invalid quantities or price. Please try again.")
-            return redirect("order")
-
-
-# ------------------ PAYMENT ------------------
 
 class PaymentPageView(View):
     def get(self, request):
@@ -192,9 +235,11 @@ class PaymentPageView(View):
             return redirect("order")
 
         try:
-            client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+            client = razorpay.Client(auth=(
+                settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET
+            ))
             razorpay_order = client.order.create({
-                "amount": int(amount * 100),  # paise
+                "amount": int(amount * 100),
                 "currency": "INR",
                 "payment_capture": 1
             })
@@ -214,20 +259,18 @@ class PaymentPageView(View):
             return redirect("order")
 
 
-# ------------------ PAYMENT SUCCESS (SAVE TO DB) ------------------
-
 class PaymentSuccessView(View):
     def get(self, request):
         customer = request.session.get("customer")
         if not customer:
-            logger.warning("Payment success accessed without customer session.")
-            messages.error(request, "Session expired. If payment was deducted, please contact support.")
+            messages.error(request, "Session expired. Please contact support.")
             return redirect("order")
 
         try:
             with transaction.atomic():
                 order = Order.objects.create(
                     order_id="ICE" + get_random_string(6).upper(),
+                    user=request.user if request.user.is_authenticated else None,
                     name=customer["name"],
                     phone=customer["phone"],
                     address=customer["address"],
@@ -238,60 +281,50 @@ class PaymentSuccessView(View):
                 )
 
                 total = 0
-                is_direct_checkout = "checkout_item" in request.session
-
-                if is_direct_checkout:
-                    item = request.session["checkout_item"]
-                    raw_items = [item]
-                else:
-                    raw_items = request.session.get("cart", [])
+                is_direct = "checkout_item" in request.session
+                raw_items = (
+                    [request.session["checkout_item"]]
+                    if is_direct
+                    else request.session.get("cart", [])
+                )
 
                 if not raw_items:
-                    raise OrderProcessingError("Cart is empty during checkout save.")
+                    raise OrderProcessingError("Cart is empty during checkout.")
 
                 for item in raw_items:
                     OrderItem.objects.create(
                         order=order,
-                        ice_cream_type=item["type"],
-                        flavour=item["flavour"],
-                        size=item["size"],
-                        toppings=item["toppings"],
-                        quantity=item["quantity"],
-                        price=item["total"],
+                        ice_cream_type=item.get("type", ""),
+                        flavour=item.get("flavour", ""),
+                        size=item.get("size", ""),
+                        toppings=item.get("toppings", ""),
+                        quantity=item.get("quantity", 1),
+                        price=item.get("total", 0),
                     )
-                    total += float(item["total"])
-                
-                # Server side calculation vs validation
-                order.total_price = total
-                order.save()
+                    total += float(item.get("total", 0))
 
-                # Clean session
-                if is_direct_checkout:
-                    request.session.pop("checkout_item")
-                else:
-                    request.session["cart"] = []
-                
+                Order.objects.filter(id=order.id).update(total_price=total)
+
+                request.session.pop("checkout_item", None)
                 request.session.pop("customer", None)
                 request.session.pop("razorpay_order_id", None)
-                
+                if not is_direct:
+                    request.session["cart"] = []
+
                 logger.info(f"Order {order.order_id} successfully saved.")
-
-                # If N+1 was possible in views, we'd use select_related here, but we just pass order.
-                # Example usage of prefetch_related if needed elsewhere:
-                # order_with_items = Order.objects.prefetch_related('items').get(id=order.id)
-
+                order.refresh_from_db()
                 return render(request, "payment_success.html", {"order": order})
 
-        except (IntegrityError, DatabaseError) as db_err:
-            logger.critical(f"Database error saving order after payment: {db_err}", exc_info=True)
-            messages.error(request, "Payment was successful but order creation failed. Refund will be processed.")
+        except (IntegrityError, DatabaseError) as e:
+            logger.critical(f"Database error saving order: {e}", exc_info=True)
+            messages.error(request, "Payment was successful but order creation failed.")
             return redirect("order")
         except OrderProcessingError as e:
             logger.error(f"Order Processing Error: {e}")
             messages.error(request, str(e))
             return redirect("order")
         except Exception as e:
-            logger.critical(f"Unexpected error in payment success: {e}", exc_info=True)
+            logger.critical(f"Unexpected error: {e}", exc_info=True)
             messages.error(request, "An unexpected error occurred. Please contact support.")
             return redirect("order")
 
@@ -299,31 +332,104 @@ class PaymentSuccessView(View):
 @method_decorator(csrf_exempt, name='dispatch')
 class RazorpaySuccessWebhookView(View):
     def post(self, request):
-        # We can implement signature validation here using Razorpay SDK Utility
         try:
-            client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
-            # e.g. client.utility.verify_webhook_signature(...)
-            logger.info("Webhook hit.")
+            logger.info("Webhook received from Razorpay.")
             return HttpResponse(status=200)
         except Exception as e:
-            logger.error(f"Webhook signature mismatch: {e}")
+            logger.error(f"Webhook error: {e}")
             return HttpResponse(status=400)
+
+
+class NewsletterSubscribeView(View):
+    def post(self, request):
+        form = NewsletterForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Subscribed to newsletter successfully!")
+        else:
+            for error in form.errors.get('email', []):
+                messages.error(request, error)
+        return redirect(request.META.get('HTTP_REFERER', 'home'))
+
+
+class AddReviewView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        product = get_object_or_404(Product, pk=pk)
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.product = product
+            review.user = request.user
+            review.save()
+            messages.success(request, "Your review has been posted!")
+        else:
+            messages.error(request, "Please correct the errors in your review.")
+        return redirect('product_detail', slug=product.slug)
+
+
+class WishlistToggleView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        product = get_object_or_404(Product, pk=pk)
+        wishlist_item = Wishlist.objects.filter(user=request.user, product=product)
+        if wishlist_item.exists():
+            wishlist_item.delete()
+            messages.info(request, "Removed from wishlist.")
+        else:
+            Wishlist.objects.create(user=request.user, product=product)
+            messages.success(request, "Added to wishlist!")
+        return redirect(request.META.get('HTTP_REFERER', 'product_detail'))
+
+
+class WishlistView(LoginRequiredMixin, ListView):
+    model = Wishlist
+    template_name = "wishlist.html"
+    context_object_name = "wishlist_items"
+
+    def get_queryset(self):
+        return Wishlist.objects.filter(user=self.request.user).select_related('product')
+
+
+class OrderTrackView(View):
+    def get(self, request):
+        order_id = request.GET.get("order_id", "")
+        order = None
+        if order_id:
+            try:
+                order = Order.objects.prefetch_related('items').get(order_id=order_id.upper())
+            except Order.DoesNotExist:
+                messages.error(request, "Order not found. Please check your order ID.")
+        return render(request, "order_track.html", {"order": order, "order_id": order_id})
+
+    def post(self, request):
+        order_id = request.POST.get("order_id", "").upper().strip()
+        if not order_id:
+            messages.error(request, "Please enter an order ID.")
+            return redirect("order_track")
+        return redirect(f"{reverse_lazy('order_track')}?order_id={order_id}")
+
 
 def register(request):
     if request.method == 'POST':
-        username = request.POST['username']
-        email = request.POST['email']
-        password = request.POST['password']
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(request, f"Welcome, {user.username}!")
+            return redirect('home')
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
+    else:
+        form = RegisterForm()
+    return render(request, 'register.html', {'form': form})
 
-        user = User.objects.create_user(username=username, email=email, password=password)
-        login(request, user)
-        return redirect('index')
 
-    return render(request, 'register.html')
-@login_required
-def order(request):
-    return render(request, 'order.html')
 @login_required
 def profile(request):
-    orders = Order.objects.filter(user=request.user)
-    return render(request, 'profile.html', {'orders': orders})
+    orders = Order.objects.filter(user=request.user).prefetch_related('items')
+    wishlist_count = Wishlist.objects.filter(user=request.user).count()
+    return render(request, 'profile.html', {
+        'orders': orders,
+        'wishlist_count': wishlist_count,
+    })

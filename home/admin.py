@@ -1,68 +1,104 @@
 import csv
 from django.http import HttpResponse
 from django.contrib import admin
-from .models import Contact, CateringEnquiry, Order, OrderItem
+from .models import (
+    Contact, CateringEnquiry, Order, OrderItem,
+    Product, Category, Review, Newsletter, Wishlist
+)
+
 
 def export_as_csv(modeladmin, request, queryset):
-    """
-    Generic export to CSV action.
-    """
     opts = modeladmin.model._meta
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = f'attachment; filename={opts.verbose_name}.csv'
     writer = csv.writer(response)
-    
     field_names = [field.name for field in opts.fields]
-    # Write header
     writer.writerow(field_names)
-    # Write rows
     for obj in queryset:
         writer.writerow([getattr(obj, field) for field in field_names])
     return response
 
-export_as_csv.short_description = "Export Selected Items in CSV"
 
-# ---------- Inline Order Items ----------
+export_as_csv.short_description = "Export Selected Items as CSV"
+
+
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
-    extra = 0   # no empty rows
+    extra = 0
+    readonly_fields = ['created_at']
 
-# ---------- Order Admin ----------
+
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ['name', 'slug', 'created_at']
+    prepopulated_fields = {'slug': ('name',)}
+    search_fields = ['name']
+
+
+@admin.register(Product)
+class ProductAdmin(admin.ModelAdmin):
+    list_display = ['name', 'category', 'price', 'stock', 'is_available', 'is_featured', 'created_at']
+    list_filter = ['category', 'is_available', 'is_featured']
+    search_fields = ['name', 'description']
+    prepopulated_fields = {'slug': ('name',)}
+    list_editable = ['price', 'stock', 'is_available', 'is_featured']
+    actions = [export_as_csv]
+
+
+@admin.register(Review)
+class ReviewAdmin(admin.ModelAdmin):
+    list_display = ['product', 'name', 'rating', 'created_at']
+    list_filter = ['rating', 'created_at']
+    search_fields = ['name', 'comment']
+
+
+@admin.register(Newsletter)
+class NewsletterAdmin(admin.ModelAdmin):
+    list_display = ['email', 'is_active', 'created_at']
+    list_filter = ['is_active']
+    search_fields = ['email']
+    actions = [export_as_csv]
+
+
+@admin.register(Wishlist)
+class WishlistAdmin(admin.ModelAdmin):
+    list_display = ['user', 'product', 'created_at']
+    search_fields = ['user__username', 'product__name']
+
+
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = (
-        "order_id",
-        "name",
-        "phone",
-        "total_price",
-        "payment_mode",
-        "status",
-        "created_at",
-    )
-    list_filter = ("status", "payment_mode", "created_at")
-    search_fields = ("order_id", "name", "phone")
-    date_hierarchy = "created_at"
+    list_display = [
+        'order_id', 'name', 'phone', 'total_price',
+        'payment_mode', 'status', 'created_at'
+    ]
+    list_filter = ['status', 'payment_mode', 'created_at']
+    search_fields = ['order_id', 'name', 'phone']
+    date_hierarchy = 'created_at'
     inlines = [OrderItemInline]
     actions = [export_as_csv]
+    readonly_fields = ['order_id', 'created_at', 'updated_at']
 
-# ---------- OrderItem Admin ----------
+
 @admin.register(OrderItem)
 class OrderItemAdmin(admin.ModelAdmin):
-    list_display = ("order", "flavour", "quantity", "price")
-    list_filter = ("flavour", "created_at")
-    search_fields = ("flavour",)
+    list_display = ['order', 'product', 'flavour', 'quantity', 'price']
+    list_filter = ['flavour', 'created_at']
+    search_fields = ['flavour', 'order__order_id']
 
-# ---------- Other Models ----------
+
 @admin.register(Contact)
 class ContactAdmin(admin.ModelAdmin):
-    list_display = ("name", "email", "phone", "created_at")
-    search_fields = ("name", "email", "phone")
-    date_hierarchy = "created_at"
+    list_display = ['name', 'email', 'phone', 'created_at']
+    search_fields = ['name', 'email', 'phone']
+    date_hierarchy = 'created_at'
     actions = [export_as_csv]
+    readonly_fields = ['created_at', 'updated_at']
+
 
 @admin.register(CateringEnquiry)
 class CateringEnquiryAdmin(admin.ModelAdmin):
-    list_display = ("name", "phone", "event_type", "event_date", "created_at")
-    search_fields = ("name", "phone", "event_type")
-    date_hierarchy = "created_at"
+    list_display = ['name', 'phone', 'event_type', 'event_date', 'created_at']
+    search_fields = ['name', 'phone', 'event_type']
+    date_hierarchy = 'created_at'
     actions = [export_as_csv]
