@@ -19,7 +19,7 @@
   <!-- ==================== NAVBAR ==================== -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
     <div class="container">
-      <a class="navbar-brand fw-bold fs-3" href="{% url 'home' %}">
+      <a class="navbar-brand fw-bold fs-3" href="{% url 'landing' %}">
         <span class="text-gradient">🍦 Bapu Ice-Cream</span>
       </a>
       <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
@@ -28,7 +28,10 @@
       <div class="collapse navbar-collapse" id="mainNav">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'home' %}">Home</a>
+            <a class="nav-link" href="{% url 'landing' %}">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'home' %}">Menu</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="{% url 'products' %}">Products</a>
@@ -121,7 +124,7 @@
         <div class="col-lg-2 col-md-4">
           <h6 class="fw-bold mb-3">Quick Links</h6>
           <ul class="list-unstyled">
-            <li class="mb-2"><a href="{% url 'home' %}" class="text-white-50 text-decoration-none">Home</a></li>
+            <li class="mb-2"><a href="{% url 'landing' %}" class="text-white-50 text-decoration-none">Home</a></li>
             <li class="mb-2"><a href="{% url 'products' %}" class="text-white-50 text-decoration-none">Products</a></li>
             <li class="mb-2"><a href="{% url 'services' %}" class="text-white-50 text-decoration-none">Services</a></li>
             <li class="mb-2"><a href="{% url 'about' %}" class="text-white-50 text-decoration-none">About Us</a></li>

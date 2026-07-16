@@ -91,8 +91,8 @@ RAZORPAY_KEY_SECRET = config('RAZORPAY_KEY_SECRET', default='')
 
 # Auth
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'home'
-LOGOUT_REDIRECT_URL = 'home'
+LOGIN_REDIRECT_URL = 'landing'
+LOGOUT_REDIRECT_URL = 'landing'
 
 # Messages — map Django tags to Bootstrap 5 alert classes
 MESSAGE_TAGS = {

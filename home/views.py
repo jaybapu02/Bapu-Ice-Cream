@@ -27,15 +27,33 @@ from .exceptions import OrderProcessingError
 logger = logging.getLogger('home.views')
 
 
-class IndexView(TemplateView):
-    template_name = "index.html"
+class LandingView(TemplateView):
+    template_name = "landing.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['featured_products'] = Product.objects.filter(
             is_available=True, is_featured=True
         )[:6]
+        return context
+
+
+class HomeView(TemplateView):
+    template_name = "index.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        qs = Product.objects.filter(is_available=True).select_related('category')
+        category_slug = self.request.GET.get('category')
+        search_q = self.request.GET.get('q')
+        if category_slug:
+            qs = qs.filter(category__slug=category_slug)
+        if search_q:
+            qs = qs.filter(name__icontains=search_q)
+        context['all_products'] = qs
         context['categories'] = Category.objects.all()
+        context['selected_category'] = category_slug or ''
+        context['search_query'] = search_q or ''
         return context
 
 
@@ -415,7 +433,7 @@ def register(request):
             user = form.save()
             login(request, user)
             messages.success(request, f"Welcome, {user.username}!")
-            return redirect('home')
+            return redirect('landing')
         else:
             for field, errors in form.errors.items():
                 for error in errors:
