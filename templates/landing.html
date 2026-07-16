@@ -4,93 +4,176 @@
 
 {% block extra_head %}
 <style>
-  .landing-hero {
-    min-height: 100vh;
-    background: linear-gradient(135deg, #1a0a2e 0%, #2d1b4e 30%, #16213e 60%, #0f3460 100%);
+  /* ========== LANDING LIGHT THEME ========== */
+  .premium-hero {
+    min-height: 92vh;
+    background: linear-gradient(160deg, #faf5ff 0%, #fff0f5 40%, #fffbeb 70%, #f0fdf4 100%);
     display: flex;
     align-items: center;
     position: relative;
     overflow: hidden;
   }
-  .landing-hero::before {
+  .premium-hero::before {
     content: '';
     position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle at 30% 50%, rgba(236,72,153,0.08) 0%, transparent 50%),
-                radial-gradient(circle at 70% 50%, rgba(168,85,247,0.08) 0%, transparent 50%);
-    animation: heroGlow 8s ease-in-out infinite alternate;
+    top: -30%;
+    right: -20%;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(236,72,153,0.08) 0%, transparent 70%);
+    pointer-events: none;
   }
-  @keyframes heroGlow {
-    0% { transform: translate(0, 0); }
-    100% { transform: translate(-2%, -2%); }
+  .premium-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -20%;
+    left: -10%;
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(168,85,247,0.06) 0%, transparent 70%);
+    pointer-events: none;
   }
-  .landing-hero-content {
+
+  .hero-img-wrap {
     position: relative;
-    z-index: 2;
+    display: inline-block;
   }
-  .landing-hero h1 {
-    font-size: clamp(2.5rem, 6vw, 5rem);
-    line-height: 1.1;
-  }
-  .landing-hero .lead {
-    font-size: clamp(1rem, 2vw, 1.3rem);
-    max-width: 540px;
-  }
-  .floating-ice-cream {
-    animation: floatY 6s ease-in-out infinite;
-    max-width: 100%;
-    height: auto;
-  }
-  @keyframes floatY {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-20px); }
-  }
-  .floating-slow {
-    animation: floatY 8s ease-in-out infinite;
-  }
-  .floating-delay {
-    animation-delay: -3s;
-  }
-
-  .brand-story-card {
+  .hero-img-wrap::after {
+    content: '';
+    position: absolute;
+    inset: 12px;
     border-radius: 24px;
-    transition: transform 0.3s ease;
+    background: linear-gradient(135deg, rgba(236,72,153,0.15), rgba(168,85,247,0.15));
+    transform: rotate(-3deg);
+    z-index: -1;
   }
-  .brand-story-card:hover {
+  .hero-main-img {
+    border-radius: 24px;
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
+    max-height: 460px;
+    width: 100%;
+    object-fit: cover;
+    animation: softFloat 6s ease-in-out infinite;
+  }
+  @keyframes softFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .brand-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(236,72,153,0.1);
+    color: #be185d;
+    padding: 8px 20px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+  }
+  .brand-tag i { font-size: 1.1rem; }
+
+  .hero-stats {
+    display: flex;
+    gap: 2.5rem;
+    margin-top: 2rem;
+  }
+  .hero-stat { text-align: center; }
+  .hero-stat .num {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #1f2937;
+    line-height: 1;
+  }
+  .hero-stat .label {
+    font-size: 0.8rem;
+    color: #9ca3af;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .hero-stat-divider {
+    width: 1px;
+    background: #e5e7eb;
+  }
+
+  .glass-card-light {
+    background: rgba(255,255,255,0.7);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.8);
+    border-radius: 20px;
+    transition: all 0.3s ease;
+  }
+  .glass-card-light:hover {
+    background: rgba(255,255,255,0.95);
     transform: translateY(-4px);
+    box-shadow: 0 20px 40px -12px rgba(0,0,0,0.1);
   }
 
-  .stat-card {
-    border-radius: 16px;
-    background: linear-gradient(135deg, #fff0f5, #f3e8ff);
-    transition: transform 0.3s ease;
-  }
-  .stat-card:hover {
-    transform: scale(1.05);
-  }
-
-  .feature-icon {
-    width: 64px;
-    height: 64px;
+  .value-icon {
+    width: 56px;
+    height: 56px;
     border-radius: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
+    font-size: 1.4rem;
+    margin: 0 auto 1rem;
   }
 
-  .cta-section {
-    background: linear-gradient(135deg, #ec4899, #a855f7);
+  .section-subtitle {
+    display: inline-block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #ec4899;
+    margin-bottom: 0.5rem;
+  }
+
+  .flavour-card {
+    border-radius: 20px;
+    overflow: hidden;
+    border: none;
+    transition: all 0.4s ease;
+    background: #fff;
+  }
+  .flavour-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
+  }
+  .flavour-card .card-img-top {
+    height: 200px;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+  .flavour-card:hover .card-img-top {
+    transform: scale(1.08);
+  }
+
+  .story-card {
+    border-radius: 20px;
+    border: none;
+    transition: all 0.3s ease;
+  }
+  .story-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px -12px rgba(0,0,0,0.1);
+  }
+
+  .cta-gradient {
+    background: linear-gradient(135deg, #fdf2f8, #faf5ff, #fefce8);
+    border-radius: 24px;
   }
 
   @media (max-width: 768px) {
-    .landing-hero {
-      min-height: 90vh;
-      padding-top: 80px;
-    }
+    .premium-hero { min-height: auto; padding: 100px 0 60px; }
+    .hero-stats { gap: 1.5rem; }
+    .hero-main-img { max-height: 280px; }
+    .hero-stat .num { font-size: 1.3rem; }
   }
 </style>
 {% endblock %}
@@ -98,176 +181,247 @@
 {% block body %}
 
 <!-- ==================== HERO ==================== -->
-<section class="landing-hero">
-  <div class="container landing-hero-content">
-    <div class="row align-items-center g-5">
+<section class="premium-hero">
+  <div class="container position-relative">
+    <div class="row g-5 align-items-center">
       <div class="col-lg-6">
-        <span class="badge bg-pink text-white mb-3 fs-6 px-3 py-2 rounded-pill">
-          🍨 Since 2010
-        </span>
-        <h1 class="fw900 text-white mb-3">
-          Scoop Into <span class="text-gradient">Happiness</span>
+        <div class="brand-tag">
+          <i class="bi bi-award-fill"></i> India's Favourite Since 2010
+        </div>
+        <h1 class="display-3 fw900 mb-3" style="line-height:1.1;">
+          Every Scoop is a
+          <span class="text-gradient">Hug</span> of Happiness
         </h1>
-        <p class="lead text-white-50 mb-4">
-          Handcrafted artisan ice cream made with love, premium ingredients, and 50+ unforgettable flavours. Every scoop tells a story.
+        <p class="lead text-muted mb-4" style="max-width:480px;">
+          Handcrafted artisan ice cream made with love, premium ingredients, and 50+ unforgettable flavours. Delivered fresh to your doorstep.
         </p>
         <div class="d-flex flex-wrap gap-3">
-          <a href="{% url 'home' %}" class="btn btn-lg btn-primary rounded-pill px-5 py-3">
-            <i class="bi bi-cart-plus"></i> Explore Flavours
+          <a href="{% url 'home' %}" class="btn btn-lg btn-primary rounded-pill px-5 py-3 shadow-sm">
+            <i class="bi bi-cart-plus"></i> Explore Menu
           </a>
-          <a href="{% url 'about' %}" class="btn btn-lg btn-outline-light rounded-pill px-5 py-3">
+          <a href="{% url 'about' %}" class="btn btn-lg btn-outline-dark rounded-pill px-5 py-3">
             Our Story
           </a>
         </div>
-        <div class="d-flex gap-4 mt-5 text-white-50">
-          <div><small class="d-block fw-bold text-white fs-5">50+</small>Flavours</div>
-          <div><small class="d-block fw-bold text-white fs-5">10K+</small>Happy Customers</div>
-          <div><small class="d-block fw-bold text-white fs-5">4.9★</small>Avg Rating</div>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <div class="num">50+</div>
+            <div class="label">Flavours</div>
+          </div>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat">
+            <div class="num">10K+</div>
+            <div class="label">Happy Customers</div>
+          </div>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat">
+            <div class="num">4.9</div>
+            <div class="label">Avg Rating ★</div>
+          </div>
         </div>
       </div>
       <div class="col-lg-6 text-center d-none d-lg-block">
-        <img src="{% static 'hero-icecream.jpg' %}" alt="Ice Cream" class="floating-ice-cream rounded-4 shadow-lg" style="max-height: 500px; width: 100%; object-fit: cover;">
+        <div class="hero-img-wrap">
+          <img src="{% static 'hero-icecream.jpg' %}" alt="Ice Cream Delight" class="hero-main-img">
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ==================== BRAND STORY ==================== -->
+<!-- ==================== TRUSTED FEATURES ==================== -->
+<section class="py-5 bg-white border-bottom border-top" style="border-color:#f3f4f6 !important;">
+  <div class="container">
+    <div class="row g-3">
+      <div class="col-md-3 col-6">
+        <div class="d-flex align-items-center gap-3 p-3">
+          <div class="value-icon" style="background:#fdf2f8;">
+            <i class="bi bi-flower1 text-pink"></i>
+          </div>
+          <div>
+            <h6 class="fw-bold mb-0 small">100% Natural</h6>
+            <small class="text-muted">Pure ingredients</small>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="d-flex align-items-center gap-3 p-3">
+          <div class="value-icon" style="background:#f0fdf4;">
+            <i class="bi bi-hand-thumbs-up text-success"></i>
+          </div>
+          <div>
+            <h6 class="fw-bold mb-0 small">Hygienic</h6>
+            <small class="text-muted">Clean facility</small>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="d-flex align-items-center gap-3 p-3">
+          <div class="value-icon" style="background:#fffbeb;">
+            <i class="bi bi-truck text-warning"></i>
+          </div>
+          <div>
+            <h6 class="fw-bold mb-0 small">Free Delivery</h6>
+            <small class="text-muted">Above ₹500</small>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="d-flex align-items-center gap-3 p-3">
+          <div class="value-icon" style="background:#fef2f2;">
+            <i class="bi bi-heart text-danger"></i>
+          </div>
+          <div>
+            <h6 class="fw-bold mb-0 small">Made with Love</h6>
+            <small class="text-muted">Since 2010</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== OUR STORY SNEAK ==================== -->
 <section class="py-5">
   <div class="container">
-    <div class="row g-4 align-items-center">
+    <div class="row g-5 align-items-center">
       <div class="col-lg-5">
         <img src="{% static 'jay.jpeg' %}" alt="Founder" class="img-fluid rounded-4 shadow-lg">
       </div>
       <div class="col-lg-7">
-        <span class="badge bg-pink text-white mb-2">Our Story</span>
-        <h2 class="fw-bold display-6">Crafted with <span class="text-gradient">Love</span> Since 2010</h2>
-        <p class="text-muted lead">What started as a small family recipe has grown into a beloved brand trusted by thousands.</p>
-        <p class="text-muted">At Bapu Ice Cream, we believe ice cream is more than dessert — it's a moment of joy. Every batch is made with fresh, natural ingredients, traditional recipes, and a whole lot of love. From our kitchen to your cone, we deliver happiness.</p>
-        <div class="row g-3 mt-3">
-          <div class="col-sm-4">
-            <div class="stat-card text-center p-3">
+        <span class="section-subtitle"><i class="bi bi-bookmark-heart"></i> Our Story</span>
+        <h2 class="fw-bold display-6 mb-3">Crafted with <span class="text-gradient">Love</span> Since 2010</h2>
+        <p class="text-muted lead" style="max-width:520px;">
+          What started as a small family recipe has grown into a beloved brand trusted by thousands across the city.
+        </p>
+        <p class="text-muted">
+          At Bapu Ice Cream, we believe ice cream is more than dessert — it's a moment of pure joy. Every batch is made from scratch using fresh, natural ingredients, time-honoured recipes, and a whole lot of love. From our kitchen to your cone, we deliver happiness.
+        </p>
+        <div class="row g-3 mt-4">
+          <div class="col-4">
+            <div class="text-center p-3 rounded-3" style="background:#fdf2f8;">
               <h3 class="fw-bold text-pink mb-0">50+</h3>
               <small class="text-muted">Flavours</small>
             </div>
           </div>
-          <div class="col-sm-4">
-            <div class="stat-card text-center p-3">
-              <h3 class="fw-bold text-pink mb-0">15+</h3>
+          <div class="col-4">
+            <div class="text-center p-3 rounded-3" style="background:#f0fdf4;">
+              <h3 class="fw-bold text-success mb-0">15+</h3>
               <small class="text-muted">Years</small>
             </div>
           </div>
-          <div class="col-sm-4">
-            <div class="stat-card text-center p-3">
-              <h3 class="fw-bold text-pink mb-0">10K+</h3>
+          <div class="col-4">
+            <div class="text-center p-3 rounded-3" style="background:#fffbeb;">
+              <h3 class="fw-bold text-warning mb-0">10K+</h3>
               <small class="text-muted">Customers</small>
             </div>
           </div>
         </div>
-        <a href="{% url 'about' %}" class="btn btn-outline-primary rounded-pill mt-4 px-4">Learn More <i class="bi bi-arrow-right"></i></a>
+        <a href="{% url 'about' %}" class="btn btn-outline-primary rounded-pill mt-4 px-5">
+          Read Full Story <i class="bi bi-arrow-right"></i>
+        </a>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ==================== FEATURED FLAVOURS ==================== -->
+<!-- ==================== BESTSELLERS ==================== -->
 {% if featured_products %}
-<section class="py-5 bg-light">
+<section class="py-5" style="background:#faf5ff;">
   <div class="container">
     <div class="text-center mb-5">
-      <span class="badge bg-pink text-white mb-2">Featured</span>
-      <h2 class="fw-bold">Our Bestsellers</h2>
-      <p class="text-muted">The flavours everyone loves</p>
+      <span class="section-subtitle"><i class="bi bi-star-fill"></i> Bestsellers</span>
+      <h2 class="fw-bold">Our Most Loved <span class="text-gradient">Flavours</span></h2>
+      <p class="text-muted">The ones everyone keeps coming back for</p>
     </div>
     <div class="row g-4">
       {% for product in featured_products %}
       <div class="col-md-4 col-lg-2 col-6">
-        <div class="card border-0 shadow-sm h-100 product-card">
-          <div class="product-img-wrapper">
-            {% if product.image %}
-              <img src="{{ product.image.url }}" class="card-img-top product-img" alt="{{ product.name }}">
-            {% else %}
-              <div class="card-img-top product-img d-flex align-items-center justify-content-center bg-light text-muted">
-                <i class="bi bi-image fs-1"></i>
-              </div>
-            {% endif %}
-          </div>
-          <div class="card-body text-center p-2">
-            <h6 class="fw-bold mb-1 small">{{ product.name }}</h6>
-            <p class="text-success fw-bold mb-2">₹{{ product.price }}</p>
-            <a href="{% url 'product_detail' product.slug %}" class="btn btn-sm btn-outline-primary w-100 rounded-pill">View</a>
+        <div class="card flavour-card shadow-sm h-100">
+          {% if product.image %}
+            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+          {% else %}
+            <div class="card-img-top d-flex align-items-center justify-content-center" style="height:200px;background:#f9fafb;">
+              <i class="bi bi-image fs-1 text-muted"></i>
+            </div>
+          {% endif %}
+          <div class="card-body text-center p-3">
+            <h6 class="fw-bold mb-1">{{ product.name }}</h6>
+            <p class="text-success fw-bold fs-5 mb-2">₹{{ product.price }}</p>
+            <a href="{% url 'product_detail' product.slug %}" class="btn btn-sm btn-outline-primary rounded-pill w-100">
+              View <i class="bi bi-arrow-right"></i>
+            </a>
           </div>
         </div>
       </div>
       {% endfor %}
     </div>
     <div class="text-center mt-4">
-      <a href="{% url 'products' %}" class="btn btn-primary rounded-pill px-5">View All Products <i class="bi bi-arrow-right"></i></a>
+      <a href="{% url 'home' %}" class="btn btn-primary rounded-pill px-5 py-2">View Full Menu <i class="bi bi-arrow-right"></i></a>
     </div>
   </div>
 </section>
 {% endif %}
 
-<!-- ==================== WHY CHOOSE US ==================== -->
+<!-- ==================== WHAT WE OFFER ==================== -->
 <section class="py-5">
   <div class="container">
     <div class="text-center mb-5">
-      <h2 class="fw-bold">Why Choose <span class="text-gradient">Bapu Ice Cream</span></h2>
-      <p class="text-muted">We don't just make ice cream. We craft experiences.</p>
+      <span class="section-subtitle"><i class="bi bi-grid"></i> What We Offer</span>
+      <h2 class="fw-bold">Something for <span class="text-gradient">Everyone</span></h2>
+      <p class="text-muted">From classic scoops to party packs — we've got you covered</p>
     </div>
     <div class="row g-4">
-      <div class="col-md-3 col-6">
-        <div class="card border-0 shadow-sm text-center p-4 h-100 brand-story-card">
-          <div class="feature-icon bg-pink bg-opacity-10 mx-auto mb-3">
-            <i class="bi bi-flower1 text-pink"></i>
+      <div class="col-md-4">
+        <div class="card story-card shadow-sm h-100 p-4 text-center">
+          <div class="value-icon" style="background:#fdf2f8;width:64px;height:64px;font-size:1.6rem;">
+            <i class="bi bi-cup-straw text-pink"></i>
           </div>
-          <h6 class="fw-bold">100% Natural</h6>
-          <p class="text-muted small mb-0">Only the freshest, natural ingredients go into every batch.</p>
+          <h5 class="fw-bold mt-3">Scooped Ice Cream</h5>
+          <p class="text-muted small">20+ premium hand-scooped flavours made fresh daily.</p>
+          <a href="{% url 'order' %}?type=Scooped Ice Cream" class="btn btn-outline-primary rounded-pill mt-auto">Order Now</a>
         </div>
       </div>
-      <div class="col-md-3 col-6">
-        <div class="card border-0 shadow-sm text-center p-4 h-100 brand-story-card">
-          <div class="feature-icon bg-success bg-opacity-10 mx-auto mb-3">
-            <i class="bi bi-hand-thumbs-up text-success"></i>
+      <div class="col-md-4">
+        <div class="card story-card shadow-sm h-100 p-4 text-center">
+          <div class="value-icon" style="background:#fffbeb;width:64px;height:64px;font-size:1.6rem;">
+            <i class="bi bi-gem text-warning"></i>
           </div>
-          <h6 class="fw-bold">Hygienic</h6>
-          <p class="text-muted small mb-0">Made in a clean, sanitised facility with the highest standards.</p>
+          <h5 class="fw-bold mt-3">Event Catering</h5>
+          <p class="text-muted small">Ice cream carts, party packs, and custom desserts for every celebration.</p>
+          <a href="{% url 'catering' %}" class="btn btn-outline-primary rounded-pill mt-auto">Book Now</a>
         </div>
       </div>
-      <div class="col-md-3 col-6">
-        <div class="card border-0 shadow-sm text-center p-4 h-100 brand-story-card">
-          <div class="feature-icon bg-warning bg-opacity-10 mx-auto mb-3">
-            <i class="bi bi-truck text-warning"></i>
+      <div class="col-md-4">
+        <div class="card story-card shadow-sm h-100 p-4 text-center">
+          <div class="value-icon" style="background:#f0fdf4;width:64px;height:64px;font-size:1.6rem;">
+            <i class="bi bi-truck text-success"></i>
           </div>
-          <h6 class="fw-bold">Free Delivery</h6>
-          <p class="text-muted small mb-0">Free home delivery on orders above ₹500.</p>
-        </div>
-      </div>
-      <div class="col-md-3 col-6">
-        <div class="card border-0 shadow-sm text-center p-4 h-100 brand-story-card">
-          <div class="feature-icon bg-danger bg-opacity-10 mx-auto mb-3">
-            <i class="bi bi-heart text-danger"></i>
-          </div>
-          <h6 class="fw-bold">Made with Love</h6>
-          <p class="text-muted small mb-0">Every scoop is crafted with passion and tradition since 2010.</p>
+          <h5 class="fw-bold mt-3">Home Delivery</h5>
+          <p class="text-muted small">Fast, contactless delivery right to your doorstep. Free above ₹500.</p>
+          <a href="{% url 'order' %}" class="btn btn-outline-primary rounded-pill mt-auto">Order Now</a>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ==================== CTA ==================== -->
-<section class="cta-section py-5">
-  <div class="container text-center py-4">
-    <h2 class="fw-bold text-white mb-3">Ready for a Scoop of Happiness?</h2>
-    <p class="lead text-white-50 mb-4">Browse our menu, customise your order, and get it delivered to your doorstep.</p>
-    <div class="d-flex justify-content-center gap-3 flex-wrap">
-      <a href="{% url 'order' %}" class="btn btn-lg btn-light rounded-pill px-5 py-3 fw-bold">
-        <i class="bi bi-cart-plus"></i> Order Now
-      </a>
-      <a href="{% url 'products' %}" class="btn btn-lg btn-outline-light rounded-pill px-5 py-3">
-        <i class="bi bi-grid"></i> Browse Menu
-      </a>
+<!-- ==================== FINAL CTA ==================== -->
+<section class="py-5">
+  <div class="container">
+    <div class="cta-gradient p-5 p-lg-5 text-center">
+      <h2 class="fw-bold display-6 mb-3">Ready for a <span class="text-gradient">Scoop of Joy</span>?</h2>
+      <p class="lead text-muted mx-auto mb-4" style="max-width:500px;">
+        Browse our full menu, customise your perfect order, and get it delivered fresh to your home.
+      </p>
+      <div class="d-flex justify-content-center gap-3 flex-wrap">
+        <a href="{% url 'order' %}" class="btn btn-lg btn-primary rounded-pill px-5 py-3 shadow-sm fw-bold">
+          <i class="bi bi-cart-plus"></i> Order Now
+        </a>
+        <a href="{% url 'products' %}" class="btn btn-lg btn-outline-dark rounded-pill px-5 py-3">
+          <i class="bi bi-grid"></i> Browse Menu
+        </a>
+      </div>
     </div>
   </div>
 </section>

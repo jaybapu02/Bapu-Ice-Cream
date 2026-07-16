@@ -4,163 +4,156 @@
 
 {% block extra_head %}
 <style>
-  .menu-hero {
-    background: linear-gradient(135deg, #fff0f5 0%, #f3e8ff 50%, #fffbeb 100%);
-    padding: 60px 0 40px;
+  .menu-header {
+    background: linear-gradient(160deg, #faf5ff, #fff0f5, #fffbeb);
+    padding: 50px 0 40px;
     text-align: center;
   }
-  .menu-hero h1 { font-size: clamp(2rem, 4vw, 3rem); }
 
-  .cat-pill {
+  .pill-filter {
     display: inline-block;
-    padding: 8px 22px;
+    padding: 7px 20px;
     border-radius: 50px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 600;
     border: 2px solid #e5e7eb;
     color: #6b7280;
-    cursor: pointer;
     transition: all 0.25s ease;
     text-decoration: none;
     background: #fff;
   }
-  .cat-pill:hover, .cat-pill.active {
+  .pill-filter:hover, .pill-filter.active {
     background: linear-gradient(135deg, #ec4899, #a855f7);
     border-color: transparent;
     color: #fff;
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(236,72,153,0.3);
+    box-shadow: 0 6px 20px rgba(236,72,153,0.25);
   }
 
-  .menu-card {
+  .product-card-v2 {
     border-radius: 20px;
     overflow: hidden;
-    transition: all 0.35s ease;
     border: none;
     background: #fff;
+    transition: all 0.35s ease;
     position: relative;
   }
-  .menu-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+  .product-card-v2:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px -8px rgba(0,0,0,0.12);
   }
-  .menu-card-img-wrap {
-    height: 220px;
+  .product-card-v2 .img-wrap {
+    height: 200px;
     overflow: hidden;
     position: relative;
   }
-  .menu-card-img {
+  .product-card-v2 .img-wrap img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     transition: transform 0.5s ease;
   }
-  .menu-card:hover .menu-card-img {
-    transform: scale(1.12);
+  .product-card-v2:hover .img-wrap img {
+    transform: scale(1.08);
   }
-  .menu-card-badge {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    z-index: 2;
+  .product-card-v2 .card-body {
+    padding: 1.2rem;
   }
-  .menu-card-body {
-    padding: 1.25rem;
-  }
-  .menu-card-title {
+  .product-card-v2 .name {
     font-weight: 700;
-    font-size: 1.1rem;
-    margin-bottom: 4px;
+    font-size: 1rem;
+    margin-bottom: 2px;
   }
-  .menu-card-desc {
-    font-size: 0.85rem;
+  .product-card-v2 .desc {
+    font-size: 0.82rem;
     color: #9ca3af;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
   }
-  .menu-card-price {
-    font-size: 1.3rem;
+  .product-card-v2 .price {
+    font-size: 1.25rem;
     font-weight: 800;
     color: #059669;
   }
-  .menu-card-actions {
+  .product-card-v2 .actions {
     display: flex;
     gap: 6px;
     margin-top: 12px;
   }
-  .menu-card-actions .btn {
+  .product-card-v2 .actions .btn {
     font-size: 0.8rem;
-    padding: 6px 12px;
+    padding: 7px 0;
     border-radius: 50px;
     flex: 1;
   }
 
-  .search-box {
+  .search-field {
     border-radius: 50px;
-    padding: 12px 20px;
+    padding: 10px 18px;
     border: 2px solid #e5e7eb;
-    transition: border-color 0.3s;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    background: #fff;
   }
-  .search-box:focus {
+  .search-field:focus {
     border-color: #ec4899;
-    box-shadow: 0 0 0 3px rgba(236,72,153,0.15);
+    box-shadow: 0 0 0 3px rgba(236,72,153,0.12);
   }
 
-  .empty-state {
-    padding: 80px 20px;
-    text-align: center;
+  .menu-cta-card {
+    background: linear-gradient(135deg, #fdf2f8, #faf5ff);
+    border-radius: 20px;
+    border: none;
   }
 
   @media (max-width: 576px) {
-    .menu-card-img-wrap { height: 180px; }
-    .cat-pill { font-size: 0.8rem; padding: 6px 16px; }
+    .product-card-v2 .img-wrap { height: 160px; }
   }
 </style>
 {% endblock %}
 
 {% block body %}
 
-<!-- ==================== MENU HERO ==================== -->
-<section class="menu-hero">
+<!-- ==================== HEADER ==================== -->
+<section class="menu-header">
   <div class="container">
     <span class="badge bg-pink text-white mb-3 px-3 py-2 rounded-pill fs-6">
-      🍨 50+ Flavours
+      🍨 50+ Handcrafted Flavours
     </span>
-    <h1 class="fw900">Our <span class="text-gradient">Menu</span></h1>
-    <p class="lead text-muted mx-auto mb-0" style="max-width:560px;">
-      Handcrafted with love, using the finest ingredients. Pick your perfect scoop.
+    <h1 class="display-5 fw900">Our <span class="text-gradient">Menu</span></h1>
+    <p class="lead text-muted mx-auto mb-0" style="max-width:540px;">
+      Every flavour tells a story. Pick your perfect scoop, we'll deliver the joy.
     </p>
   </div>
 </section>
 
-<!-- ==================== FILTERS ==================== -->
-<section class="py-4 border-bottom bg-white">
+<!-- ==================== FILTER BAR ==================== -->
+<section class="py-3 bg-white border-bottom sticky-top" style="top:56px;z-index:999;">
   <div class="container">
-    <div class="row g-3 align-items-center">
-      <div class="col-md-7">
+    <div class="row g-2 align-items-center">
+      <div class="col-lg-8">
         <div class="d-flex flex-wrap gap-2">
-          <a href="{% url 'home' %}" class="cat-pill {% if not selected_category %}active{% endif %}">
+          <a href="{% url 'home' %}" class="pill-filter {% if not selected_category %}active{% endif %}">
             🍦 All
           </a>
           {% for cat in categories %}
             <a href="{% url 'home' %}?category={{ cat.slug }}{% if search_query %}&q={{ search_query }}{% endif %}"
-               class="cat-pill {% if selected_category == cat.slug %}active{% endif %}">
+               class="pill-filter {% if selected_category == cat.slug %}active{% endif %}">
               {{ cat.name }}
             </a>
           {% endfor %}
         </div>
       </div>
-      <div class="col-md-5">
+      <div class="col-lg-4 mt-2 mt-lg-0">
         <form method="get" class="d-flex gap-2">
           {% if selected_category %}
             <input type="hidden" name="category" value="{{ selected_category }}">
           {% endif %}
           <div class="input-group">
-            <input type="text" name="q" class="form-control search-box border-end-0" placeholder="Search flavours..." value="{{ search_query }}">
-            <button class="btn btn-primary rounded-pill ms-2 px-4" type="submit">
+            <input type="text" name="q" class="form-control search-field" placeholder="Search flavours..." value="{{ search_query }}">
+            <button class="btn btn-primary rounded-pill ms-2 px-3" type="submit">
               <i class="bi bi-search"></i>
             </button>
             {% if search_query or selected_category %}
@@ -175,44 +168,46 @@
   </div>
 </section>
 
-<!-- ==================== PRODUCTS GRID ==================== -->
+<!-- ==================== PRODUCTS ==================== -->
 <section class="py-5">
   <div class="container">
-
     {% if search_query %}
-      <p class="text-muted mb-4">
-        Showing results for "<strong>{{ search_query }}</strong>"
-        <span class="text-muted">· {{ all_products|length }} found</span>
-      </p>
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <p class="text-muted mb-0">
+          <i class="bi bi-search"></i>
+          Results for "<strong>{{ search_query }}</strong>"
+          · <strong>{{ all_products|length }}</strong> found
+        </p>
+      </div>
     {% endif %}
 
     {% if all_products %}
       <div class="row g-4">
         {% for product in all_products %}
           <div class="col-md-4 col-lg-3 col-6">
-            <div class="card menu-card shadow-sm">
-              <div class="menu-card-img-wrap">
+            <div class="card product-card-v2 shadow-sm">
+              <div class="img-wrap">
                 {% if product.image %}
-                  <img src="{{ product.image.url }}" class="menu-card-img" alt="{{ product.name }}">
+                  <img src="{{ product.image.url }}" alt="{{ product.name }}">
                 {% else %}
-                  <div class="menu-card-img d-flex align-items-center justify-content-center bg-light text-muted">
+                  <div class="d-flex align-items-center justify-content-center w-100 h-100 bg-light text-muted">
                     <i class="bi bi-image fs-1"></i>
                   </div>
                 {% endif %}
                 {% if product.is_featured %}
-                  <span class="badge bg-warning text-dark menu-card-badge">⭐ Featured</span>
+                  <span class="badge bg-warning text-dark position-absolute top-0 start-0 m-2">⭐ Featured</span>
                 {% endif %}
                 {% if product.category %}
-                  <span class="badge bg-white text-dark border menu-card-badge" style="left:auto;right:12px;">
+                  <span class="badge bg-white text-dark border position-absolute top-0 end-0 m-2">
                     {{ product.category.name }}
                   </span>
                 {% endif %}
               </div>
-              <div class="menu-card-body">
-                <h6 class="menu-card-title">{{ product.name }}</h6>
-                <p class="menu-card-desc">{{ product.description|default:"Delicious homemade ice cream" }}</p>
-                <div class="menu-card-price">₹{{ product.price }}</div>
-                <div class="menu-card-actions">
+              <div class="card-body">
+                <h6 class="name">{{ product.name }}</h6>
+                <p class="desc">{{ product.description|default:"Delicious homemade ice cream" }}</p>
+                <div class="price">₹{{ product.price }}</div>
+                <div class="actions">
                   <a href="{% url 'order' %}?flavour={{ product.name|urlencode }}" class="btn btn-primary btn-sm">
                     <i class="bi bi-cart-plus"></i> Order
                   </a>
@@ -226,42 +221,42 @@
         {% endfor %}
       </div>
     {% else %}
-      <div class="empty-state">
+      <div class="text-center py-5">
         <i class="bi bi-emoji-frown fs-1 text-muted"></i>
-        <h5 class="fw-bold mt-3">No products found</h5>
-        <p class="text-muted">Try a different category or search term.</p>
-        <a href="{% url 'home' %}" class="btn btn-primary rounded-pill px-5">View All</a>
+        <h5 class="fw-bold mt-3">Nothing here yet</h5>
+        <p class="text-muted">No products match your filter. Try something else!</p>
+        <a href="{% url 'home' %}" class="btn btn-primary rounded-pill px-5">Clear Filters</a>
       </div>
     {% endif %}
   </div>
 </section>
 
 <!-- ==================== FEATURES STRIP ==================== -->
-<section class="py-4 bg-white border-top">
+<section class="py-4 border-top bg-white" style="border-color:#f3f4f6 !important;">
   <div class="container">
-    <div class="row text-center g-3">
+    <div class="row text-center g-2">
       <div class="col-6 col-md-3">
-        <div class="p-3">
-          <i class="bi bi-flower1 fs-1 text-pink"></i>
-          <h6 class="mt-2 fw-bold small">Natural Ingredients</h6>
+        <div class="p-2">
+          <i class="bi bi-flower1 fs-3 text-pink"></i>
+          <h6 class="mt-1 fw-bold small">Natural Ingredients</h6>
         </div>
       </div>
       <div class="col-6 col-md-3">
-        <div class="p-3">
-          <i class="bi bi-heart fs-1 text-danger"></i>
-          <h6 class="mt-2 fw-bold small">Made with Love</h6>
+        <div class="p-2">
+          <i class="bi bi-heart fs-3 text-danger"></i>
+          <h6 class="mt-1 fw-bold small">Made with Love</h6>
         </div>
       </div>
       <div class="col-6 col-md-3">
-        <div class="p-3">
-          <i class="bi bi-clock fs-1 text-success"></i>
-          <h6 class="mt-2 fw-bold small">Fresh Daily</h6>
+        <div class="p-2">
+          <i class="bi bi-clock fs-3 text-success"></i>
+          <h6 class="mt-1 fw-bold small">Fresh Daily</h6>
         </div>
       </div>
       <div class="col-6 col-md-3">
-        <div class="p-3">
-          <i class="bi bi-award fs-1 text-warning"></i>
-          <h6 class="mt-2 fw-bold small">Award Winning</h6>
+        <div class="p-2">
+          <i class="bi bi-award fs-3 text-warning"></i>
+          <h6 class="mt-1 fw-bold small">Award Winning</h6>
         </div>
       </div>
     </div>
@@ -271,18 +266,17 @@
 <!-- ==================== QUICK ORDER CTA ==================== -->
 <section class="py-5">
   <div class="container">
-    <div class="row align-items-center g-4 p-4 p-lg-5 rounded-4" style="background:linear-gradient(135deg, #fce4ec, #f3e8ff);">
-      <div class="col-md-7">
-        <h2 class="fw-bold">Can't Decide? <span class="text-gradient">Try Our Bestseller!</span></h2>
-        <p class="text-muted mb-0">Let us surprise you with the most popular flavour of the week. Order now and get free delivery above ₹500.</p>
-      </div>
-      <div class="col-md-5 text-md-end">
-        <a href="{% url 'order' %}" class="btn btn-lg btn-primary rounded-pill px-5 py-3">
-          <i class="bi bi-cart-plus"></i> Order Now
-        </a>
-        <a href="{% url 'products' %}" class="btn btn-lg btn-outline-dark rounded-pill px-4 py-3 ms-2">
-          Full Menu
-        </a>
+    <div class="card menu-cta-card shadow-sm p-4 p-lg-5">
+      <div class="row align-items-center g-4">
+        <div class="col-md-7">
+          <h2 class="fw-bold mb-2">Can't Decide? <span class="text-gradient">Try a Bestseller!</span></h2>
+          <p class="text-muted mb-0">Let us surprise you with the most popular flavour of the week. Free delivery above ₹500.</p>
+        </div>
+        <div class="col-md-5 text-md-end">
+          <a href="{% url 'order' %}" class="btn btn-lg btn-primary rounded-pill px-5 py-3 shadow-sm">
+            <i class="bi bi-cart-plus"></i> Order Now
+          </a>
+        </div>
       </div>
     </div>
   </div>
