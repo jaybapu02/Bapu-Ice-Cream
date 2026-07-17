@@ -68,6 +68,9 @@
               <ul class="dropdown-menu dropdown-menu-end">
                 <li><a class="dropdown-item" href="{% url 'profile' %}"><i class="bi bi-person"></i> My Profile</a></li>
                 <li><a class="dropdown-item" href="{% url 'wishlist' %}"><i class="bi bi-heart"></i> Wishlist</a></li>
+                {% if user.is_staff %}
+                <li><a class="dropdown-item" href="{% url 'admin:index' %}"><i class="bi bi-shield-lock"></i> Admin</a></li>
+                {% endif %}
                 <li><hr class="dropdown-divider"></li>
                 <li>
                   <form method="post" action="{% url 'logout' %}" class="d-inline">

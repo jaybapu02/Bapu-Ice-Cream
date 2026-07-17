@@ -1,15 +1,11 @@
-from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
-
-admin.site.site_header = "Bapu Ice Cream Admin"
-admin.site.site_title = "Bapu Ice Cream Admin Portal"
-admin.site.index_title = "Welcome to Bapu Ice Cream Admin"
+from home.cadmin import custom_admin_site
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path("admin/", custom_admin_site.urls),
     path("", include("home.urls")),
     path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
