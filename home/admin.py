@@ -279,11 +279,11 @@ class ProductAdmin(ImageThumbnailMixin, admin.ModelAdmin):
 @admin.register(Order, site=custom_admin_site)
 class OrderAdmin(admin.ModelAdmin):
     list_display = [
-        "order_id", "name", "phone", "total_price_display",
+        "order_id", "name", "phone", "email", "total_price_display",
         "payment_mode", "order_status_badge", "items_count", "created_at"
     ]
     list_filter = ["status", "payment_mode", "delivery_type", "created_at"]
-    search_fields = ["order_id", "name", "phone", "address"]
+    search_fields = ["order_id", "name", "phone", "email", "address"]
     list_per_page = 25
     ordering = ["-created_at"]
     date_hierarchy = "created_at"
@@ -293,14 +293,18 @@ class OrderAdmin(admin.ModelAdmin):
 
     fieldsets = [
         (None, {
-            "fields": ["order_id", "status", "total_price"]
+            "fields": ["order_id", "status", "subtotal", "tax", "delivery_charge", "total_price"]
         }),
         ("Customer Details", {
-            "fields": ["user", "name", "phone", "address"],
+            "fields": ["user", "name", "email", "phone", "address"],
             "classes": ["collapse"]
         }),
         ("Delivery & Payment", {
-            "fields": ["delivery_type", "payment_mode"],
+            "fields": ["delivery_type", "payment_mode", "special_instructions"],
+            "classes": ["collapse"]
+        }),
+        ("Payment Gateway", {
+            "fields": ["razorpay_order_id"],
             "classes": ["collapse"]
         }),
         ("Timestamps", {
@@ -320,7 +324,10 @@ class OrderAdmin(admin.ModelAdmin):
     total_price_display.admin_order_field = "total_price"
 
     def order_status_badge(self, obj):
-        colors = {"PENDING": "warning", "PAID": "success", "CANCELLED": "danger"}
+        colors = {
+            "PENDING": "warning", "CONFIRMED": "info", "PREPARING": "primary",
+            "OUT_FOR_DELIVERY": "dark", "DELIVERED": "success", "CANCELLED": "danger",
+        }
         badge_class = colors.get(obj.status, "secondary")
         return format_html(
             '<span class="badge bg-{}">{}</span>', badge_class, obj.get_status_display()
@@ -345,7 +352,7 @@ class OrderAdmin(admin.ModelAdmin):
 
 @admin.register(OrderItem, site=custom_admin_site)
 class OrderItemAdmin(admin.ModelAdmin):
-    list_display = ["order_link", "product", "ice_cream_type", "flavour", "size", "quantity", "price_display", "created_at"]
+    list_display = ["order_link", "product", "ice_cream_type", "flavour", "size", "toppings", "quantity", "unit_price_display", "price_display", "created_at"]
     list_filter = ["flavour", "ice_cream_type", "created_at"]
     search_fields = ["flavour", "order__order_id", "product__name"]
     list_per_page = 25
@@ -353,15 +360,33 @@ class OrderItemAdmin(admin.ModelAdmin):
     readonly_fields = ["created_at"]
     autocomplete_fields = ["order", "product"]
 
+    fieldsets = [
+        (None, {
+            "fields": ["order", "product"]
+        }),
+        ("Item Details", {
+            "fields": ["ice_cream_type", "flavour", "size", "toppings", "quantity", "unit_price", "price"]
+        }),
+        ("Timestamps", {
+            "fields": ["created_at"],
+            "classes": ["collapse"]
+        }),
+    ]
+
     def order_link(self, obj):
         url = reverse("admin:home_order_change", args=[obj.order.id])
         return format_html('<a href="{}">{}</a>', url, obj.order.order_id)
     order_link.short_description = "Order"
     order_link.admin_order_field = "order__order_id"
 
+    def unit_price_display(self, obj):
+        return format_html('₹{}', obj.unit_price)
+    unit_price_display.short_description = "Unit Price"
+    unit_price_display.admin_order_field = "unit_price"
+
     def price_display(self, obj):
         return format_html('₹{}', obj.price)
-    price_display.short_description = "Price"
+    price_display.short_description = "Total"
     price_display.admin_order_field = "price"
 
     def get_queryset(self, request):

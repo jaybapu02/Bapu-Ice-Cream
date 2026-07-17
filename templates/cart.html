@@ -1,72 +1,166 @@
 {% extends "base.html" %}
-{% block title %}Your Cart{% endblock %}
+{% load static %}
+{% block title %}Your Cart — Bapu Ice Cream{% endblock %}
+{% block extra_head %}
+<style>
+  .qty-control { display: inline-flex; align-items: center; gap: 0.25rem; }
+  .qty-control button { width: 32px; height: 32px; border-radius: 50%; border: 1px solid #dee2e6; background: #fff; font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; }
+  .qty-control button:hover { background: #0d6efd; color: #fff; border-color: #0d6efd; }
+  .qty-control .qty-val { min-width: 28px; text-align: center; font-weight: 700; font-size: 1.05rem; }
+  #loading-overlay { display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(255,255,255,0.85); justify-content: center; align-items: center; flex-direction: column; }
+  #loading-overlay.show { display: flex; }
+  .spinner-big { width: 4rem; height: 4rem; border: 5px solid #e9ecef; border-top-color: #0d6efd; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+{% endblock %}
 {% block body %}
+
+<div id="loading-overlay"><div class="spinner-big"></div><p class="mt-3 fw-semibold text-muted">Updating cart…</p></div>
 
 <section class="py-5">
   <div class="container">
-    <h2 class="fw-bold text-center mb-4"><i class="bi bi-cart3"></i> Your Cart</h2>
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <h2 class="fw-bold mb-1"><i class="bi bi-cart3 text-primary"></i> Your Cart</h2>
+        <p class="text-muted mb-4">{{ cart|length }} item(s) in your cart</p>
 
-    {% if cart %}
-      <div class="card border-0 shadow-lg">
-        <div class="card-body p-4">
-          <div class="table-responsive">
-            <table class="table align-middle">
-              <thead class="table-light">
-                <tr>
-                  <th>Item</th>
-                  <th>Details</th>
-                  <th>Qty</th>
-                  <th>Price</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for item in cart %}
-                  <tr>
-                    <td>
-                      <strong>{{ item.flavour }}</strong><br>
-                      <small class="text-muted">{{ item.type }}</small>
-                    </td>
-                    <td>{{ item.size }}<br><small>{{ item.toppings }}</small></td>
-                    <td>{{ item.quantity }}</td>
-                    <td class="fw-bold">₹{{ item.total }}</td>
-                    <td>
-                      <a href="{% url 'remove_from_cart' forloop.counter0 %}" class="btn btn-sm btn-outline-danger">
-                        <i class="bi bi-trash"></i>
-                      </a>
-                    </td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-
-          <hr>
-          <div class="d-flex justify-content-between align-items-center">
-            <h4 class="fw-bold mb-0">Total</h4>
-            <h4 class="text-success fw-bold mb-0">₹{{ grand_total }}</h4>
-          </div>
-
-          <div class="d-flex flex-wrap justify-content-between mt-4 gap-2">
-            <a href="{% url 'order' %}" class="btn btn-outline-secondary rounded-pill px-4">
-              <i class="bi bi-arrow-left"></i> Continue Shopping
-            </a>
-            <a href="{% url 'payment' %}" class="btn btn-success rounded-pill px-5 py-2">
-              Proceed to Pay <i class="bi bi-credit-card"></i>
-            </a>
+        {% if cart %}
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4" id="cart-items-container">
+            {% for item in cart %}
+            <div class="cart-item-row d-flex justify-content-between align-items-start py-3 border-bottom" data-index="{{ forloop.counter0 }}">
+              <div>
+                <h6 class="fw-bold mb-1">{{ item.flavour }}</h6>
+                <small class="text-muted d-block">{{ item.type }} | {{ item.size }}</small>
+                {% if item.toppings and item.toppings != "No Toppings" %}
+                <small class="text-muted">+ {{ item.toppings }}</small>
+                {% endif %}
+                <div class="qty-control mt-2">
+                  <button class="qty-dec" data-index="{{ forloop.counter0 }}">−</button>
+                  <span class="qty-val" id="qty-{{ forloop.counter0 }}">{{ item.quantity }}</span>
+                  <button class="qty-inc" data-index="{{ forloop.counter0 }}">+</button>
+                </div>
+              </div>
+              <div class="text-end">
+                <div class="fw-bold" id="price-{{ forloop.counter0 }}">₹{{ item.total }}</div>
+                <button class="btn btn-sm btn-outline-danger rounded-pill mt-2 remove-item" data-index="{{ forloop.counter0 }}">
+                  <i class="bi bi-trash"></i> Remove
+                </button>
+              </div>
+            </div>
+            {% endfor %}
           </div>
         </div>
+
+        <div class="card border-0 shadow-sm mt-3">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between mb-1"><span>Subtotal</span><span id="c-subtotal">₹{{ subtotal }}</span></div>
+            <div class="d-flex justify-content-between mb-1"><span>Tax (5%)</span><span id="c-tax">₹{{ tax }}</span></div>
+            <div class="d-flex justify-content-between mb-1">
+              <span>Delivery</span>
+              <span id="c-delivery">{% if delivery_charge == 0 %}<span class="text-success">FREE</span>{% else %}₹{{ delivery_charge }}{% endif %}</span>
+            </div>
+            {% if delivery_charge > 0 %}
+            <div class="small text-muted mb-2">Free delivery above ₹{{ free_delivery_above }}</div>
+            {% endif %}
+            <hr>
+            <div class="d-flex justify-content-between fs-4 fw-bold">
+              <span>Total</span>
+              <span class="text-success" id="c-grand">₹{{ grand_total }}</span>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-4">
+              <a href="{% url 'order' %}" class="btn btn-outline-primary rounded-pill px-4"><i class="bi bi-arrow-left"></i> Continue Shopping</a>
+              <a href="{% url 'checkout' %}" class="btn btn-success rounded-pill px-5 py-2 flex-fill"><i class="bi bi-credit-card"></i> Proceed to Checkout</a>
+            </div>
+            <button class="btn btn-outline-danger btn-sm rounded-pill mt-3" id="clear-cart-btn"><i class="bi bi-trash"></i> Clear Cart</button>
+          </div>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+          <i class="bi bi-cart-x display-1 text-muted"></i>
+          <p class="text-muted fs-5 mt-3">Your cart is empty</p>
+          <a href="{% url 'order' %}" class="btn btn-primary rounded-pill px-5 py-2 mt-2"><i class="bi bi-ice-cream"></i> Order Ice Cream</a>
+        </div>
+        {% endif %}
       </div>
-    {% else %}
-      <div class="text-center py-5">
-        <i class="bi bi-cart-x fs-1 text-muted"></i>
-        <p class="text-muted fs-5 mt-2">Your cart is empty</p>
-        <a href="{% url 'order' %}" class="btn btn-primary rounded-pill px-5">
-          <i class="bi bi-cart-plus"></i> Order Ice Cream
-        </a>
-      </div>
-    {% endif %}
+    </div>
   </div>
 </section>
 
+<script>
+(function() {
+  const csrf = '{{ csrf_token }}';
+  const overlay = document.getElementById('loading-overlay');
+  const DELIVERY_CHARGE = {{ delivery_charge }};
+  const FREE_DELIVERY = {{ free_delivery_above }};
+
+  function api(action, data, cb) {
+    overlay.classList.add('show');
+    var body = new URLSearchParams({ action: action, csrfmiddlewaretoken: csrf });
+    if (data) Object.keys(data).forEach(function(k) { body.append(k, data[k]); });
+    fetch('{% url "cart_api" %}', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
+      body: body.toString()
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(resp) {
+      overlay.classList.remove('show');
+      if (resp.success) {
+        if (cb) cb(resp);
+        if (resp.cart && resp.cart.length === 0) location.reload();
+        else updateTotals(resp);
+      } else { alert(resp.message || 'Error'); }
+    })
+    .catch(function() { overlay.classList.remove('show'); alert('Network error.'); });
+  }
+
+  function updateTotals(data) {
+    document.getElementById('c-subtotal').textContent = '₹' + data.subtotal;
+    document.getElementById('c-tax').textContent = '₹' + data.tax;
+    document.getElementById('c-delivery').innerHTML = data.delivery_charge == 0 ? '<span class="text-success">FREE</span>' : '₹' + data.delivery_charge;
+    document.getElementById('c-grand').textContent = '₹' + data.grand_total;
+  }
+
+  document.querySelectorAll('.qty-inc').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var idx = this.dataset.index;
+      var qtyEl = document.getElementById('qty-' + idx);
+      var newQty = parseInt(qtyEl.textContent) + 1;
+      api('update', { index: idx, quantity: newQty }, function(resp) {
+        qtyEl.textContent = newQty;
+        document.getElementById('price-' + idx).textContent = '₹' + (resp.cart[idx] ? resp.cart[idx].total : '0');
+      });
+    });
+  });
+
+  document.querySelectorAll('.qty-dec').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var idx = this.dataset.index;
+      var qtyEl = document.getElementById('qty-' + idx);
+      var current = parseInt(qtyEl.textContent);
+      if (current <= 1) return;
+      var newQty = current - 1;
+      api('update', { index: idx, quantity: newQty }, function(resp) {
+        qtyEl.textContent = newQty;
+        document.getElementById('price-' + idx).textContent = '₹' + (resp.cart[idx] ? resp.cart[idx].total : '0');
+      });
+    });
+  });
+
+  document.querySelectorAll('.remove-item').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var idx = this.dataset.index;
+      api('remove', { index: idx }, function(resp) {
+        var row = document.querySelector('.cart-item-row[data-index="' + idx + '"]');
+        if (row) row.remove();
+      });
+    });
+  });
+
+  document.getElementById('clear-cart-btn') && document.getElementById('clear-cart-btn').addEventListener('click', function() {
+    if (confirm('Clear your cart?')) api('clear', {}, function() { location.reload(); });
+  });
+})();
+</script>
 {% endblock %}

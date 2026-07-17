@@ -1,3 +1,6 @@
+from decimal import Decimal
+
+
 def cart_count(request):
-    cart = request.session.get('cart', [])
-    return {'cart_count': len(cart)}
+    cart = request.session.get("cart", [])
+    return {"cart_count": len(cart)}

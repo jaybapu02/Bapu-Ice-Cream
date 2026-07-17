@@ -129,27 +129,45 @@ class CateringEnquiry(models.Model):
 class Order(models.Model):
     STATUS_CHOICES = [
         ("PENDING", "Pending"),
-        ("PAID", "Paid"),
+        ("CONFIRMED", "Confirmed"),
+        ("PREPARING", "Preparing"),
+        ("OUT_FOR_DELIVERY", "Out for Delivery"),
+        ("DELIVERED", "Delivered"),
         ("CANCELLED", "Cancelled"),
     ]
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
-        null=True, blank=True, related_name='orders'
+        null=True, blank=True, related_name="orders"
     )
     order_id = models.CharField(max_length=20, unique=True)
     name = models.CharField(max_length=100)
+    email = models.EmailField(blank=True, help_text="Confirmation will be sent here")
     phone = models.CharField(validators=[phone_regex], max_length=17)
     address = models.TextField()
     delivery_type = models.CharField(max_length=20)
     payment_mode = models.CharField(max_length=20)
+    subtotal = models.DecimalField(
+        max_digits=10, decimal_places=2, default=Decimal("0.00"),
+        validators=[MinValueValidator(Decimal("0.00"))]
+    )
+    tax = models.DecimalField(
+        max_digits=8, decimal_places=2, default=Decimal("0.00"),
+        validators=[MinValueValidator(Decimal("0.00"))]
+    )
+    delivery_charge = models.DecimalField(
+        max_digits=8, decimal_places=2, default=Decimal("0.00"),
+        validators=[MinValueValidator(Decimal("0.00"))]
+    )
     total_price = models.DecimalField(
-        max_digits=8, decimal_places=2, default=Decimal('0.00'),
-        validators=[MinValueValidator(Decimal('0.00'))]
+        max_digits=10, decimal_places=2, default=Decimal("0.00"),
+        validators=[MinValueValidator(Decimal("0.00"))]
     )
+    special_instructions = models.TextField(blank=True)
     status = models.CharField(
-        max_length=10, choices=STATUS_CHOICES, default="PENDING"
+        max_length=20, choices=STATUS_CHOICES, default="PENDING"
     )
+    razorpay_order_id = models.CharField(max_length=100, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -157,14 +175,14 @@ class Order(models.Model):
         verbose_name = "Order"
         verbose_name_plural = "Orders"
         indexes = [
-            models.Index(fields=['order_id']),
-            models.Index(fields=['status']),
-            models.Index(fields=['-created_at']),
-            models.Index(fields=['phone']),
+            models.Index(fields=["order_id"]),
+            models.Index(fields=["status"]),
+            models.Index(fields=["-created_at"]),
+            models.Index(fields=["phone"]),
         ]
 
     def __str__(self):
-        return f"Order {self.order_id} - {self.name} ({self.status})"
+        return f"Order {self.order_id} — {self.name} ({self.get_status_display()})"
 
 
 class OrderItem(models.Model):
@@ -173,16 +191,20 @@ class OrderItem(models.Model):
     )
     product = models.ForeignKey(
         Product, on_delete=models.SET_NULL, null=True, blank=True,
-        related_name='order_items'
+        related_name="order_items"
     )
     ice_cream_type = models.CharField(max_length=50)
     flavour = models.CharField(max_length=50)
     size = models.CharField(max_length=50)
     toppings = models.CharField(max_length=100, blank=True)
     quantity = models.PositiveIntegerField(validators=[MinValueValidator(1)])
+    unit_price = models.DecimalField(
+        max_digits=8, decimal_places=2, default=Decimal("0.00"),
+        validators=[MinValueValidator(Decimal("0.00"))]
+    )
     price = models.DecimalField(
-        max_digits=6, decimal_places=2,
-        validators=[MinValueValidator(Decimal('0.00'))]
+        max_digits=8, decimal_places=2,
+        validators=[MinValueValidator(Decimal("0.00"))]
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -190,12 +212,12 @@ class OrderItem(models.Model):
         verbose_name = "Order Item"
         verbose_name_plural = "Order Items"
         indexes = [
-            models.Index(fields=['order']),
-            models.Index(fields=['flavour']),
+            models.Index(fields=["order"]),
+            models.Index(fields=["flavour"]),
         ]
 
     def __str__(self):
-        return f"{self.quantity}x {self.flavour} ({self.ice_cream_type}) for {self.order.order_id}"
+        return f"{self.quantity}x {self.flavour} ({self.ice_cream_type}) — {self.order.order_id}"
 
 
 class Review(models.Model):

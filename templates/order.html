@@ -1,132 +1,156 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}Order Ice Cream{% endblock %}
+{% block title %}Order Ice Cream — Bapu Ice Cream{% endblock %}
+{% block extra_head %}
+<meta name="description" content="Order handcrafted ice cream online from Bapu Ice Cream. Choose from 12+ flavours, custom sizes, and toppings for home delivery.">
+<style>
+  .flavour-card {
+    border: 2px solid #dee2e6; border-radius: 14px; padding: 1.25rem;
+    cursor: pointer; transition: all 0.25s; text-align: center; background: #fff;
+  }
+  .flavour-card:hover { border-color: #0d6efd; box-shadow: 0 6px 24px rgba(13,110,253,0.1); transform: translateY(-2px); }
+  .flavour-card.selected { border-color: #0d6efd; background: #f0f6ff; }
+  .flavour-card .emoji { font-size: 2.5rem; margin-bottom: 0.5rem; }
+  .flavour-card .name { font-weight: 700; font-size: 0.95rem; }
+  .flavour-card .price-tag { font-size: 0.85rem; color: #0d6efd; font-weight: 600; }
+
+  .cart-sidebar {
+    position: sticky; top: 80px; max-height: calc(100vh - 100px); overflow-y: auto;
+  }
+  .cart-item { border-bottom: 1px solid #f0f0f0; padding: 0.75rem 0; }
+  .cart-item:last-child { border-bottom: none; }
+  .qty-control { display: inline-flex; align-items: center; gap: 0.25rem; }
+  .qty-control button { width: 30px; height: 30px; border-radius: 50%; border: 1px solid #dee2e6; background: #fff; font-weight: 700; font-size: 1rem; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; }
+  .qty-control button:hover { background: #0d6efd; color: #fff; border-color: #0d6efd; }
+  .qty-control .qty-val { min-width: 24px; text-align: center; font-weight: 700; }
+
+  .toast-notification {
+    position: fixed; top: 80px; right: 20px; z-index: 9999;
+    background: #198754; color: #fff; padding: 0.75rem 1.25rem; border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15); font-weight: 500;
+    transform: translateX(120%); transition: transform 0.35s ease; max-width: 350px;
+  }
+  .toast-notification.show { transform: translateX(0); }
+  .toast-notification.error { background: #dc3545; }
+
+  #loading-overlay { display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(255,255,255,0.85); justify-content: center; align-items: center; flex-direction: column; }
+  #loading-overlay.show { display: flex; }
+  .spinner-big { width: 4rem; height: 4rem; border: 5px solid #e9ecef; border-top-color: #0d6efd; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 992px) { .cart-sidebar { position: static; max-height: none; } }
+</style>
+{% endblock %}
 {% block body %}
 
-<section class="py-5">
+<div id="loading-overlay"><div class="spinner-big"></div><p class="mt-3 fw-semibold text-muted">Updating cart…</p></div>
+<div id="cart-toast" class="toast-notification"><i class="bi bi-check-circle"></i> <span id="toast-msg"></span></div>
+
+<section class="py-4 bg-light">
   <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-lg-10">
-        <div class="card border-0 shadow-lg">
-          <div class="card-body p-4 p-lg-5">
-            <div class="text-center mb-4">
-              <h2 class="fw-bold">🍦 Order Your Ice Cream</h2>
-              <p class="text-muted">Freshly made, delivered with love ❤️</p>
+    <div class="row g-4">
+      <!-- Product Grid -->
+      <div class="col-lg-8">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+          <h3 class="fw-bold mb-0"><i class="bi bi-ice-cream text-primary"></i> Choose Your Flavour</h3>
+          <a href="{% url 'cart' %}" class="btn btn-outline-primary rounded-pill position-relative">
+            <i class="bi bi-cart3"></i> Cart <span id="nav-cart-badge" class="badge bg-danger rounded-pill ms-1">0</span>
+          </a>
+        </div>
+        <p class="text-muted mb-4">Pick a flavour, choose your size and toppings, then add to cart.</p>
+
+        <div class="row g-3" id="flavour-grid">
+          {% for flavour in flavour_options %}
+          <div class="col-md-4 col-6">
+            <div class="flavour-card" data-flavour="{{ flavour }}">
+              <div class="emoji">
+                {% if "Mango" in flavour %}🥭{% elif "Vanilla" in flavour %}🍦{% elif "Chocolate" in flavour %}🍫{% elif "Strawberry" in flavour %}🍓{% elif "Butterscotch" in flavour %}🍯{% elif "Pista" in flavour %}🟢{% elif "Black Currant" in flavour %}🫐{% elif "Dry Fruit" in flavour %}🥜{% elif "Cookies" in flavour %}🍪{% elif "Coconut" in flavour %}🥥{% elif "Coffee" in flavour %}☕{% elif "Rainbow" in flavour %}🌈{% else %}🍨{% endif %}
+              </div>
+              <div class="name">{{ flavour }}</div>
+              <div class="price-tag">Starting ₹120</div>
             </div>
+          </div>
+          {% endfor %}
+        </div>
 
-            <form method="POST" id="orderForm">
-              {% csrf_token %}
-
-              <h5 class="fw-bold mb-3">Customer Details</h5>
-              <div class="row g-3 mb-4">
-                <div class="col-md-6">
-                  <label class="form-label">Name</label>
-                  <input type="text" name="name" class="form-control" required>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">Phone</label>
-                  <input type="tel" name="phone" class="form-control" required>
-                </div>
-                <div class="col-12">
-                  <label class="form-label">Delivery Address</label>
-                  <textarea name="address" class="form-control" rows="2" required></textarea>
-                </div>
+        <!-- Customization Panel -->
+        <div class="card border-0 shadow-sm mt-4" id="customize-panel" style="display:none;">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-1"><i class="bi bi-sliders text-primary"></i> Customize</h5>
+            <p class="text-muted small mb-3" id="selected-flavour-display">Selected: <strong></strong></p>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Type</label>
+                <select id="opt-type" class="form-select">
+                  <option value="Scooped Ice Cream">Scooped Ice Cream — ₹120</option>
+                  <option value="Softy Cone">Softy Cone — ₹80</option>
+                  <option value="Family Pack">Family Pack — ₹350</option>
+                </select>
               </div>
-
-              <h5 class="fw-bold mb-3">Order Details</h5>
-              <div class="row g-3 mb-4">
-                <div class="col-md-4">
-                  <label class="form-label">Ice Cream Type</label>
-                  <select name="ice_cream_type" class="form-select">
-                    <option value="Scooped Ice Cream" {% if selected_type == "Scooped Ice Cream" %}selected{% endif %}>Scooped Ice Cream</option>
-                    <option value="Softy Cone" {% if selected_type == "Softy Cone" %}selected{% endif %}>Softy Cone</option>
-                    <option value="Family Pack" {% if selected_type == "Family Pack" %}selected{% endif %}>Family Pack</option>
-                  </select>
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label">Flavour</label>
-                  <select name="flavour" class="form-select">
-                    <option>Mango Magic</option>
-                    <option>Vanilla Classic</option>
-                    <option>Chocolate Delight</option>
-                    <option>Strawberry Bliss</option>
-                    <option>Butterscotch Crunch</option>
-                    <option>Kesar Pista Royal</option>
-                    <option>Black Currant Twist</option>
-                    <option>Dry Fruit Special</option>
-                    <option>Cookies & Cream</option>
-                    <option>Tender Coconut Fresh</option>
-                    <option>Coffee Mocha</option>
-                    <option>Rainbow Fantasy</option>
-                  </select>
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label">Quantity</label>
-                  <input type="number" name="quantity" class="form-control" value="1" min="1">
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label">Size</label>
-                  <select name="size" class="form-select">
-                    <option>Single Scoop</option>
-                    <option>Double Scoop</option>
-                    <option>500 ml</option>
-                    <option>1 Liter</option>
-                  </select>
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label">Toppings</label>
-                  <select name="toppings" class="form-select">
-                    <option>No Toppings</option>
-                    <option>Choco Chips</option>
-                    <option>Nuts</option>
-                    <option>Caramel Syrup</option>
-                  </select>
-                </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Size</label>
+                <select id="opt-size" class="form-select">
+                  <option value="Single Scoop">Single Scoop — ₹0</option>
+                  <option value="Double Scoop">Double Scoop — +₹40</option>
+                  <option value="500 ml">500 ml — +₹150</option>
+                  <option value="1 Liter">1 Liter — +₹280</option>
+                </select>
               </div>
-
-              <h5 class="fw-bold mb-3">Delivery & Payment</h5>
-              <div class="row g-3 mb-4">
-                <div class="col-md-6">
-                  <label class="form-label">Delivery Type</label>
-                  <select name="delivery_type" class="form-select">
-                    <option>Home Delivery</option>
-                    <option>Takeaway</option>
-                  </select>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">Payment Mode</label>
-                  <select name="payment_mode" class="form-select">
-                    <option>Cash on Delivery</option>
-                    <option>UPI</option>
-                    <option>Card</option>
-                  </select>
-                </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Toppings</label>
+                <select id="opt-toppings" class="form-select">
+                  <option value="No Toppings">No Toppings — ₹0</option>
+                  <option value="Choco Chips">Choco Chips — +₹30</option>
+                  <option value="Nuts">Nuts — +₹40</option>
+                  <option value="Caramel Syrup">Caramel Syrup — +₹25</option>
+                </select>
               </div>
-
-              <input type="hidden" name="total_price" id="totalPriceHidden" value="0">
-
-              <div class="p-4 bg-light rounded-4 text-center mb-4">
-                <h4 class="mb-0">Total: ₹<span id="totalPrice">0</span></h4>
+              <div class="col-md-3">
+                <label class="form-label fw-semibold">Quantity</label>
+                <input type="number" id="opt-qty" class="form-control" value="1" min="1" max="99">
               </div>
-
-              <div class="row g-3">
-                <div class="col-md-4">
-                  <button type="submit" class="btn btn-outline-primary w-100 rounded-pill py-2" onclick="setAction('add_to_cart')">
-                    <i class="bi bi-cart-plus"></i> Add to Cart
-                  </button>
-                </div>
-                <div class="col-md-4">
-                  <a href="{% url 'products' %}" class="btn btn-outline-secondary w-100 rounded-pill py-2">
-                    <i class="bi bi-grid"></i> Products
-                  </a>
-                </div>
-                <div class="col-md-4">
-                  <button type="submit" class="btn btn-primary w-100 rounded-pill py-2" onclick="setAction('direct_checkout')">
-                    <i class="bi bi-credit-card"></i> Pay Now
-                  </button>
-                </div>
+              <div class="col-md-3 d-flex align-items-end">
+                <div class="fs-5 fw-bold text-primary">₹<span id="opt-total">0</span></div>
               </div>
-            </form>
+              <div class="col-md-6 d-flex align-items-end gap-2">
+                <button class="btn btn-primary rounded-pill w-100" id="add-to-cart-btn"><i class="bi bi-cart-plus"></i> Add to Cart</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cart Sidebar -->
+      <div class="col-lg-4">
+        <div class="cart-sidebar">
+          <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+              <h5 class="fw-bold mb-3"><i class="bi bi-cart3 text-primary"></i> Your Cart</h5>
+              <div id="cart-items-container">
+                <p class="text-muted text-center py-4" id="empty-cart-msg"><i class="bi bi-cart-x fs-3 d-block mb-2"></i>Your cart is empty</p>
+              </div>
+              <div id="cart-totals" style="display:none;">
+                <hr>
+                <div class="d-flex justify-content-between mb-1"><span>Subtotal</span><span id="c-subtotal">₹0</span></div>
+                <div class="d-flex justify-content-between mb-1"><span>Tax (5%)</span><span id="c-tax">₹0</span></div>
+                <div class="d-flex justify-content-between mb-1">
+                  <span>Delivery</span>
+                  <span id="c-delivery">₹{{ delivery_charge }}</span>
+                </div>
+                <div class="small text-muted mb-2" id="c-free-del-msg">Free delivery above ₹{{ free_delivery_above }}</div>
+                <hr>
+                <div class="d-flex justify-content-between fs-5 fw-bold">
+                  <span>Total</span>
+                  <span class="text-success" id="c-grand">₹0</span>
+                </div>
+                <a href="{% url 'checkout' %}" class="btn btn-success w-100 rounded-pill mt-3 py-2">
+                  <i class="bi bi-credit-card"></i> Proceed to Checkout
+                </a>
+              </div>
+              <button class="btn btn-outline-danger btn-sm w-100 mt-2 rounded-pill" id="clear-cart-btn" style="display:none;">
+                <i class="bi bi-trash"></i> Clear Cart
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -135,33 +159,181 @@
 </section>
 
 <script>
-  const prices = {
-    iceCream: {"Scooped Ice Cream": 120, "Softy Cone": 80, "Family Pack": 350},
-    size: {"Single Scoop": 0, "Double Scoop": 40, "500 ml": 150, "1 Liter": 280},
-    toppings: {"No Toppings": 0, "Choco Chips": 30, "Nuts": 40, "Caramel Syrup": 25}
+(function() {
+  const csrf = '{{ csrf_token }}';
+  const DELIVERY_CHARGE = {{ delivery_charge }};
+  const FREE_DELIVERY = {{ free_delivery_above }};
+  const TAX_RATE = {{ tax_rate }};
+
+  var prices = {{ prices_json|safe }};
+  var sizePrices = {{ size_prices_json|safe }};
+  var toppingPrices = {{ topping_prices_json|safe }};
+
+  const flavourCards = document.querySelectorAll('.flavour-card');
+  const customizePanel = document.getElementById('customize-panel');
+  const selectedFlavourDisplay = document.querySelector('#selected-flavour-display strong');
+  const optType = document.getElementById('opt-type');
+  const optSize = document.getElementById('opt-size');
+  const optToppings = document.getElementById('opt-toppings');
+  const optQty = document.getElementById('opt-qty');
+  const optTotal = document.getElementById('opt-total');
+  const addBtn = document.getElementById('add-to-cart-btn');
+  const cartItemsContainer = document.getElementById('cart-items-container');
+  const emptyCartMsg = document.getElementById('empty-cart-msg');
+  const cartTotals = document.getElementById('cart-totals');
+  const clearBtn = document.getElementById('clear-cart-btn');
+  const loadingOverlay = document.getElementById('loading-overlay');
+  const toast = document.getElementById('cart-toast');
+  const toastMsg = document.getElementById('toast-msg');
+
+  let selectedFlavour = '';
+
+  function showToast(msg, error) {
+    toastMsg.textContent = msg;
+    toast.className = 'toast-notification' + (error ? ' error' : '');
+    toast.classList.add('show');
+    setTimeout(function() { toast.classList.remove('show'); }, 3000);
+  }
+
+  function calcTotal() {
+    var type = optType.value;
+    var size = optSize.value;
+    var topping = optToppings.value;
+    var qty = parseInt(optQty.value) || 1;
+    var base = (prices[type] || 100) + (sizePrices[size] || 0) + (toppingPrices[topping] || 0);
+    var total = base * qty;
+    optTotal.textContent = total;
+    return { base: base, total: total, qty: qty };
+  }
+
+  [optType, optSize, optToppings, optQty].forEach(function(el) {
+    el.addEventListener('change', calcTotal);
+    el.addEventListener('input', calcTotal);
+  });
+
+  flavourCards.forEach(function(card) {
+    card.addEventListener('click', function() {
+      flavourCards.forEach(function(c) { c.classList.remove('selected'); });
+      card.classList.add('selected');
+      selectedFlavour = card.dataset.flavour;
+      selectedFlavourDisplay.textContent = selectedFlavour;
+      customizePanel.style.display = 'block';
+      calcTotal();
+      customizePanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  });
+
+  function apiCall(action, data, cb) {
+    loadingOverlay.classList.add('show');
+    var body = new URLSearchParams({ action: action, csrfmiddlewaretoken: csrf });
+    if (data) {
+      Object.keys(data).forEach(function(k) { body.append(k, data[k]); });
+    }
+    fetch('{% url "cart_api" %}', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
+      body: body.toString()
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(resp) {
+      loadingOverlay.classList.remove('show');
+      if (resp.success) {
+        if (cb) cb(resp);
+        renderCart(resp);
+        updateNavBadge(resp.cart_count);
+        showToast(resp.message);
+      } else {
+        showToast(resp.message || 'Error', true);
+      }
+    })
+    .catch(function() {
+      loadingOverlay.classList.remove('show');
+      showToast('Network error', true);
+    });
+  }
+
+  function renderCart(data) {
+    cartItemsContainer.innerHTML = '';
+    if (!data.cart || data.cart.length === 0) {
+      cartItemsContainer.innerHTML = '<p class="text-muted text-center py-4" id="empty-cart-msg"><i class="bi bi-cart-x fs-3 d-block mb-2"></i>Your cart is empty</p>';
+      cartTotals.style.display = 'none';
+      clearBtn.style.display = 'none';
+      return;
+    }
+    emptyCartMsg.style.display = 'none';
+    cartTotals.style.display = 'block';
+    clearBtn.style.display = 'block';
+
+    data.cart.forEach(function(item, idx) {
+      var div = document.createElement('div');
+      div.className = 'cart-item';
+      div.innerHTML =
+        '<div class="d-flex justify-content-between align-items-start">' +
+          '<div><strong>' + item.flavour + '</strong><br>' +
+          '<small class="text-muted">' + item.type + ' | ' + item.size + '</small>' +
+          (item.toppings && item.toppings !== 'No Toppings' ? '<br><small class="text-muted">+ ' + item.toppings + '</small>' : '') +
+          '</div>' +
+          '<button class="btn btn-sm btn-outline-danger rounded-circle p-0" style="width:28px;height:28px;" onclick="removeItem(' + idx + ')"><i class="bi bi-x small"></i></button>' +
+        '</div>' +
+        '<div class="d-flex justify-content-between align-items-center mt-1">' +
+          '<div class="qty-control">' +
+            '<button onclick="updateQty(' + idx + ', -1)">−</button>' +
+            '<span class="qty-val">' + item.quantity + '</span>' +
+            '<button onclick="updateQty(' + idx + ', 1)">+</button>' +
+          '</div>' +
+          '<span class="fw-bold">₹' + item.total + '</span>' +
+        '</div>';
+      cartItemsContainer.appendChild(div);
+    });
+
+    document.getElementById('c-subtotal').textContent = '₹' + data.subtotal;
+    document.getElementById('c-tax').textContent = '₹' + data.tax;
+    document.getElementById('c-delivery').textContent = data.delivery_charge == 0 ? 'FREE' : '₹' + data.delivery_charge;
+    document.getElementById('c-grand').textContent = '₹' + data.grand_total;
+    document.getElementById('c-free-del-msg').style.display = data.delivery_charge > 0 ? 'block' : 'none';
+  }
+
+  window.updateQty = function(idx, delta) {
+    var current = 0;
+    var items = cartItemsContainer.querySelectorAll('.cart-item');
+    if (items[idx]) {
+      var qtyEl = items[idx].querySelector('.qty-val');
+      if (qtyEl) current = parseInt(qtyEl.textContent);
+    }
+    var newQty = Math.max(1, current + delta);
+    apiCall('update', { index: idx, quantity: newQty });
   };
 
-  function calculatePrice() {
-    const type = document.querySelector('[name="ice_cream_type"]').value;
-    const size = document.querySelector('[name="size"]').value;
-    const topping = document.querySelector('[name="toppings"]').value;
-    const qty = parseInt(document.querySelector('[name="quantity"]').value) || 1;
-    const total = (prices.iceCream[type] + prices.size[size] + prices.toppings[topping]) * qty;
-    document.getElementById("totalPrice").innerText = total;
-    document.getElementById("totalPriceHidden").value = total;
+  window.removeItem = function(idx) {
+    apiCall('remove', { index: idx });
+  };
+
+  function updateNavBadge(count) {
+    var badge = document.getElementById('nav-cart-badge');
+    if (badge) badge.textContent = count;
   }
 
-  document.querySelectorAll("select, input[name='quantity']").forEach(el => el.addEventListener("change", calculatePrice));
-  calculatePrice();
+  clearBtn.addEventListener('click', function() {
+    apiCall('clear', {});
+  });
 
-  function setAction(action) {
-    const form = document.getElementById("orderForm");
-    if (action === "add_to_cart") {
-      form.action = "{% url 'add_to_cart' %}";
-    } else {
-      form.action = "{% url 'direct_checkout' %}";
-    }
-  }
+  addBtn.addEventListener('click', function() {
+    if (!selectedFlavour) { showToast('Please select a flavour first.', true); return; }
+    var type = optType.value;
+    var size = optSize.value;
+    var toppings = optToppings.value;
+    var qty = parseInt(optQty.value) || 1;
+    apiCall('add', {
+      ice_cream_type: type,
+      flavour: selectedFlavour,
+      size: size,
+      toppings: toppings,
+      quantity: qty,
+    });
+  });
+
+  // Initial cart render
+  apiCall('list', {});
+})();
 </script>
-
 {% endblock %}

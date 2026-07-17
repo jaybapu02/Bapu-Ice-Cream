@@ -183,20 +183,35 @@ class CateringEnquiryForm(forms.ModelForm):
 
 
 class OrderCustomerForm(forms.Form):
+    PAYMENT_CHOICES = [
+        ("cod", "Cash on Delivery"),
+        ("razorpay", "Online (Razorpay)"),
+    ]
+
     name = forms.CharField(
         max_length=100,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Your Name'})
+        widget=forms.TextInput(attrs={
+            'class': 'form-control', 'placeholder': 'Your full name',
+            'required': True,
+        })
+    )
+    email = forms.EmailField(
+        required=False,
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control', 'placeholder': 'your@email.com (for receipt)',
+        })
     )
     phone = forms.CharField(
         max_length=17,
         widget=forms.TextInput(attrs={
             'class': 'form-control', 'placeholder': 'e.g. +919876543210',
-            'type': 'tel'
+            'type': 'tel', 'required': True,
         })
     )
     address = forms.CharField(
         widget=forms.Textarea(attrs={
-            'class': 'form-control', 'placeholder': 'Delivery Address', 'rows': 2
+            'class': 'form-control', 'placeholder': 'Delivery Address', 'rows': 2,
+            'required': True,
         })
     )
     delivery_type = forms.ChoiceField(
@@ -204,8 +219,15 @@ class OrderCustomerForm(forms.Form):
         widget=forms.Select(attrs={'class': 'form-select'})
     )
     payment_mode = forms.ChoiceField(
-        choices=[('Cash on Delivery', 'Cash on Delivery'), ('UPI', 'UPI'), ('Card', 'Card')],
+        choices=PAYMENT_CHOICES,
         widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    special_instructions = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={
+            'class': 'form-control', 'placeholder': 'Any special instructions...',
+            'rows': 2,
+        })
     )
 
     def clean_phone(self):
@@ -216,9 +238,19 @@ class OrderCustomerForm(forms.Form):
         name = self.cleaned_data.get('name', '').strip()
         if not name:
             raise forms.ValidationError("Name is required.")
+        if len(name) < 2:
+            raise forms.ValidationError("Name must be at least 2 characters.")
         if re.search(r'<[^>]*>|href\s*=|javascript\s*:', name, re.I):
             raise forms.ValidationError("Invalid characters in name.")
         return name
+
+    def clean_address(self):
+        address = self.cleaned_data.get('address', '').strip()
+        if not address:
+            raise forms.ValidationError("Address is required.")
+        if len(address) < 10:
+            raise forms.ValidationError("Please enter a complete delivery address (min 10 chars).")
+        return address
 
 
 class ReviewForm(forms.ModelForm):

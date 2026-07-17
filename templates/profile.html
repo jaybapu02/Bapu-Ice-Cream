@@ -42,8 +42,8 @@
                         <td>{{ order.items.count }}</td>
                         <td class="fw-bold">₹{{ order.total_price }}</td>
                         <td>
-                          <span class="badge {% if order.status == 'PAID' %}bg-success{% elif order.status == 'CANCELLED' %}bg-danger{% else %}bg-warning{% endif %}">
-                            {{ order.status }}
+                          <span class="badge {% if order.status == 'DELIVERED' %}bg-success{% elif order.status == 'CANCELLED' %}bg-danger{% elif order.status == 'PENDING' %}bg-warning{% elif order.status == 'CONFIRMED' %}bg-info{% elif order.status == 'PREPARING' %}bg-primary{% elif order.status == 'OUT_FOR_DELIVERY' %}bg-dark{% else %}bg-secondary{% endif %}">
+                            {{ order.get_status_display }}
                           </span>
                         </td>
                         <td>

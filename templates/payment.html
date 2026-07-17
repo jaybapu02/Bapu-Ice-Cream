@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Payment{% endblock %}
+{% block title %}Payment — Bapu Ice Cream{% endblock %}
 {% block body %}
 
 <section class="py-5">
@@ -13,13 +13,13 @@
             <h5 class="fw-bold mb-3">Order Summary</h5>
             <ul class="list-group mb-4">
               {% for item in items %}
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                  <div>
-                    <strong>{{ item.flavour }}</strong><br>
-                    <small class="text-muted">{{ item.type }} | {{ item.size }} | Qty: {{ item.quantity }}</small>
-                  </div>
-                  <span class="fw-bold">₹{{ item.total }}</span>
-                </li>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                  <strong>{{ item.flavour }}</strong><br>
+                  <small class="text-muted">{{ item.type }} | {{ item.size }} | Qty: {{ item.quantity }}</small>
+                </div>
+                <span class="fw-bold">₹{{ item.total }}</span>
+              </li>
               {% endfor %}
             </ul>
 
@@ -56,15 +56,19 @@
         method: "POST",
         headers: {"Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}"},
         body: JSON.stringify(response)
-      }).then(function () {
-        window.location.href = "{% url 'payment_success' %}";
+      }).then(function(r) { return r.json(); }).then(function(data) {
+        if (data.success) {
+          window.location.href = "{% url 'order_track' %}?order_id=" + data.order_id;
+        } else {
+          window.location.href = "{% url 'order' %}";
+        }
       });
     },
     "prefill": {
       "name": "{{ customer.name }}",
       "contact": "{{ customer.phone }}"
     },
-    "theme": {"color": "#198754"}
+    "theme": {"color": "#0d6efd"}
   };
   var rzp1 = new Razorpay(options);
   document.getElementById('rzp-button').onclick = function (e) {

@@ -1,4 +1,7 @@
+import json
 import logging
+from decimal import Decimal
+
 import razorpay
 from django.conf import settings
 from django.contrib import messages
@@ -233,79 +236,249 @@ class CateringView(FormView):
             logger.warning(f"Failed to send catering notification emails: {e}")
 
 
+PRICE_TABLE = {
+    "Scooped Ice Cream": 120,
+    "Softy Cone": 80,
+    "Family Pack": 350,
+}
+SIZE_PRICES = {
+    "Single Scoop": 0,
+    "Double Scoop": 40,
+    "500 ml": 150,
+    "1 Liter": 280,
+}
+TOPPING_PRICES = {
+    "No Toppings": 0,
+    "Choco Chips": 30,
+    "Nuts": 40,
+    "Caramel Syrup": 25,
+}
+DELIVERY_CHARGE = 30
+FREE_DELIVERY_ABOVE = 200
+TAX_RATE = Decimal("0.05")
+
+
+def _calc_item_price(ice_cream_type, size, toppings, quantity):
+    base = PRICE_TABLE.get(ice_cream_type, 100)
+    size_extra = SIZE_PRICES.get(size, 0)
+    topping_extra = TOPPING_PRICES.get(toppings, 0)
+    unit = Decimal(str(base + size_extra + topping_extra))
+    return unit, unit * int(quantity or 1)
+
+
+def _get_cart_data(request):
+    cart = request.session.get("cart", [])
+    subtotal = sum(Decimal(str(item["total"])) for item in cart)
+    delivery = Decimal("0") if subtotal >= FREE_DELIVERY_ABOVE else Decimal(str(DELIVERY_CHARGE))
+    tax = (subtotal * TAX_RATE).quantize(Decimal("0.01"))
+    grand = subtotal + tax + delivery
+    return {
+        "cart": cart,
+        "subtotal": subtotal,
+        "tax": tax,
+        "delivery_charge": delivery,
+        "grand_total": grand,
+        "free_delivery": FREE_DELIVERY_ABOVE,
+    }
+
+
+def _send_order_notifications(order):
+    try:
+        from django.core.mail import send_mail
+        from django.conf import settings
+
+        items_summary = "\n".join(
+            f"  - {item.quantity}x {item.flavour} ({item.size}) — ₹{item.price}"
+            for item in order.items.all()
+        )
+
+        subject = f"Order Confirmed — {order.order_id}"
+        customer_msg = (
+            f"Dear {order.name},\n\n"
+            f"Your order has been placed successfully!\n\n"
+            f"Order ID: {order.order_id}\n"
+            f"Status: {order.get_status_display()}\n"
+            f"Items:\n{items_summary}\n"
+            f"Subtotal: ₹{order.subtotal}\n"
+            f"Tax: ₹{order.tax}\n"
+            f"Delivery: ₹{order.delivery_charge}\n"
+            f"Total: ₹{order.total_price}\n\n"
+            f"Delivery: {order.delivery_type}\n"
+            f"Address: {order.address}\n\n"
+            f"Track your order: {settings.BASE_DIR}/order/track/?order_id={order.order_id}\n\n"
+            f"Thank you for choosing Bapu Ice Cream!\n"
+            f"— Bapu Ice-Cream Team"
+        )
+
+        if order.email:
+            send_mail(subject, customer_msg, settings.DEFAULT_FROM_EMAIL, [order.email], fail_silently=True)
+
+        if hasattr(settings, "ADMIN_EMAIL") and settings.ADMIN_EMAIL:
+            admin_subject = f"[Admin] New Order {order.order_id} — ₹{order.total_price}"
+            admin_msg = (
+                f"New order received:\n\n"
+                f"Order: {order.order_id}\n"
+                f"Customer: {order.name}\n"
+                f"Phone: {order.phone}\n"
+                f"Email: {order.email or 'N/A'}\n"
+                f"Payment: {order.payment_mode}\n"
+                f"Total: ₹{order.total_price}\n"
+                f"Items:\n{items_summary}\n"
+                f"View: /admin/home/order/{order.id}/change/"
+            )
+            send_mail(admin_subject, admin_msg, settings.DEFAULT_FROM_EMAIL, [settings.ADMIN_EMAIL], fail_silently=True)
+
+    except Exception as e:
+        logger.warning(f"Failed to send order notification: {e}")
+
+
+# ──────────────────────────────────────────────
+# AJAX Cart API
+# ──────────────────────────────────────────────
+
+class CartAPIView(View):
+    """Generic AJAX cart endpoint — add, update, remove, get"""
+
+    def post(self, request):
+        action = request.POST.get("action", "")
+        cart = request.session.get("cart", [])
+
+        try:
+            if action == "add":
+                ice_cream_type = request.POST.get("ice_cream_type", "Scooped Ice Cream")
+                flavour = request.POST.get("flavour", "Vanilla Classic")
+                size = request.POST.get("size", "Single Scoop")
+                toppings = request.POST.get("toppings", "No Toppings")
+                quantity = int(request.POST.get("quantity", 1))
+
+                unit_price, total = _calc_item_price(ice_cream_type, size, toppings, quantity)
+                cart.append({
+                    "type": ice_cream_type,
+                    "flavour": flavour,
+                    "size": size,
+                    "toppings": toppings,
+                    "quantity": quantity,
+                    "unit_price": float(unit_price),
+                    "total": float(total),
+                })
+                msg = f"Added {flavour} to cart!"
+
+            elif action == "update":
+                index = int(request.POST.get("index", -1))
+                quantity = int(request.POST.get("quantity", 1))
+                if 0 <= index < len(cart):
+                    item = cart[index]
+                    _, new_total = _calc_item_price(
+                        item["type"], item["size"], item["toppings"], quantity
+                    )
+                    cart[index]["quantity"] = quantity
+                    cart[index]["total"] = float(new_total)
+                    msg = "Cart updated."
+                else:
+                    return JsonResponse({"success": False, "message": "Invalid item."}, status=400)
+
+            elif action == "remove":
+                index = int(request.POST.get("index", -1))
+                if 0 <= index < len(cart):
+                    removed = cart.pop(index)
+                    msg = f"Removed {removed['flavour']} from cart."
+                else:
+                    return JsonResponse({"success": False, "message": "Invalid item."}, status=400)
+
+            elif action == "clear":
+                cart = []
+                msg = "Cart cleared."
+
+            elif action == "list":
+                data = _get_cart_data(request)
+                data["success"] = True
+                data["cart_count"] = len(cart)
+                return JsonResponse(data)
+
+            else:
+                return JsonResponse({"success": False, "message": "Unknown action."}, status=400)
+
+            request.session["cart"] = cart
+            data = _get_cart_data(request)
+            data["success"] = True
+            data["message"] = msg
+            data["cart_count"] = len(cart)
+            return JsonResponse(data)
+
+        except (ValueError, TypeError, KeyError) as e:
+            logger.error(f"Cart API error: {e}")
+            return JsonResponse({"success": False, "message": "Invalid request."}, status=400)
+
+
+# ──────────────────────────────────────────────
+# Order / Checkout Page
+# ──────────────────────────────────────────────
+
 class OrderView(View):
     template_name = "order.html"
 
     def get(self, request):
+        flavour_options = [
+            "Mango Magic", "Vanilla Classic", "Chocolate Delight", "Strawberry Bliss",
+            "Butterscotch Crunch", "Kesar Pista Royal", "Black Currant Twist",
+            "Dry Fruit Special", "Cookies & Cream", "Tender Coconut Fresh",
+            "Coffee Mocha", "Rainbow Fantasy",
+        ]
         return render(request, self.template_name, {
             "selected_flavour": request.GET.get("flavour", ""),
-            "selected_type": request.GET.get("type", "")
+            "selected_type": request.GET.get("type", ""),
+            "flavour_options": flavour_options,
+            "prices": PRICE_TABLE,
+            "prices_json": json.dumps(PRICE_TABLE),
+            "size_prices": SIZE_PRICES,
+            "size_prices_json": json.dumps(SIZE_PRICES),
+            "topping_prices": TOPPING_PRICES,
+            "topping_prices_json": json.dumps(TOPPING_PRICES),
+            "delivery_charge": DELIVERY_CHARGE,
+            "free_delivery_above": FREE_DELIVERY_ABOVE,
+            "tax_rate": float(TAX_RATE * 100),
         })
 
-    def post(self, request):
-        form = OrderCustomerForm(request.POST)
-        if not form.is_valid():
-            messages.error(request, "Invalid details. Check phone number and retry.")
-            return render(request, self.template_name, {"form": form})
 
-        request.session["customer"] = form.cleaned_data
-        action = request.POST.get("action", "direct_checkout")
-
-        if action == "add_to_cart":
-            cart = request.session.get("cart", [])
-            cart.append({
-                "type": request.POST.get("ice_cream_type"),
-                "flavour": request.POST.get("flavour"),
-                "size": request.POST.get("size"),
-                "toppings": request.POST.get("toppings", ""),
-                "quantity": int(request.POST.get("quantity", 1)),
-                "total": float(request.POST.get("total_price", 0)),
-            })
-            request.session["cart"] = cart
-            messages.success(request, "Added to cart successfully!")
-            return redirect("cart")
-        else:
-            try:
-                request.session["checkout_item"] = {
-                    "type": request.POST.get("ice_cream_type"),
-                    "flavour": request.POST.get("flavour"),
-                    "size": request.POST.get("size"),
-                    "toppings": request.POST.get("toppings", ""),
-                    "quantity": int(request.POST.get("quantity", 1)),
-                    "total": float(request.POST.get("total_price", 0)),
-                }
-                return redirect("payment")
-            except (ValueError, TypeError):
-                messages.error(request, "Invalid quantities or price. Please try again.")
-                return redirect("order")
-
+# ──────────────────────────────────────────────
+# Cart Page
+# ──────────────────────────────────────────────
 
 class CartView(TemplateView):
     template_name = "cart.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        cart = self.request.session.get("cart", [])
-        context['cart'] = cart
-        context['grand_total'] = sum(item["total"] for item in cart)
+        context.update(_get_cart_data(self.request))
+        context["delivery_charge"] = DELIVERY_CHARGE
+        context["free_delivery_above"] = FREE_DELIVERY_ABOVE
         return context
 
+
+# ──────────────────────────────────────────────
+# Legacy cart endpoints (redirect-based)
+# ──────────────────────────────────────────────
 
 class AddToCartView(View):
     def post(self, request):
         try:
             cart = request.session.get("cart", [])
+            ice_cream_type = request.POST.get("ice_cream_type", "Scooped Ice Cream")
+            flavour = request.POST.get("flavour", "Vanilla Classic")
+            size = request.POST.get("size", "Single Scoop")
+            toppings = request.POST.get("toppings", "No Toppings")
+            quantity = int(request.POST.get("quantity", 1))
+            _, total = _calc_item_price(ice_cream_type, size, toppings, quantity)
             cart.append({
-                "type": request.POST.get("ice_cream_type"),
-                "flavour": request.POST.get("flavour"),
-                "size": request.POST.get("size"),
-                "toppings": request.POST.get("toppings", ""),
-                "quantity": int(request.POST.get("quantity", 1)),
-                "total": float(request.POST.get("total_price", 0)),
+                "type": ice_cream_type,
+                "flavour": flavour,
+                "size": size,
+                "toppings": toppings,
+                "quantity": quantity,
+                "total": float(total),
             })
             request.session["cart"] = cart
             messages.success(request, "Added to cart successfully!")
-            logger.info("Item added to cart.")
         except Exception as e:
             logger.error(f"Error adding to cart: {e}")
             messages.error(request, "Could not add item to cart.")
@@ -322,126 +495,192 @@ class RemoveFromCartView(View):
         return redirect("cart")
 
 
-class PaymentPageView(View):
-    def get(self, request):
-        customer = request.session.get("customer")
-        checkout_item = request.session.get("checkout_item")
-        cart = request.session.get("cart", [])
+# ──────────────────────────────────────────────
+# Checkout & Payment
+# ──────────────────────────────────────────────
 
-        if checkout_item:
-            amount = float(checkout_item["total"])
-            items = [checkout_item]
-        elif cart:
-            amount = sum(float(item["total"]) for item in cart)
-            items = cart
+class CheckoutView(View):
+    """Collect customer details and redirect to payment"""
+    template_name = "checkout.html"
+
+    def get(self, request):
+        cart_data = _get_cart_data(request)
+        if not cart_data["cart"]:
+            messages.warning(request, "Your cart is empty.")
+            return redirect("order")
+        form = OrderCustomerForm()
+        return render(request, self.template_name, {
+            "form": form,
+            **cart_data,
+            "delivery_charge": DELIVERY_CHARGE,
+            "free_delivery_above": FREE_DELIVERY_ABOVE,
+        })
+
+    def post(self, request):
+        cart_data = _get_cart_data(request)
+        if not cart_data["cart"]:
+            messages.warning(request, "Your cart is empty.")
+            return redirect("order")
+
+        form = OrderCustomerForm(request.POST)
+        if not form.is_valid():
+            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                return JsonResponse({"success": False, "errors": form.errors}, status=400)
+            return render(request, self.template_name, {"form": form, **cart_data})
+
+        customer = form.cleaned_data
+        request.session["customer"] = customer
+
+        payment_mode = customer["payment_mode"]
+
+        if payment_mode == "cod":
+            return self._place_order(request, customer, cart_data, payment_mode="cod")
         else:
-            messages.warning(request, "No items to checkout.")
-            return redirect("order")
+            return self._init_razorpay(request, customer, cart_data)
 
-        try:
-            client = razorpay.Client(auth=(
-                settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET
-            ))
-            razorpay_order = client.order.create({
-                "amount": int(amount * 100),
-                "currency": "INR",
-                "payment_capture": 1
-            })
-            request.session["razorpay_order_id"] = razorpay_order["id"]
-
-            return render(request, "payment.html", {
-                "items": items,
-                "grand_total": amount,
-                "razorpay_key": settings.RAZORPAY_KEY_ID,
-                "razorpay_order_id": razorpay_order["id"],
-                "amount": int(amount * 100),
-                "customer": customer
-            })
-        except Exception as e:
-            logger.error(f"Razorpay Order Creation Failed: {e}")
-            messages.error(request, "Payment gateway initialization failed. Try again later.")
-            return redirect("order")
-
-
-class PaymentSuccessView(View):
-    def get(self, request):
-        customer = request.session.get("customer")
-        if not customer:
-            messages.error(request, "Session expired. Please contact support.")
-            return redirect("order")
-
+    def _place_order(self, request, customer, cart_data, payment_mode, razorpay_id=""):
         try:
             with transaction.atomic():
                 order = Order.objects.create(
-                    order_id="ICE" + get_random_string(6).upper(),
+                    order_id="ICE" + get_random_string(8).upper(),
                     user=request.user if request.user.is_authenticated else None,
                     name=customer["name"],
+                    email=customer.get("email", ""),
                     phone=customer["phone"],
                     address=customer["address"],
                     delivery_type=customer["delivery_type"],
-                    payment_mode=customer["payment_mode"],
-                    status="PAID",
-                    total_price=0
+                    payment_mode=payment_mode,
+                    subtotal=cart_data["subtotal"],
+                    tax=cart_data["tax"],
+                    delivery_charge=cart_data["delivery_charge"],
+                    total_price=cart_data["grand_total"],
+                    special_instructions=customer.get("special_instructions", ""),
+                    status="CONFIRMED" if payment_mode == "cod" else "PENDING",
+                    razorpay_order_id=razorpay_id,
                 )
 
-                total = 0
-                is_direct = "checkout_item" in request.session
-                raw_items = (
-                    [request.session["checkout_item"]]
-                    if is_direct
-                    else request.session.get("cart", [])
-                )
-
-                if not raw_items:
-                    raise OrderProcessingError("Cart is empty during checkout.")
-
-                for item in raw_items:
+                for item in cart_data["cart"]:
                     OrderItem.objects.create(
                         order=order,
-                        ice_cream_type=item.get("type", ""),
-                        flavour=item.get("flavour", ""),
-                        size=item.get("size", ""),
+                        ice_cream_type=item["type"],
+                        flavour=item["flavour"],
+                        size=item["size"],
                         toppings=item.get("toppings", ""),
-                        quantity=item.get("quantity", 1),
-                        price=item.get("total", 0),
+                        quantity=item["quantity"],
+                        unit_price=item.get("unit_price", 0),
+                        price=item["total"],
                     )
-                    total += float(item.get("total", 0))
 
-                Order.objects.filter(id=order.id).update(total_price=total)
-
-                request.session.pop("checkout_item", None)
+                request.session["cart"] = []
                 request.session.pop("customer", None)
-                request.session.pop("razorpay_order_id", None)
-                if not is_direct:
-                    request.session["cart"] = []
 
-                logger.info(f"Order {order.order_id} successfully saved.")
-                order.refresh_from_db()
-                return render(request, "payment_success.html", {"order": order})
+                logger.info(f"Order {order.order_id} created ({payment_mode})")
+                _send_order_notifications(order)
+
+            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                return JsonResponse({"success": True, "order_id": order.order_id, "payment_mode": payment_mode})
+            return render(request, "payment_success.html", {"order": order})
 
         except (IntegrityError, DatabaseError) as e:
-            logger.critical(f"Database error saving order: {e}", exc_info=True)
-            messages.error(request, "Payment was successful but order creation failed.")
-            return redirect("order")
-        except OrderProcessingError as e:
-            logger.error(f"Order Processing Error: {e}")
-            messages.error(request, str(e))
-            return redirect("order")
-        except Exception as e:
-            logger.critical(f"Unexpected error: {e}", exc_info=True)
-            messages.error(request, "An unexpected error occurred. Please contact support.")
-            return redirect("order")
+            logger.critical(f"Order creation DB error: {e}", exc_info=True)
+            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                return JsonResponse({"success": False, "message": "Database error. Please try again."}, status=500)
+            messages.error(request, "An error occurred. Please try again.")
+            return redirect("cart")
 
-
-@method_decorator(csrf_exempt, name='dispatch')
-class RazorpaySuccessWebhookView(View):
-    def post(self, request):
+    def _init_razorpay(self, request, customer, cart_data):
         try:
-            logger.info("Webhook received from Razorpay.")
-            return HttpResponse(status=200)
+            client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+            amount_paise = int(cart_data["grand_total"] * Decimal("100"))
+            razorpay_order = client.order.create({
+                "amount": amount_paise,
+                "currency": "INR",
+                "payment_capture": 1,
+            })
+            request.session["razorpay_order_id"] = razorpay_order["id"]
+            request.session["razorpay_amount"] = amount_paise
+
+            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                return JsonResponse({
+                    "success": True,
+                    "razorpay_key": settings.RAZORPAY_KEY_ID,
+                    "razorpay_order_id": razorpay_order["id"],
+                    "amount": amount_paise,
+                    "customer": customer,
+                    "payment_mode": "razorpay",
+                })
+
+            return render(request, "payment.html", {
+                "razorpay_key": settings.RAZORPAY_KEY_ID,
+                "razorpay_order_id": razorpay_order["id"],
+                "amount": amount_paise,
+                "grand_total": float(cart_data["grand_total"]),
+                "customer": customer,
+                "items": cart_data["cart"],
+            })
+
         except Exception as e:
-            logger.error(f"Webhook error: {e}")
-            return HttpResponse(status=400)
+            logger.error(f"Razorpay init failed: {e}")
+            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                return JsonResponse({"success": False, "message": "Payment gateway error. Try COD."}, status=500)
+            messages.error(request, "Payment gateway failed. Please try again.")
+            return redirect("checkout")
+
+
+class RazorpayCallbackView(View):
+    """Called after successful Razorpay payment (POST) or direct success page (GET)"""
+
+    def get(self, request):
+        order_id = request.GET.get("order_id", "")
+        if order_id:
+            try:
+                order = Order.objects.prefetch_related("items").get(order_id=order_id)
+                return render(request, "payment_success.html", {"order": order})
+            except Order.DoesNotExist:
+                pass
+        messages.success(request, "Payment completed successfully!")
+        return redirect("order_track")
+
+    def post(self, request):
+        customer = request.session.get("customer")
+        razorpay_order_id = request.session.get("razorpay_order_id")
+
+        if not customer:
+            return JsonResponse({"success": False, "message": "Session expired."}, status=400)
+
+        cart_data = _get_cart_data(request)
+        if not cart_data["cart"]:
+            return JsonResponse({"success": False, "message": "Cart empty."}, status=400)
+
+        checkout = CheckoutView()
+        response = checkout._place_order(
+            request, customer, cart_data,
+            payment_mode="razorpay",
+            razorpay_id=razorpay_order_id or "",
+        )
+
+        request.session.pop("razorpay_order_id", None)
+        request.session.pop("razorpay_amount", None)
+        return response
+
+
+class OrderTrackView(View):
+    def get(self, request):
+        order_id = request.GET.get("order_id", "")
+        order = None
+        if order_id:
+            try:
+                order = Order.objects.prefetch_related("items").get(order_id=order_id.upper())
+            except Order.DoesNotExist:
+                messages.error(request, "Order not found. Please check your order ID.")
+        return render(request, "order_track.html", {"order": order, "order_id": order_id})
+
+    def post(self, request):
+        order_id = request.POST.get("order_id", "").upper().strip()
+        if not order_id:
+            messages.error(request, "Please enter an order ID.")
+            return redirect("order_track")
+        return redirect(f"{reverse_lazy('order_track')}?order_id={order_id}")
 
 
 class NewsletterSubscribeView(View):
@@ -510,6 +749,17 @@ class OrderTrackView(View):
             messages.error(request, "Please enter an order ID.")
             return redirect("order_track")
         return redirect(f"{reverse_lazy('order_track')}?order_id={order_id}")
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+class RazorpaySuccessWebhookView(View):
+    def post(self, request):
+        try:
+            logger.info("Webhook received from Razorpay.")
+            return HttpResponse(status=200)
+        except Exception as e:
+            logger.error(f"Webhook error: {e}")
+            return HttpResponse(status=400)
 
 
 def register(request):

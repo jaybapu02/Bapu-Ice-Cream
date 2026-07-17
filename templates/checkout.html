@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Checkout — Bapu Ice Cream{% endblock %}
+{% block extra_head %}
+<style>
+  .order-summary-item { border-bottom: 1px solid #f0f0f0; padding: 0.75rem 0; }
+  .order-summary-item:last-child { border-bottom: none; }
+  .payment-option { border: 2px solid #dee2e6; border-radius: 12px; padding: 1rem; cursor: pointer; transition: all 0.2s; text-align: center; }
+  .payment-option:hover, .payment-option.selected { border-color: #0d6efd; background: #f0f6ff; }
+  .payment-option .icon { font-size: 2rem; }
+  #loading-overlay { display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(255,255,255,0.85); justify-content: center; align-items: center; flex-direction: column; }
+  #loading-overlay.show { display: flex; }
+  .spinner-big { width: 4rem; height: 4rem; border: 5px solid #e9ecef; border-top-color: #0d6efd; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+{% endblock %}
+{% block body %}
+
+<div id="loading-overlay">
+  <div class="spinner-big"></div>
+  <p class="mt-3 fw-semibold text-muted">Processing your order…</p>
+</div>
+
+<section class="py-5">
+  <div class="container">
+    <div class="row g-4">
+      <!-- Customer Form -->
+      <div class="col-lg-7">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <h4 class="fw-bold mb-1"><i class="bi bi-pen text-primary"></i> Delivery Details</h4>
+            <p class="text-muted small mb-4">Enter your details to complete the order</p>
+            <form id="checkout-form" method="post" novalidate>
+              {% csrf_token %}
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">{{ form.name.label }} <span class="text-danger">*</span></label>
+                  {{ form.name }}
+                  <div class="invalid-feedback"></div>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">{{ form.phone.label }} <span class="text-danger">*</span></label>
+                  {{ form.phone }}
+                  <div class="invalid-feedback"></div>
+                  <div class="form-text">e.g. +919876543210</div>
+                </div>
+                <div class="col-md-12">
+                  <label class="form-label fw-semibold">{{ form.email.label }}</label>
+                  {{ form.email }}
+                  <div class="invalid-feedback"></div>
+                  <div class="form-text">For order confirmation receipt</div>
+                </div>
+                <div class="col-12">
+                  <label class="form-label fw-semibold">{{ form.address.label }} <span class="text-danger">*</span></label>
+                  {{ form.address }}
+                  <div class="invalid-feedback"></div>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">{{ form.delivery_type.label }}</label>
+                  {{ form.delivery_type }}
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">{{ form.special_instructions.label }}</label>
+                  {{ form.special_instructions }}
+                </div>
+              </div>
+
+              <hr class="my-4">
+              <h5 class="fw-bold mb-3"><i class="bi bi-credit-card text-primary"></i> Payment Method</h5>
+              <div class="row g-3 mb-4">
+                {% for val, label in form.payment_mode.field.choices %}
+                <div class="col-md-6">
+                  <div class="payment-option{% if val == 'cod' %} selected{% endif %}" data-value="{{ val }}">
+                    <div class="icon">{% if val == 'cod' %}💵{% else %}💳{% endif %}</div>
+                    <h6 class="fw-bold mt-2 mb-0">{{ label }}</h6>
+                    <small class="text-muted">{% if val == 'cod' %}Pay when delivered{% else %}Razorpay (UPI, Card, Net Banking){% endif %}</small>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+              {{ form.payment_mode }}
+
+              <button type="submit" class="btn btn-success btn-lg w-100 rounded-pill py-3 mt-3" id="place-order-btn">
+                <i class="bi bi-shield-check"></i> Place Order — ₹{{ grand_total }}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Summary -->
+      <div class="col-lg-5">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-receipt text-primary"></i> Order Summary</h5>
+            <div id="order-items">
+              {% for item in cart %}
+              <div class="order-summary-item d-flex justify-content-between align-items-start">
+                <div>
+                  <strong>{{ item.flavour }}</strong><br>
+                  <small class="text-muted">{{ item.type }} | {{ item.size }}</small>
+                  {% if item.toppings and item.toppings != "No Toppings" %}
+                  <br><small class="text-muted">+ {{ item.toppings }}</small>
+                  {% endif %}
+                  <br><small>Qty: {{ item.quantity }}</small>
+                </div>
+                <span class="fw-bold">₹{{ item.total }}</span>
+              </div>
+              {% endfor %}
+            </div>
+            <hr>
+            <div class="d-flex justify-content-between mb-1"><span>Subtotal</span><span>₹{{ subtotal }}</span></div>
+            <div class="d-flex justify-content-between mb-1"><span>Tax (5%)</span><span>₹{{ tax }}</span></div>
+            <div class="d-flex justify-content-between mb-1">
+              <span>Delivery</span>
+              <span>{% if delivery_charge == 0 %}<span class="text-success">FREE</span>{% else %}₹{{ delivery_charge }}{% endif %}</span>
+            </div>
+            {% if delivery_charge > 0 %}
+            <div class="small text-muted mb-2">Free delivery on orders above ₹{{ free_delivery_above }}</div>
+            {% endif %}
+            <hr>
+            <div class="d-flex justify-content-between fs-5 fw-bold">
+              <span>Total</span>
+              <span class="text-success">₹{{ grand_total }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex gap-2 mt-3">
+          <a href="{% url 'cart' %}" class="btn btn-outline-secondary w-100 rounded-pill"><i class="bi bi-arrow-left"></i> Back to Cart</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+(function() {
+  const form = document.getElementById('checkout-form');
+  const paymentSelect = document.querySelector('[name="payment_mode"]');
+  const paymentOptions = document.querySelectorAll('.payment-option');
+  const loadingOverlay = document.getElementById('loading-overlay');
+  const submitBtn = document.getElementById('place-order-btn');
+
+  // Hide native select
+  if (paymentSelect) paymentSelect.style.display = 'none';
+
+  paymentOptions.forEach(function(opt) {
+    opt.addEventListener('click', function() {
+      paymentOptions.forEach(function(o) { o.classList.remove('selected'); });
+      opt.classList.add('selected');
+      if (paymentSelect) paymentSelect.value = opt.dataset.value;
+    });
+  });
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    var paymentMode = paymentSelect ? paymentSelect.value : 'cod';
+    loadingOverlay.classList.add('show');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Processing...';
+
+    var formData = new FormData(form);
+
+    if (paymentMode === 'cod') {
+      fetch('', { method: 'POST', body: formData, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          loadingOverlay.classList.remove('show');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="bi bi-shield-check"></i> Place Order';
+          if (data.success) {
+            window.location.href = "{% url 'order_track' %}?order_id=" + data.order_id;
+          } else {
+            alert(data.message || 'Error placing order.');
+          }
+        })
+        .catch(function() {
+          loadingOverlay.classList.remove('show');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="bi bi-shield-check"></i> Place Order';
+          alert('Network error. Please try again.');
+        });
+    } else {
+      fetch('', { method: 'POST', body: formData, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.success && data.razorpay_order_id) {
+            var rzp = new Razorpay({
+              key: data.razorpay_key,
+              amount: data.amount,
+              currency: 'INR',
+              name: 'Bapu Ice Cream',
+              description: 'Ice Cream Order',
+              order_id: data.razorpay_order_id,
+              prefill: { name: data.customer.name, contact: data.customer.phone },
+              theme: { color: '#0d6efd' },
+              handler: function() {
+                window.location.href = "{% url 'order_track' %}?order_id=SUCCESS";
+              },
+              modal: { ondismiss: function() {
+                loadingOverlay.classList.remove('show');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="bi bi-shield-check"></i> Place Order';
+              }}
+            });
+            rzp.open();
+          } else {
+            loadingOverlay.classList.remove('show');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="bi bi-shield-check"></i> Place Order';
+            alert(data.message || 'Error initializing payment.');
+          }
+        })
+        .catch(function() {
+          loadingOverlay.classList.remove('show');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="bi bi-shield-check"></i> Place Order';
+          alert('Payment initialization failed.');
+        });
+    }
+  });
+})();
+</script>
+{% endblock %}
