@@ -126,25 +126,111 @@ class ContactView(FormView):
         return super().form_invalid(form)
 
 
-@method_decorator(ratelimit(key='ip', rate='3/m', block=True), name='dispatch')
+@method_decorator(ratelimit(key='ip', rate='5/m', block=True), name='dispatch')
 class CateringView(FormView):
     template_name = "catering.html"
     form_class = CateringEnquiryForm
-    success_url = reverse_lazy('catering')
+    success_url = reverse_lazy("catering")
 
     def form_valid(self, form):
         try:
-            form.save()
-            messages.success(self.request, "Thank you! We will contact you shortly.")
-            logger.info(f"New catering enquiry from {form.cleaned_data['phone']}")
+            enquiry = form.save()
+
+            if self.request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                return JsonResponse({
+                    "success": True,
+                    "message": "Thank you! Your catering enquiry has been submitted. We'll contact you within 30 minutes.",
+                })
+
+            messages.success(
+                self.request,
+                "Thank you! Your catering enquiry has been submitted. We'll contact you within 30 minutes.",
+            )
+
+            logger.info(
+                f"New catering enquiry #{enquiry.id} from {enquiry.name} ({enquiry.phone})"
+            )
+
+            self._send_notifications(enquiry)
+
         except DatabaseError as e:
             logger.error(f"Database error saving catering enquiry: {e}")
-            messages.error(self.request, "An error occurred submitting your enquiry.")
+            if self.request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                return JsonResponse({
+                    "success": False,
+                    "message": "A database error occurred. Please try again later.",
+                }, status=500)
+            messages.error(self.request, "A database error occurred. Please try again later.")
+
         return super().form_valid(form)
 
     def form_invalid(self, form):
-        messages.error(self.request, "Invalid details submitted. Please check your form.")
+        if self.request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return JsonResponse({
+                "success": False,
+                "errors": form.errors,
+            }, status=400)
+        messages.error(self.request, "Please correct the errors below.")
         return super().form_invalid(form)
+
+    def _send_notifications(self, enquiry):
+        """Send confirmation email to customer + notification to admin."""
+        try:
+            from django.core.mail import send_mail
+            from django.conf import settings
+
+            subject = f"Catering Enquiry Confirmation — {enquiry.name}"
+            customer_message = (
+                f"Dear {enquiry.name},\n\n"
+                f"Thank you for your catering enquiry with Bapu Ice Cream!\n\n"
+                f"Event: {enquiry.get_event_type_display()}\n"
+                f"Date: {enquiry.event_date or 'To be decided'}\n"
+                f"Venue: {enquiry.venue or 'To be decided'}\n"
+                f"Guests: {enquiry.guests or 'To be decided'}\n"
+                f"Package: {enquiry.get_catering_package_display()}\n\n"
+                f"We will review your requirements and contact you at {enquiry.phone} "
+                f"within 30 minutes during business hours (10 AM – 10 PM).\n\n"
+                f"If you have any urgent requests, please call us at +91 9692244008.\n\n"
+                f"Warm regards,\nBapu Ice-Cream Team"
+            )
+
+            if enquiry.email:
+                send_mail(
+                    subject,
+                    customer_message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [enquiry.email],
+                    fail_silently=True,
+                )
+
+            admin_subject = f"[Admin] New Catering Enquiry from {enquiry.name}"
+            admin_message = (
+                f"New catering enquiry received:\n\n"
+                f"Name: {enquiry.name}\n"
+                f"Phone: {enquiry.phone}\n"
+                f"Email: {enquiry.email or 'N/A'}\n"
+                f"Event: {enquiry.get_event_type_display()}\n"
+                f"Date: {enquiry.event_date or 'N/A'}\n"
+                f"Venue: {enquiry.venue or 'N/A'}\n"
+                f"Guests: {enquiry.guests or 'N/A'}\n"
+                f"Package: {enquiry.get_catering_package_display()}\n"
+                f"Budget: ₹{enquiry.budget or 'N/A'}\n"
+                f"Special Requirements: {enquiry.special_requirements or 'N/A'}\n"
+                f"Message: {enquiry.message or 'N/A'}\n\n"
+                f"View in admin: /admin/home/cateringenquiry/{enquiry.id}/change/"
+            )
+
+            if hasattr(settings, "ADMIN_EMAIL") and settings.ADMIN_EMAIL:
+                send_mail(
+                    admin_subject,
+                    admin_message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [settings.ADMIN_EMAIL],
+                    fail_silently=True,
+                )
+
+        except Exception as e:
+            logger.warning(f"Failed to send catering notification emails: {e}")
 
 
 class OrderView(View):

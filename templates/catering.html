@@ -1,41 +1,454 @@
 {% extends "base.html" %}
-{% block title %}Catering Enquiry{% endblock %}
+{% load static %}
+{% block title %}Catering Enquiry — Bapu Ice Cream{% endblock %}
+{% block extra_head %}
+<meta name="description" content="Book Bapu Ice Cream for your next event. Birthday parties, weddings, corporate events, and more. Custom catering packages available.">
+<style>
+  .catering-hero {
+    background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
+    padding: 3rem 0;
+    color: #fff;
+    text-align: center;
+  }
+  .catering-hero h1 { font-size: 2.5rem; font-weight: 800; }
+  .catering-hero p { font-size: 1.1rem; opacity: 0.9; max-width: 600px; margin: 0 auto; }
+  .step-indicator {
+    display: flex; justify-content: center; gap: 0.5rem; margin-bottom: 2rem;
+  }
+  .step-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: #dee2e6; transition: all 0.3s;
+  }
+  .step-dot.active { background: #0d6efd; transform: scale(1.3); }
+  .step-dot.done { background: #198754; }
+  .form-section { display: none; }
+  .form-section.active { display: block; }
+  .package-card {
+    border: 2px solid #dee2e6; border-radius: 12px; padding: 1.5rem;
+    cursor: pointer; transition: all 0.25s; text-align: center;
+  }
+  .package-card:hover { border-color: #0d6efd; box-shadow: 0 4px 20px rgba(13,110,253,0.12); }
+  .package-card.selected { border-color: #0d6efd; background: #f0f6ff; }
+  .package-card .icon { font-size: 2rem; margin-bottom: 0.5rem; }
+  .package-card .price { font-size: 1.25rem; font-weight: 700; color: #0d6efd; }
+  .package-card ul { list-style: none; padding: 0; margin: 0.75rem 0 0; font-size: 0.875rem; }
+  .package-card ul li { padding: 0.2rem 0; color: #6c757d; }
+  .package-card ul li::before { content: "✓ "; color: #198754; font-weight: 700; }
+  #loading-overlay {
+    display: none; position: fixed; inset: 0; z-index: 99999;
+    background: rgba(255,255,255,0.85);
+    justify-content: center; align-items: center; flex-direction: column;
+  }
+  #loading-overlay.show { display: flex; }
+  .spinner-big { width: 4rem; height: 4rem; border: 5px solid #e9ecef; border-top-color: #0d6efd; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .form-floating>.form-control:focus~label,
+  .form-floating>.form-control:not(:placeholder-shown)~label { color: #0d6efd; }
+  .is-valid { border-color: #198754 !important; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='M2.3 6.73.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right calc(0.375em + 0.1875rem) center; background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem); }
+  .is-invalid { border-color: #dc3545 !important; }
+  @media (max-width: 768px) { .catering-hero h1 { font-size: 1.75rem; } .package-card { padding: 1rem; } }
+</style>
+{% endblock %}
 {% block body %}
 
+<div id="loading-overlay">
+  <div class="spinner-big"></div>
+  <p class="mt-3 fw-semibold text-muted">Submitting your enquiry…</p>
+</div>
+
+<!-- Hero -->
+<section class="catering-hero">
+  <div class="container">
+    <h1><i class="bi bi-stars"></i> Catering Enquiry</h1>
+    <p>Tell us about your event and we'll create the perfect ice-cream experience for you.</p>
+  </div>
+</section>
+
+<!-- Form Section -->
 <section class="py-5">
   <div class="container">
     <div class="row justify-content-center">
-      <div class="col-lg-8">
+      <div class="col-lg-10">
         <div class="card border-0 shadow-lg">
           <div class="card-body p-4 p-lg-5">
-            <div class="text-center mb-4">
-              <h2 class="fw-bold">🎉 Catering Enquiry</h2>
-              <p class="text-muted">Planning a celebration? Let us make it sweeter with our ice-cream catering 🍦</p>
+
+            <!-- Success Message (hidden by default) -->
+            <div id="success-message" class="d-none text-center py-5">
+              <div class="mb-3" style="font-size:4rem;">🎉</div>
+              <h3 class="fw-bold mb-3">Enquiry Submitted!</h3>
+              <p class="lead text-muted mb-4">Thank you! We've received your catering enquiry and will contact you at the provided phone number within 30 minutes.</p>
+              <div class="d-flex justify-content-center gap-3 flex-wrap">
+                <a href="{% url 'landing' %}" class="btn btn-primary rounded-pill px-4"><i class="bi bi-house"></i> Back to Home</a>
+                <a href="{% url 'catering' %}" class="btn btn-outline-primary rounded-pill px-4"><i class="bi bi-plus-circle"></i> New Enquiry</a>
+              </div>
             </div>
-            <form method="post">
+
+            <!-- Step Indicator -->
+            <div id="step-indicator" class="step-indicator">
+              <span class="step-dot active" data-step="1"></span>
+              <span class="step-dot" data-step="2"></span>
+              <span class="step-dot" data-step="3"></span>
+              <span class="step-dot" data-step="4"></span>
+            </div>
+
+            <!-- Error Display -->
+            <div id="form-errors" class="d-none alert alert-danger alert-dismissible" role="alert">
+              <i class="bi bi-exclamation-triangle"></i> <span id="error-text"></span>
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <!-- Form -->
+            <form id="catering-form" method="post" enctype="multipart/form-data" novalidate>
               {% csrf_token %}
-              <div class="row g-3">
-                {% for field in form %}
-                  <div class="col-12">
-                    <label class="form-label fw-semibold">{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.errors %}
-                      <div class="text-danger small">{{ field.errors.0 }}</div>
-                    {% endif %}
+
+              <!-- Step 1: Personal Details -->
+              <div class="form-section active" data-step="1">
+                <h4 class="fw-bold mb-1"><i class="bi bi-person-circle text-primary"></i> Personal Details</h4>
+                <p class="text-muted small mb-4">How can we reach you?</p>
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold">{{ form.name.label }} <span class="text-danger">*</span></label>
+                    {{ form.name }}
+                    <div class="invalid-feedback"></div>
                   </div>
-                {% endfor %}
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold">{{ form.phone.label }} <span class="text-danger">*</span></label>
+                    {{ form.phone }}
+                    <div class="invalid-feedback"></div>
+                    <div class="form-text">Indian: +919876543210 or 9876543210</div>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold">{{ form.email.label }}</label>
+                    {{ form.email }}
+                    <div class="invalid-feedback"></div>
+                    <div class="form-text">We'll send a confirmation email</div>
+                  </div>
+                </div>
+                <div class="d-flex justify-content-end mt-4">
+                  <button type="button" class="btn btn-primary rounded-pill px-4 next-step" data-next="2">Next <i class="bi bi-arrow-right"></i></button>
+                </div>
               </div>
-              <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-3">
-                <a href="{% url 'landing' %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back to Home</a>
-                <button type="submit" class="btn btn-primary btn-lg px-5 rounded-pill">Submit Enquiry <i class="bi bi-send"></i></button>
+
+              <!-- Step 2: Event Details -->
+              <div class="form-section" data-step="2">
+                <h4 class="fw-bold mb-1"><i class="bi bi-calendar-event text-primary"></i> Event Details</h4>
+                <p class="text-muted small mb-4">Tell us about your event</p>
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold">{{ form.event_type.label }} <span class="text-danger">*</span></label>
+                    {{ form.event_type }}
+                    <div class="invalid-feedback"></div>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold">{{ form.event_date.label }}</label>
+                    {{ form.event_date }}
+                    <div class="invalid-feedback"></div>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold">{{ form.venue.label }}</label>
+                    {{ form.venue }}
+                    <div class="invalid-feedback"></div>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold">{{ form.guests.label }}</label>
+                    {{ form.guests }}
+                    <div class="invalid-feedback"></div>
+                  </div>
+                </div>
+                <div class="d-flex justify-content-between mt-4">
+                  <button type="button" class="btn btn-outline-secondary rounded-pill px-4 prev-step" data-prev="1"><i class="bi bi-arrow-left"></i> Back</button>
+                  <button type="button" class="btn btn-primary rounded-pill px-4 next-step" data-next="3">Next <i class="bi bi-arrow-right"></i></button>
+                </div>
               </div>
+
+              <!-- Step 3: Package Selection -->
+              <div class="form-section" data-step="3">
+                <h4 class="fw-bold mb-1"><i class="bi bi-box-seam text-primary"></i> Choose a Package</h4>
+                <p class="text-muted small mb-4">Select the option that best fits your event</p>
+                <div class="row g-3 mb-4">
+                  {% for choice_val, choice_label in form.catering_package.field.choices %}
+                  <div class="col-md-3 col-6">
+                    <div class="package-card{% if choice_val == 'basic' %} selected{% endif %}" data-value="{{ choice_val }}">
+                      {% if choice_val == 'basic' %}
+                        <div class="icon">🍦</div>
+                        <h6 class="fw-bold">Basic</h6>
+                        <div class="price">₹99/head</div>
+                        <ul><li>Ice Cream Tub Service</li><li>3 Classic Flavours</li><li>Disposable Cups & Spoons</li></ul>
+                      {% elif choice_val == 'standard' %}
+                        <div class="icon">🍨</div>
+                        <h6 class="fw-bold">Standard</h6>
+                        <div class="price">₹149/head</div>
+                        <ul><li>Ice Cream + Toppings Bar</li><li>6 Flavours</li><li>Premium Serving</li></ul>
+                      {% elif choice_val == 'premium' %}
+                        <div class="icon">🧁</div>
+                        <h6 class="fw-bold">Premium</h6>
+                        <div class="price">₹249/head</div>
+                        <ul><li>Full Dessert Catering</li><li>10+ Flavours</li><li>Custom Decor & Setup</li></ul>
+                      {% elif choice_val == 'custom' %}
+                        <div class="icon">✨</div>
+                        <h6 class="fw-bold">Custom</h6>
+                        <div class="price">Tailored</div>
+                        <ul><li>Fully Customizable</li><li>Any Flavour Combinations</li><li>Dedicated Coordinator</li></ul>
+                      {% endif %}
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+                {{ form.catering_package }}
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold">{{ form.budget.label }}</label>
+                    {{ form.budget }}
+                    <div class="invalid-feedback"></div>
+                    <div class="form-text">Approximate total budget</div>
+                  </div>
+                </div>
+                <div class="d-flex justify-content-between mt-4">
+                  <button type="button" class="btn btn-outline-secondary rounded-pill px-4 prev-step" data-prev="2"><i class="bi bi-arrow-left"></i> Back</button>
+                  <button type="button" class="btn btn-primary rounded-pill px-4 next-step" data-next="4">Next <i class="bi bi-arrow-right"></i></button>
+                </div>
+              </div>
+
+              <!-- Step 4: Additional Details & Submit -->
+              <div class="form-section" data-step="4">
+                <h4 class="fw-bold mb-1"><i class="bi bi-chat-dots text-primary"></i> Additional Details</h4>
+                <p class="text-muted small mb-4">Anything else we should know?</p>
+                <div class="row g-3">
+                  <div class="col-12">
+                    <label class="form-label fw-semibold">{{ form.special_requirements.label }}</label>
+                    {{ form.special_requirements }}
+                    <div class="invalid-feedback"></div>
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label fw-semibold">{{ form.message.label }}</label>
+                    {{ form.message }}
+                    <div class="invalid-feedback"></div>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold">{{ form.reference_image.label }}</label>
+                    {{ form.reference_image }}
+                    <div class="invalid-feedback"></div>
+                    <div class="form-text">Max 5 MB. JPG, PNG, WebP, or GIF.</div>
+                  </div>
+                </div>
+                <div class="d-flex justify-content-between mt-4">
+                  <button type="button" class="btn btn-outline-secondary rounded-pill px-4 prev-step" data-prev="3"><i class="bi bi-arrow-left"></i> Back</button>
+                  <button type="submit" class="btn btn-success rounded-pill px-5" id="submit-btn">
+                    <i class="bi bi-send"></i> Submit Enquiry
+                  </button>
+                </div>
+              </div>
+
             </form>
           </div>
         </div>
-        <p class="text-center text-muted mt-4">📞 We'll contact you within 30 minutes | Available 10 AM – 10 PM</p>
+
+        <div class="row g-3 mt-4 text-center">
+          <div class="col-md-3 col-6">
+            <div class="p-3 bg-light rounded-3">
+              <i class="bi bi-telephone fs-3 text-primary"></i>
+              <h6 class="fw-bold mt-2 mb-0">Call Us</h6>
+              <small class="text-muted">+91 9692244008</small>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="p-3 bg-light rounded-3">
+              <i class="bi bi-clock fs-3 text-primary"></i>
+              <h6 class="fw-bold mt-2 mb-0">Working Hours</h6>
+              <small class="text-muted">10 AM – 10 PM</small>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="p-3 bg-light rounded-3">
+              <i class="bi bi-reply fs-3 text-primary"></i>
+              <h6 class="fw-bold mt-2 mb-0">Response Time</h6>
+              <small class="text-muted">Within 30 min</small>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="p-3 bg-light rounded-3">
+              <i class="bi bi-geo-alt fs-3 text-primary"></i>
+              <h6 class="fw-bold mt-2 mb-0">Service Area</h6>
+              <small class="text-muted">Balasore & nearby</small>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </section>
+{% endblock %}
 
+{% block extra_scripts %}
+<script>
+(function() {
+  'use strict';
+
+  const form = document.getElementById('catering-form');
+  const formSections = document.querySelectorAll('.form-section');
+  const stepDots = document.querySelectorAll('.step-dot');
+  const loadingOverlay = document.getElementById('loading-overlay');
+  const successMsg = document.getElementById('success-message');
+  const stepIndicator = document.getElementById('step-indicator');
+  const formErrors = document.getElementById('form-errors');
+  const errorText = document.getElementById('error-text');
+  const packageCards = document.querySelectorAll('.package-card');
+  const packageSelect = document.getElementById('{{ form.catering_package.id_for_label }}');
+  const submitBtn = document.getElementById('submit-btn');
+
+  let currentStep = 1;
+
+  // Hide the actual select
+  if (packageSelect) packageSelect.style.display = 'none';
+
+  // Package card selection
+  packageCards.forEach(function(card) {
+    card.addEventListener('click', function() {
+      packageCards.forEach(function(c) { c.classList.remove('selected'); });
+      card.classList.add('selected');
+      if (packageSelect) packageSelect.value = card.dataset.value;
+    });
+  });
+
+  // Show step
+  function showStep(step) {
+    formSections.forEach(function(s) { s.classList.remove('active'); });
+    stepDots.forEach(function(d) {
+      var s = parseInt(d.dataset.step);
+      d.classList.remove('active', 'done');
+      if (s === step) d.classList.add('active');
+      else if (s < step) d.classList.add('done');
+    });
+    document.querySelector('.form-section[data-step="' + step + '"]').classList.add('active');
+    currentStep = step;
+    window.scrollTo({ top: form.offsetTop - 100, behavior: 'smooth' });
+  }
+
+  // Validate visible fields in current step
+  function validateStep(step) {
+    var section = document.querySelector('.form-section[data-step="' + step + '"]');
+    var inputs = section.querySelectorAll('input, select, textarea');
+    var valid = true;
+    inputs.forEach(function(input) {
+      if (input.hasAttribute('required') && !input.value.trim()) {
+        input.classList.add('is-invalid');
+        var fb = input.closest('.col-md-6, .col-md-3, .col-12');
+        if (fb) {
+          var feedback = fb.querySelector('.invalid-feedback');
+          if (feedback) feedback.textContent = 'This field is required.';
+        }
+        valid = false;
+      } else if (input.type === 'tel' && input.value.trim()) {
+        var cleaned = input.value.replace(/[\s\-\(\)\.]/g, '');
+        if (cleaned.startsWith('0')) cleaned = '+91' + cleaned.substring(1);
+        else if (cleaned.length === 10) cleaned = '+91' + cleaned;
+        else if (cleaned.startsWith('91') && cleaned.length === 12) cleaned = '+' + cleaned;
+        if (!cleaned.startsWith('+91') || !/^\+91[6-9]\d{9}$/.test(cleaned)) {
+          input.classList.add('is-invalid');
+          var fb2 = input.closest('.col-md-6, .col-md-3, .col-12');
+          if (fb2) {
+            var feedback2 = fb2.querySelector('.invalid-feedback');
+            if (feedback2) feedback2.textContent = 'Enter a valid 10-digit Indian mobile number.';
+          }
+          valid = false;
+        }
+      }
+    });
+    return valid;
+  }
+
+  // Clear validation on input
+  form.addEventListener('input', function(e) {
+    e.target.classList.remove('is-invalid');
+    var fb = e.target.closest('.col-md-6, .col-md-3, .col-12');
+    if (fb) {
+      var feedback = fb.querySelector('.invalid-feedback');
+      if (feedback) feedback.textContent = '';
+    }
+  });
+
+  // Next/Prev buttons
+  document.querySelectorAll('.next-step').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var next = parseInt(this.dataset.next);
+      if (validateStep(currentStep)) showStep(next);
+    });
+  });
+
+  document.querySelectorAll('.prev-step').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      showStep(parseInt(this.dataset.preview));
+    });
+  });
+
+  // AJAX form submission
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    if (!validateStep(currentStep)) return;
+
+    formErrors.classList.add('d-none');
+    loadingOverlay.classList.add('show');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Submitting...';
+
+    var formData = new FormData(form);
+
+    fetch('', {
+      method: 'POST',
+      body: formData,
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(function(response) {
+      return response.json().then(function(data) {
+        return { status: response.status, data: data };
+      });
+    })
+    .then(function(result) {
+      loadingOverlay.classList.remove('show');
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="bi bi-send"></i> Submit Enquiry';
+
+      if (result.data.success) {
+        form.style.display = 'none';
+        stepIndicator.style.display = 'none';
+        successMsg.classList.remove('d-none');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        if (result.data.errors) {
+          var firstError = null;
+          Object.keys(result.data.errors).forEach(function(field) {
+            var input = form.querySelector('[name="' + field + '"]');
+            if (input) {
+              input.classList.add('is-invalid');
+              var container = input.closest('.col-md-6, .col-md-3, .col-12');
+              if (container) {
+                var feedback = container.querySelector('.invalid-feedback');
+                if (feedback) feedback.textContent = result.data.errors[field][0];
+              }
+              if (!firstError) { firstError = input; }
+            }
+          });
+          errorText.textContent = 'Please fix the highlighted fields and try again.';
+        } else {
+          errorText.textContent = result.data.message || 'An error occurred. Please try again.';
+        }
+        formErrors.classList.remove('d-none');
+        if (firstError) {
+          firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          firstError.focus();
+        }
+      }
+    })
+    .catch(function(err) {
+      loadingOverlay.classList.remove('show');
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="bi bi-send"></i> Submit Enquiry';
+      errorText.textContent = 'A network error occurred. Please check your connection and try again.';
+      formErrors.classList.remove('d-none');
+    });
+  });
+
+})();
+</script>
 {% endblock %}

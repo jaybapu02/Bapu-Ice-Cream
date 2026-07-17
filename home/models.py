@@ -73,14 +73,43 @@ class Contact(models.Model):
 
 
 class CateringEnquiry(models.Model):
+    PACKAGE_CHOICES = [
+        ("basic", "Basic — Ice Cream Tub Service"),
+        ("standard", "Standard — Ice Cream + Toppings Bar"),
+        ("premium", "Premium — Full Dessert Catering"),
+        ("custom", "Custom — Tailored Package"),
+    ]
+
     name = models.CharField(max_length=100)
     phone = models.CharField(validators=[phone_regex], max_length=17)
-    event_type = models.CharField(max_length=50)
+    email = models.EmailField(blank=True, help_text="We'll send a confirmation to this email")
+    event_type = models.CharField(max_length=50, choices=[
+        ("birthday", "Birthday Party"),
+        ("wedding", "Wedding / Reception"),
+        ("corporate", "Corporate Event"),
+        ("college", "College Fest"),
+        ("family", "Family Gathering"),
+        ("other", "Other"),
+    ], default="other")
     event_date = models.DateField(null=True, blank=True)
+    venue = models.CharField(max_length=200, blank=True, help_text="Where will the event be held?")
     guests = models.PositiveIntegerField(
         null=True, blank=True, validators=[MinValueValidator(1)]
     )
+    catering_package = models.CharField(
+        max_length=20, choices=PACKAGE_CHOICES, default="basic"
+    )
+    budget = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True,
+        validators=[MinValueValidator(Decimal('0.00'))],
+        help_text="Approximate budget in INR"
+    )
+    special_requirements = models.TextField(blank=True, help_text="Dietary restrictions, allergies, preferred flavours, etc.")
     message = models.TextField(blank=True)
+    reference_image = models.ImageField(
+        upload_to="catering_references/", blank=True,
+        help_text="Optional: upload a reference image or mood board"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -88,12 +117,13 @@ class CateringEnquiry(models.Model):
         verbose_name = "Catering Enquiry"
         verbose_name_plural = "Catering Enquiries"
         indexes = [
-            models.Index(fields=['event_date']),
-            models.Index(fields=['-created_at']),
+            models.Index(fields=["event_date"]),
+            models.Index(fields=["-created_at"]),
+            models.Index(fields=["event_type"]),
         ]
 
     def __str__(self):
-        return f"{self.name} - {self.event_type} on {self.event_date}"
+        return f"{self.name} - {self.get_event_type_display()} on {self.event_date}"
 
 
 class Order(models.Model):

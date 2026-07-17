@@ -459,30 +459,59 @@ class ContactAdmin(admin.ModelAdmin):
 
 @admin.register(CateringEnquiry, site=custom_admin_site)
 class CateringEnquiryAdmin(admin.ModelAdmin):
-    list_display = ["name", "phone", "event_type", "event_date", "guests", "created_at"]
-    list_filter = ["event_type", "event_date", "created_at"]
-    search_fields = ["name", "phone", "event_type", "message"]
+    list_display = [
+        "name", "phone", "email", "event_type", "event_date",
+        "venue", "guests", "catering_package", "budget_display",
+        "reference_thumbnail", "created_at"
+    ]
+    list_filter = ["event_type", "catering_package", "event_date", "created_at"]
+    search_fields = ["name", "phone", "email", "event_type", "venue", "message"]
     list_per_page = 25
     ordering = ["-created_at"]
     date_hierarchy = "created_at"
-    readonly_fields = ["created_at", "updated_at"]
+    readonly_fields = ["created_at", "updated_at", "reference_thumbnail"]
     actions = [export_as_csv, export_as_excel, export_as_pdf]
 
     fieldsets = [
         (None, {
-            "fields": ["name", "phone"]
+            "fields": ["name", "phone", "email"]
         }),
         ("Event Details", {
-            "fields": ["event_type", "event_date", "guests"]
+            "fields": ["event_type", "event_date", "venue", "guests"]
         }),
-        ("Message", {
-            "fields": ["message"]
+        ("Package & Budget", {
+            "fields": ["catering_package", "budget"],
+            "classes": ["collapse"]
+        }),
+        ("Requirements", {
+            "fields": ["special_requirements", "message", "reference_image", "reference_thumbnail"],
+            "classes": ["collapse"]
         }),
         ("Timestamps", {
             "fields": ["created_at", "updated_at"],
             "classes": ["collapse"]
         }),
     ]
+
+    def budget_display(self, obj):
+        if obj.budget:
+            return format_html(
+                '<span style="font-weight:600;color:#0d6efd;">₹{}</span>', obj.budget
+            )
+        return format_html('<span class="text-muted">—</span>')
+    budget_display.short_description = "Budget"
+    budget_display.admin_order_field = "budget"
+
+    def reference_thumbnail(self, obj):
+        if obj.reference_image:
+            return format_html(
+                '<a href="{}" target="_blank">'
+                '<img src="{}" style="width:60px;height:60px;object-fit:cover;'
+                'border-radius:6px;border:1px solid #dee2e6;" /></a>',
+                obj.reference_image.url, obj.reference_image.url
+            )
+        return format_html('<span class="text-muted">—</span>')
+    reference_thumbnail.short_description = "Reference Image"
 
 
 # ──────────────────────────────────────────────

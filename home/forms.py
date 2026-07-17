@@ -88,27 +88,64 @@ class ContactForm(forms.ModelForm):
 class CateringEnquiryForm(forms.ModelForm):
     class Meta:
         model = CateringEnquiry
-        fields = ['name', 'phone', 'event_type', 'event_date', 'guests', 'message']
+        fields = [
+            'name', 'phone', 'email', 'event_type', 'event_date',
+            'venue', 'guests', 'catering_package', 'budget',
+            'special_requirements', 'message', 'reference_image',
+        ]
         widgets = {
             'name': forms.TextInput(attrs={
-                'class': 'form-control', 'placeholder': 'Enter your name'
+                'class': 'form-control', 'placeholder': 'Your full name',
+                'required': True,
             }),
             'phone': forms.TextInput(attrs={
                 'class': 'form-control', 'placeholder': 'e.g. +919876543210',
-                'type': 'tel'
+                'type': 'tel', 'required': True,
             }),
-            'event_type': forms.Select(attrs={'class': 'form-select'}),
+            'email': forms.EmailInput(attrs={
+                'class': 'form-control', 'placeholder': 'your@email.com',
+            }),
+            'event_type': forms.Select(attrs={
+                'class': 'form-select', 'required': True,
+            }),
             'event_date': forms.DateInput(attrs={
-                'class': 'form-control', 'type': 'date'
+                'class': 'form-control', 'type': 'date',
+            }),
+            'venue': forms.TextInput(attrs={
+                'class': 'form-control', 'placeholder': 'Venue name or address',
             }),
             'guests': forms.NumberInput(attrs={
-                'class': 'form-control', 'placeholder': 'Approximate guest count'
+                'class': 'form-control', 'placeholder': 'Approx. number of guests',
+                'min': 1,
+            }),
+            'catering_package': forms.Select(attrs={
+                'class': 'form-select',
+            }),
+            'budget': forms.NumberInput(attrs={
+                'class': 'form-control', 'placeholder': 'Approx. budget in INR',
+                'min': 0, 'step': '100',
+            }),
+            'special_requirements': forms.Textarea(attrs={
+                'class': 'form-control', 'placeholder': 'Dietary restrictions, allergies, preferred flavours, etc.',
+                'rows': 3,
             }),
             'message': forms.Textarea(attrs={
-                'class': 'form-control', 'placeholder': 'Tell us about flavours, theme, timing, etc.',
-                'rows': 4
+                'class': 'form-control', 'placeholder': 'Any additional details or requests...',
+                'rows': 3,
+            }),
+            'reference_image': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*',
             }),
         }
+
+    def clean_name(self):
+        name = self.cleaned_data.get('name', '').strip()
+        if not name:
+            raise forms.ValidationError("Name is required.")
+        if len(name) < 2:
+            raise forms.ValidationError("Name must be at least 2 characters.")
+        return name
 
     def clean_phone(self):
         phone = self.cleaned_data.get('phone', '')
@@ -121,6 +158,28 @@ class CateringEnquiryForm(forms.ModelForm):
             if date < dt_date.today():
                 raise forms.ValidationError("Event date cannot be in the past.")
         return date
+
+    def clean_guests(self):
+        guests = self.cleaned_data.get('guests')
+        if guests and guests > 50000:
+            raise forms.ValidationError("Please contact us directly for events with 50,000+ guests.")
+        return guests
+
+    def clean_budget(self):
+        budget = self.cleaned_data.get('budget')
+        if budget and budget > 99999999:
+            raise forms.ValidationError("Please enter a realistic budget amount.")
+        return budget
+
+    def clean_reference_image(self):
+        img = self.cleaned_data.get('reference_image')
+        if img:
+            if img.size > 5 * 1024 * 1024:
+                raise forms.ValidationError("Image must be less than 5 MB.")
+            allowed = {'image/jpeg', 'image/png', 'image/webp', 'image/gif'}
+            if hasattr(img, 'content_type') and img.content_type not in allowed:
+                raise forms.ValidationError("Only JPG, PNG, WebP, or GIF images are allowed.")
+        return img
 
 
 class OrderCustomerForm(forms.Form):
