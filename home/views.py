@@ -30,6 +30,7 @@ from .forms import (
     ReviewForm, NewsletterForm, RegisterForm
 )
 from .exceptions import OrderProcessingError
+from .product_images import annotate_products_with_images
 
 logger = logging.getLogger('home.views')
 
@@ -39,9 +40,9 @@ class LandingView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['featured_products'] = Product.objects.filter(
-            is_available=True, is_featured=True
-        )[:6]
+        context['featured_products'] = annotate_products_with_images(
+            Product.objects.filter(is_available=True, is_featured=True)[:6]
+        )
         return context
 
 
@@ -57,7 +58,7 @@ class HomeView(TemplateView):
             qs = qs.filter(category__slug=category_slug)
         if search_q:
             qs = qs.filter(name__icontains=search_q)
-        context['all_products'] = qs
+        context['all_products'] = annotate_products_with_images(qs)
         context['categories'] = Category.objects.all()
         context['selected_category'] = category_slug or ''
         context['search_query'] = search_q or ''
@@ -135,7 +136,7 @@ class ProductsView(ListView):
         else:
             qs = qs.order_by('-is_featured', '-is_best_seller', '-is_new_arrival', 'name')
 
-        return qs
+        return annotate_products_with_images(qs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -145,15 +146,15 @@ class ProductsView(ListView):
         context['selected_category'] = self.request.GET.get('category', '')
         context['search_query'] = self.request.GET.get('q', '')
         context['current_sort'] = self.request.GET.get('sort', '')
-        context['featured_products'] = Product.objects.filter(
-            is_available=True, is_featured=True
-        ).select_related('category')[:4]
-        context['best_sellers'] = Product.objects.filter(
-            is_available=True, is_best_seller=True
-        ).select_related('category')[:4]
-        context['new_arrivals'] = Product.objects.filter(
-            is_available=True, is_new_arrival=True
-        ).select_related('category')[:4]
+        context['featured_products'] = annotate_products_with_images(
+            Product.objects.filter(is_available=True, is_featured=True).select_related('category')[:4]
+        )
+        context['best_sellers'] = annotate_products_with_images(
+            Product.objects.filter(is_available=True, is_best_seller=True).select_related('category')[:4]
+        )
+        context['new_arrivals'] = annotate_products_with_images(
+            Product.objects.filter(is_available=True, is_new_arrival=True).select_related('category')[:4]
+        )
         return context
 
 
@@ -168,12 +169,14 @@ class ProductDetailView(DetailView):
         context['reviews'] = product.reviews.select_related('user').all()[:10]
         context['review_form'] = ReviewForm()
         context['gallery_images'] = product.images.filter(is_primary=False).all()[:5]
-        context['related_products'] = Product.objects.filter(
-            category=product.category, is_available=True
-        ).exclude(id=product.id).select_related('category')[:4]
-        context['recommended_products'] = Product.objects.filter(
-            is_available=True, is_featured=True
-        ).exclude(id=product.id).select_related('category')[:4]
+        context['related_products'] = annotate_products_with_images(
+            Product.objects.filter(category=product.category, is_available=True)
+            .exclude(id=product.id).select_related('category')[:4]
+        )
+        context['recommended_products'] = annotate_products_with_images(
+            Product.objects.filter(is_available=True, is_featured=True)
+            .exclude(id=product.id).select_related('category')[:4]
+        )
         return context
 
 
@@ -816,6 +819,13 @@ class WishlistView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         return Wishlist.objects.filter(user=self.request.user).select_related('product')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        items = context['wishlist_items']
+        products = [item.product for item in items]
+        annotate_products_with_images(products)
+        return context
 
 
 class OrderTrackView(View):

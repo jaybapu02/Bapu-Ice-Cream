@@ -34,15 +34,7 @@
       <div class="col-lg-6">
         <div class="position-relative">
           <div class="product-img-wrapper rounded-4 overflow-hidden shadow-sm bg-light" style="aspect-ratio:1/1;max-height:500px">
-            {% if product.image %}
-            <img id="mainImage" src="{{ product.image.url }}" class="w-100 h-100" style="object-fit:cover" alt="{{ product.name }}">
-            {% elif gallery_images.0 %}
-            <img id="mainImage" src="{{ gallery_images.0.image.url }}" class="w-100 h-100" style="object-fit:cover" alt="{{ product.name }}">
-            {% else %}
-            <div class="d-flex align-items-center justify-content-center h-100 text-muted">
-              <i class="bi bi-cup-straw fs-1"></i>
-            </div>
-            {% endif %}
+            <img id="mainImage" src="{{ product.display_image }}" class="w-100 h-100" style="object-fit:cover" alt="{{ product.name }}">
           </div>
           {% if product.images.all|length > 1 %}
           <div class="d-flex gap-2 mt-3 overflow-auto pb-1">
@@ -244,13 +236,7 @@
       <div class="col-md-3 col-6">
         <div class="product-card card border-0 shadow-sm h-100" style="border-radius:12px;overflow:hidden">
           <div class="product-img-wrap" style="aspect-ratio:1/1">
-            {% if rp.image %}
-            <img src="{{ rp.image.url }}" class="w-100 h-100" style="object-fit:cover" alt="{{ rp.name }}" loading="lazy">
-            {% else %}
-            <div class="d-flex align-items-center justify-content-center h-100 bg-light text-muted">
-              <i class="bi bi-image fs-1"></i>
-            </div>
-            {% endif %}
+            <img src="{{ rp.display_image }}" class="w-100 h-100" style="object-fit:cover" alt="{{ rp.name }}" loading="lazy">
           </div>
           <div class="card-body text-center p-3">
             <h6 class="fw-bold mb-1">{{ rp.name }}</h6>
@@ -272,13 +258,7 @@
       <div class="col-md-3 col-6">
         <div class="product-card card border-0 shadow-sm h-100" style="border-radius:12px;overflow:hidden">
           <div class="product-img-wrap" style="aspect-ratio:1/1">
-            {% if rp.image %}
-            <img src="{{ rp.image.url }}" class="w-100 h-100" style="object-fit:cover" alt="{{ rp.name }}" loading="lazy">
-            {% else %}
-            <div class="d-flex align-items-center justify-content-center h-100 bg-light text-muted">
-              <i class="bi bi-image fs-1"></i>
-            </div>
-            {% endif %}
+            <img src="{{ rp.display_image }}" class="w-100 h-100" style="object-fit:cover" alt="{{ rp.name }}" loading="lazy">
           </div>
           <div class="card-body text-center p-3">
             <h6 class="fw-bold mb-1">{{ rp.name }}</h6>

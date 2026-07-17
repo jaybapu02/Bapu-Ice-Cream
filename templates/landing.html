@@ -338,13 +338,7 @@
       {% for product in featured_products %}
       <div class="col-md-4 col-lg-2 col-6">
         <div class="card flavour-card shadow-sm h-100">
-          {% if product.image %}
-            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
-          {% else %}
-            <div class="card-img-top d-flex align-items-center justify-content-center" style="height:200px;background:#f9fafb;">
-              <i class="bi bi-image fs-1 text-muted"></i>
-            </div>
-          {% endif %}
+            <img src="{{ product.display_image }}" class="card-img-top" alt="{{ product.name }}" style="height:200px;object-fit:cover">
           <div class="card-body text-center p-3">
             <h6 class="fw-bold mb-1">{{ product.name }}</h6>
             <p class="text-success fw-bold fs-5 mb-2">₹{{ product.price }}</p>

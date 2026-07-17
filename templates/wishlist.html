@@ -12,13 +12,7 @@
           <div class="col-md-4 col-lg-3 col-6">
             <div class="card border-0 shadow-sm h-100 product-card">
               <div class="product-img-wrapper">
-                {% if item.product.image %}
-                  <img src="{{ item.product.image.url }}" class="card-img-top product-img" alt="{{ item.product.name }}">
-                {% else %}
-                  <div class="card-img-top product-img d-flex align-items-center justify-content-center bg-light text-muted">
-                    <i class="bi bi-image fs-1"></i>
-                  </div>
-                {% endif %}
+                  <img src="{{ item.product.display_image }}" class="card-img-top product-img" alt="{{ item.product.name }}">
               </div>
               <div class="card-body text-center">
                 <h6 class="fw-bold mb-1">{{ item.product.name }}</h6>
