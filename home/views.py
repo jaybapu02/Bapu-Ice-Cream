@@ -165,7 +165,8 @@ class ProductDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        product = self.get_object()
+        product = context['product']
+        annotate_products_with_images([product])
         context['reviews'] = product.reviews.select_related('user').all()[:10]
         context['review_form'] = ReviewForm()
         context['gallery_images'] = product.images.filter(is_primary=False).all()[:5]
