@@ -525,7 +525,8 @@ class CheckoutView(View):
         form = OrderCustomerForm(request.POST)
         if not form.is_valid():
             if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-                return JsonResponse({"success": False, "errors": form.errors}, status=400)
+                first_error = next(iter(form.errors.values()))[0]
+                return JsonResponse({"success": False, "message": first_error, "errors": form.errors}, status=400)
             return render(request, self.template_name, {"form": form, **cart_data})
 
         customer = form.cleaned_data
@@ -647,6 +648,22 @@ class RazorpayCallbackView(View):
 
         if not customer:
             return JsonResponse({"success": False, "message": "Session expired."}, status=400)
+
+        payment_id = request.POST.get("razorpay_payment_id", "")
+        signature = request.POST.get("razorpay_signature", "")
+
+        if razorpay_order_id:
+            client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+            params_dict = {
+                'razorpay_order_id': razorpay_order_id,
+                'razorpay_payment_id': payment_id,
+                'razorpay_signature': signature,
+            }
+            try:
+                client.utility.verify_payment_signature(params_dict)
+            except Exception as e:
+                logger.error(f"Razorpay signature verification failed: {e}")
+                return JsonResponse({"success": False, "message": "Payment verification failed."}, status=400)
 
         cart_data = _get_cart_data(request)
         if not cart_data["cart"]:

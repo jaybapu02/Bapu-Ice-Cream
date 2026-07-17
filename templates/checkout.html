@@ -195,8 +195,34 @@
               order_id: data.razorpay_order_id,
               prefill: { name: data.customer.name, contact: data.customer.phone },
               theme: { color: '#0d6efd' },
-              handler: function() {
-                window.location.href = "{% url 'order_track' %}?order_id=SUCCESS";
+              handler: function(response) {
+                var paymentData = new URLSearchParams();
+                paymentData.append('razorpay_payment_id', response.razorpay_payment_id);
+                paymentData.append('razorpay_order_id', response.razorpay_order_id);
+                paymentData.append('razorpay_signature', response.razorpay_signature);
+                paymentData.append('csrfmiddlewaretoken', form.querySelector('[name=csrfmiddlewaretoken]').value);
+                fetch("{% url 'payment_success' %}", {
+                  method: 'POST',
+                  body: paymentData,
+                  headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                  loadingOverlay.classList.remove('show');
+                  submitBtn.disabled = false;
+                  submitBtn.innerHTML = '<i class="bi bi-shield-check"></i> Place Order';
+                  if (data.success) {
+                    window.location.href = "{% url 'order_track' %}?order_id=" + data.order_id;
+                  } else {
+                    alert(data.message || 'Payment verification failed.');
+                  }
+                })
+                .catch(function() {
+                  loadingOverlay.classList.remove('show');
+                  submitBtn.disabled = false;
+                  submitBtn.innerHTML = '<i class="bi bi-shield-check"></i> Place Order';
+                  alert('Payment verification failed. Please contact support.');
+                });
               },
               modal: { ondismiss: function() {
                 loadingOverlay.classList.remove('show');

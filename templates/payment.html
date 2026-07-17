@@ -52,10 +52,15 @@
     "description": "Ice Cream Order Payment",
     "order_id": "{{ razorpay_order_id }}",
     "handler": function (response) {
-      fetch("{% url 'razorpay_success' %}", {
+      var paymentData = new URLSearchParams();
+      paymentData.append('razorpay_payment_id', response.razorpay_payment_id);
+      paymentData.append('razorpay_order_id', response.razorpay_order_id);
+      paymentData.append('razorpay_signature', response.razorpay_signature);
+      paymentData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+      fetch("{% url 'payment_success' %}", {
         method: "POST",
-        headers: {"Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}"},
-        body: JSON.stringify(response)
+        headers: {"Content-Type": "application/x-www-form-urlencoded", "X-Requested-With": "XMLHttpRequest"},
+        body: paymentData
       }).then(function(r) { return r.json(); }).then(function(data) {
         if (data.success) {
           window.location.href = "{% url 'order_track' %}?order_id=" + data.order_id;
