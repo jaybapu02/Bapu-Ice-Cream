@@ -6,6 +6,7 @@ import razorpay
 from django.conf import settings
 from django.contrib import messages
 from django.db import transaction, IntegrityError, DatabaseError
+from django.db.models import Q, Count
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.utils.crypto import get_random_string
@@ -75,20 +76,48 @@ class ProductsView(ListView):
     paginate_by = 12
 
     def get_queryset(self):
-        qs = Product.objects.filter(is_available=True)
+        qs = Product.objects.filter(is_available=True).select_related('category').prefetch_related('images')
         category_slug = self.request.GET.get('category')
         search_q = self.request.GET.get('q')
+        sort = self.request.GET.get('sort', '')
+
         if category_slug:
             qs = qs.filter(category__slug=category_slug)
         if search_q:
             qs = qs.filter(name__icontains=search_q)
-        return qs.select_related('category')
+
+        if sort == 'price_low':
+            qs = qs.order_by('price', 'name')
+        elif sort == 'price_high':
+            qs = qs.order_by('-price', 'name')
+        elif sort == 'newest':
+            qs = qs.order_by('-created_at', 'name')
+        elif sort == 'rating':
+            qs = qs.order_by('-rating', 'name')
+        elif sort == 'name':
+            qs = qs.order_by('name')
+        else:
+            qs = qs.order_by('-is_featured', '-is_best_seller', '-is_new_arrival', 'name')
+
+        return qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['categories'] = Category.objects.all()
+        context['categories'] = Category.objects.annotate(
+            product_count=Count('products', filter=Q(products__is_available=True))
+        )
         context['selected_category'] = self.request.GET.get('category', '')
         context['search_query'] = self.request.GET.get('q', '')
+        context['current_sort'] = self.request.GET.get('sort', '')
+        context['featured_products'] = Product.objects.filter(
+            is_available=True, is_featured=True
+        ).select_related('category')[:4]
+        context['best_sellers'] = Product.objects.filter(
+            is_available=True, is_best_seller=True
+        ).select_related('category')[:4]
+        context['new_arrivals'] = Product.objects.filter(
+            is_available=True, is_new_arrival=True
+        ).select_related('category')[:4]
         return context
 
 
@@ -100,11 +129,15 @@ class ProductDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         product = self.get_object()
-        context['reviews'] = product.reviews.all()[:10]
+        context['reviews'] = product.reviews.select_related('user').all()[:10]
         context['review_form'] = ReviewForm()
+        context['gallery_images'] = product.images.filter(is_primary=False).all()[:5]
         context['related_products'] = Product.objects.filter(
             category=product.category, is_available=True
-        ).exclude(id=product.id)[:4]
+        ).exclude(id=product.id).select_related('category')[:4]
+        context['recommended_products'] = Product.objects.filter(
+            is_available=True, is_featured=True
+        ).exclude(id=product.id).select_related('category')[:4]
         return context
 
 

@@ -14,7 +14,7 @@ from django.db.models import Q, Count
 
 from .models import (
     Contact, CateringEnquiry, Order, OrderItem,
-    Product, Category, Review, Newsletter, Wishlist
+    Product, Category, ProductImage, Review, Newsletter, Wishlist
 )
 from .cadmin import custom_admin_site
 
@@ -207,17 +207,28 @@ class CategoryAdmin(ImageThumbnailMixin, admin.ModelAdmin):
 # Product Admin
 # ──────────────────────────────────────────────
 
+class ProductImageInline(admin.TabularInline):
+    model = ProductImage
+    extra = 1
+    fields = ["image", "alt_text", "is_primary"]
+    verbose_name = "Product Image"
+    verbose_name_plural = "Product Gallery Images"
+
+
 @admin.register(Product, site=custom_admin_site)
 class ProductAdmin(ImageThumbnailMixin, admin.ModelAdmin):
+    inlines = [ProductImageInline]
     list_display = [
         "thumbnail", "name", "category", "price_display",
-        "stock_status", "is_available", "is_featured", "created_at"
+        "rating_display", "stock_status", "badges_display",
+        "is_available", "is_featured", "is_best_seller", "is_new_arrival",
+        "created_at"
     ]
     list_display_links = ["thumbnail", "name"]
-    list_filter = ["category", "is_available", "is_featured", "created_at"]
-    search_fields = ["name", "description", "category__name"]
+    list_filter = ["category", "is_available", "is_featured", "is_best_seller", "is_new_arrival", "created_at"]
+    search_fields = ["name", "description", "ingredients", "category__name"]
     prepopulated_fields = {"slug": ("name",)}
-    list_editable = ["is_available", "is_featured"]
+    list_editable = ["is_available", "is_featured", "is_best_seller", "is_new_arrival"]
     list_per_page = 25
     ordering = ["-created_at"]
     date_hierarchy = "created_at"
@@ -229,7 +240,11 @@ class ProductAdmin(ImageThumbnailMixin, admin.ModelAdmin):
             "fields": ["category", "name", "slug", "description"]
         }),
         ("Pricing & Stock", {
-            "fields": ["price", "stock", "is_available", "is_featured"],
+            "fields": ["price", "stock", "is_available", "is_featured", "is_best_seller", "is_new_arrival"],
+            "classes": ["collapse"]
+        }),
+        ("Details", {
+            "fields": ["rating", "ingredients", "flavours", "sizes", "toppings"],
             "classes": ["collapse"]
         }),
         ("Image", {
@@ -252,6 +267,30 @@ class ProductAdmin(ImageThumbnailMixin, admin.ModelAdmin):
     price_display.short_description = "Price"
     price_display.admin_order_field = "price"
 
+    def rating_display(self, obj):
+        full = int(obj.rating)
+        half = 1 if obj.rating - full >= 0.5 else 0
+        empty = 5 - full - half
+        stars = "★" * full + ("½" if half else "") + "☆" * empty
+        return format_html(
+            '<span style="color:#f59e0b;">{} {}</span>', stars, obj.rating
+        )
+    rating_display.short_description = "Rating"
+    rating_display.admin_order_field = "rating"
+
+    def badges_display(self, obj):
+        badges = []
+        if obj.is_featured:
+            badges.append('<span class="badge bg-warning text-dark">Featured</span>')
+        if obj.is_best_seller:
+            badges.append('<span class="badge bg-success">Best Seller</span>')
+        if obj.is_new_arrival:
+            badges.append('<span class="badge bg-info text-dark">New</span>')
+        if obj.stock == 0:
+            badges.append('<span class="badge bg-danger">Out of Stock</span>')
+        return format_html("&nbsp;".join(badges)) if badges else format_html('<span class="badge bg-secondary">—</span>')
+    badges_display.short_description = "Badges"
+
     def stock_status(self, obj):
         if obj.stock == 0:
             return format_html('<span class="badge bg-danger">Out of Stock</span>')
@@ -270,6 +309,19 @@ class ProductAdmin(ImageThumbnailMixin, admin.ModelAdmin):
 
     class Media:
         css = {"all": ("admin/css/base.css",)}
+
+
+@admin.register(ProductImage, site=custom_admin_site)
+class ProductImageAdmin(admin.ModelAdmin):
+    list_display = ["thumbnail", "product", "is_primary", "created_at"]
+    list_filter = ["is_primary", "product"]
+    search_fields = ["product__name", "alt_text"]
+
+    def thumbnail(self, obj):
+        if obj.image:
+            return format_html('<img src="{}" style="width:60px;height:60px;object-fit:cover;border-radius:6px;" />', obj.image.url)
+        return ""
+    thumbnail.short_description = "Image"
 
 
 # ──────────────────────────────────────────────

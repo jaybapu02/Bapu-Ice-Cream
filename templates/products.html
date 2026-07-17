@@ -1,84 +1,545 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}Our Ice Creams{% endblock %}
+{% block title %}Our Ice Cream Menu{% endblock %}
+{% block extra_head %}
+<meta name="description" content="Browse Bapu Ice Cream's handcrafted menu. Explore our collection of premium ice creams, best sellers, and new arrivals.">
+<style>
+.menu-hero{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);padding:4rem 0;position:relative;overflow:hidden}
+.menu-hero::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(236,72,153,.08) 0%,transparent 50%);animation:heroGlow 8s ease-in-out infinite}
+@keyframes heroGlow{0%,100%{transform:translate(0,0)}50%{transform:translate(10%,10%)}}
+.menu-hero h1{font-size:3rem;font-weight:900}
+.menu-hero .lead{font-size:1.15rem;opacity:.85}
+.category-pill{display:inline-flex;align-items:center;gap:.5rem;padding:.5rem 1.25rem;border-radius:50px;border:2px solid #dee2e6;background:#fff;color:#495057;font-weight:600;font-size:.9rem;transition:all .2s;cursor:pointer;white-space:nowrap}
+.category-pill:hover,:where(.category-pill.active){border-color:#0d6efd;background:#f0f6ff;color:#0d6efd}
+.category-pill.active{background:#0d6efd;color:#fff;border-color:#0d6efd}
+.category-pill .count{font-size:.75rem;opacity:.7}
+.product-card{transition:all .3s cubic-bezier(.4,0,.2,1);border-radius:16px;overflow:hidden;position:relative}
+.product-card:hover{transform:translateY(-6px);box-shadow:0 12px 40px rgba(0,0,0,.12)!important}
+.product-img-wrap{position:relative;overflow:hidden;aspect-ratio:1;background:#f8f9fa}
+.product-img-wrap img{width:100%;height:100%;object-fit:cover;transition:transform .5s ease}
+.product-card:hover .product-img-wrap img{transform:scale(1.08)}
+.product-badges{position:absolute;top:10px;left:10px;display:flex;flex-direction:column;gap:4px;z-index:2}
+.product-badges .badge{font-size:.7rem;font-weight:600;padding:.3em .7em;border-radius:50px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.quick-view-btn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(.8);opacity:0;z-index:3;transition:all .3s;padding:.5rem 1.25rem;border-radius:50px;font-size:.85rem;font-weight:600;background:rgba(255,255,255,.95);color:#1f2937;border:none;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.product-card:hover .quick-view-btn{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.add-cart-btn{width:100%;border-radius:12px;padding:.6rem;font-weight:600;font-size:.9rem;transition:all .2s}
+.add-cart-btn:hover{transform:translateY(-1px)}
+.stock-badge{font-size:.75rem}
+.product-rating{display:flex;align-items:center;gap:4px;font-size:.85rem}
+.product-rating .stars{color:#f59e0b}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}
+.section-header h2{font-size:1.5rem;font-weight:800;margin:0}
+.section-header h2 small{font-size:.9rem;font-weight:400;color:#6c757d}
+.featured-scroll{display:flex;gap:1rem;overflow-x:auto;padding-bottom:.5rem;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+.featured-scroll::-webkit-scrollbar{height:4px}
+.featured-scroll::-webkit-scrollbar-thumb{background:#dee2e6;border-radius:10px}
+.featured-scroll .product-card{min-width:260px;scroll-snap-align:start}
+.sort-select{border-radius:50px;padding:.4rem 1rem;font-size:.9rem;border:2px solid #dee2e6;background:#fff;cursor:pointer;font-weight:500}
+.search-wrap{border-radius:50px;overflow:hidden;border:2px solid #dee2e6;background:#fff;display:flex;align-items:center;padding-left:1rem}
+.search-wrap input{border:none;background:transparent;padding:.6rem 0;font-size:.95rem;outline:none;flex:1}
+.search-wrap button{border:none;background:#0d6efd;color:#fff;padding:.6rem 1.25rem;cursor:pointer;font-size:1rem;transition:background .2s}
+.search-wrap button:hover{background:#0b5ed7}
+.loader-wrap{display:none;text-align:center;padding:3rem 0}
+.loader-wrap.show{display:block}
+.spinner{width:48px;height:48px;border:4px solid #e9ecef;border-top-color:#0d6efd;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 1rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+.fade-in{animation:fadeInUp .4s ease forwards;opacity:0}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.stagger-1{animation-delay:.05s}.stagger-2{animation-delay:.1s}.stagger-3{animation-delay:.15s}.stagger-4{animation-delay:.2s}.stagger-5{animation-delay:.25s}.stagger-6{animation-delay:.3s}
+.empty-state{padding:4rem 2rem;text-align:center}
+.empty-state i{font-size:4rem;color:#dee2e6;margin-bottom:1rem}
+.toast-menu{position:fixed;bottom:20px;right:20px;z-index:99999;background:#1f2937;color:#fff;padding:.75rem 1.5rem;border-radius:12px;font-weight:600;box-shadow:0 8px 32px rgba(0,0,0,.2);transform:translateY(100px);opacity:0;transition:all .3s}
+.toast-menu.show{transform:translateY(0);opacity:1}
+@media(max-width:768px){.menu-hero h1{font-size:2rem}.menu-hero{padding:2.5rem 0}.featured-scroll .product-card{min-width:220px}}
+</style>
+{% endblock %}
+
 {% block body %}
 
+<!-- Hero -->
+<section class="menu-hero text-white text-center">
+  <div class="container position-relative">
+    <h1 class="fw-black mb-2">🍦 Our Ice Cream Menu</h1>
+    <p class="lead mx-auto" style="max-width:600px">Handcrafted with premium ingredients — explore our collection of artisanal flavours, from timeless classics to bold new creations.</p>
+  </div>
+</section>
+
+<!-- Featured / Best Sellers / New Arrivals Carousel -->
+{% if featured_products or best_sellers or new_arrivals %}
+<section class="py-4 bg-light">
+  <div class="container">
+    {% if featured_products %}
+    <div class="mb-4">
+      <div class="section-header">
+        <h2>⭐ Featured <small>Curated picks for you</small></h2>
+      </div>
+      <div class="featured-scroll">
+        {% for p in featured_products %}
+        <div class="product-card card border-0 shadow-sm" style="min-width:240px">
+          <div class="product-img-wrap" style="aspect-ratio:1/1">
+            {% if p.image %}<img src="{{ p.image.url }}" alt="{{ p.name }}" loading="lazy">{% else %}<div class="d-flex align-items-center justify-content-center h-100 text-muted"><i class="bi bi-image fs-1"></i></div>{% endif %}
+            <div class="product-badges"><span class="badge bg-warning text-dark">Featured</span></div>
+          </div>
+          <div class="card-body text-center p-3">
+            <h6 class="fw-bold mb-1">{{ p.name }}</h6>
+            <p class="text-success fw-bold fs-5 mb-2">₹{{ p.price }}</p>
+            <a href="{% url 'product_detail' p.slug %}" class="btn btn-sm btn-outline-primary w-100">View</a>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    {% if best_sellers %}
+    <div class="mb-4">
+      <div class="section-header">
+        <h2>🔥 Best Sellers <small>Customer favourites</small></h2>
+      </div>
+      <div class="featured-scroll">
+        {% for p in best_sellers %}
+        <div class="product-card card border-0 shadow-sm" style="min-width:240px">
+          <div class="product-img-wrap" style="aspect-ratio:1/1">
+            {% if p.image %}<img src="{{ p.image.url }}" alt="{{ p.name }}" loading="lazy">{% else %}<div class="d-flex align-items-center justify-content-center h-100 text-muted"><i class="bi bi-image fs-1"></i></div>{% endif %}
+            <div class="product-badges"><span class="badge bg-success">Best Seller</span></div>
+          </div>
+          <div class="card-body text-center p-3">
+            <h6 class="fw-bold mb-1">{{ p.name }}</h6>
+            <p class="text-success fw-bold fs-5 mb-2">₹{{ p.price }}</p>
+            <a href="{% url 'product_detail' p.slug %}" class="btn btn-sm btn-outline-primary w-100">View</a>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    {% if new_arrivals %}
+    <div class="mb-0">
+      <div class="section-header">
+        <h2>✨ New Arrivals <small>Fresh from our kitchen</small></h2>
+      </div>
+      <div class="featured-scroll">
+        {% for p in new_arrivals %}
+        <div class="product-card card border-0 shadow-sm" style="min-width:240px">
+          <div class="product-img-wrap" style="aspect-ratio:1/1">
+            {% if p.image %}<img src="{{ p.image.url }}" alt="{{ p.name }}" loading="lazy">{% else %}<div class="d-flex align-items-center justify-content-center h-100 text-muted"><i class="bi bi-image fs-1"></i></div>{% endif %}
+            <div class="product-badges"><span class="badge bg-info text-dark">New</span></div>
+          </div>
+          <div class="card-body text-center p-3">
+            <h6 class="fw-bold mb-1">{{ p.name }}</h6>
+            <p class="text-success fw-bold fs-5 mb-2">₹{{ p.price }}</p>
+            <a href="{% url 'product_detail' p.slug %}" class="btn btn-sm btn-outline-primary w-100">View</a>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endif %}
+
+<!-- Main Menu Section -->
 <section class="py-5">
   <div class="container">
-    <h1 class="text-center fw-bold mb-2">🍦 Our Ice Cream Collection</h1>
-    <p class="text-center text-muted mb-4">Handcrafted flavours made with love & premium ingredients</p>
 
-    <!-- Search & Filter -->
-    <div class="row g-3 mb-4">
-      <div class="col-md-6">
-        <form method="get" class="input-group">
-          <input type="text" name="q" class="form-control" placeholder="Search flavours..." value="{{ search_query }}">
-          <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
+    <!-- Filters Row -->
+    <div class="row g-3 align-items-center mb-4">
+      <div class="col-lg-5">
+        <div class="d-flex flex-wrap gap-2" id="categoryFilters">
+          <a href="{% url 'products' %}{% if search_query %}?q={{ search_query }}{% endif %}{% if current_sort %}{% if search_query %}&{% else %}?{% endif %}sort={{ current_sort }}{% endif %}"
+             class="category-pill {% if not selected_category %}active{% endif %}">
+            All <span class="count">({{ categories.count }})</span>
+          </a>
+          {% for cat in categories %}
+          <a href="{% url 'products' %}?category={{ cat.slug }}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}"
+             class="category-pill {% if selected_category == cat.slug %}active{% endif %}">
+            {{ cat.name }} <span class="count">({{ cat.product_count }})</span>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <form method="get" id="searchForm">
+          {% if selected_category %}<input type="hidden" name="category" value="{{ selected_category }}">{% endif %}
+          {% if current_sort %}<input type="hidden" name="sort" value="{{ current_sort }}">{% endif %}
+          <div class="search-wrap">
+            <i class="bi bi-search text-muted"></i>
+            <input type="text" name="q" placeholder="Search flavours..." value="{{ search_query }}" aria-label="Search menu">
+            {% if search_query %}
+            <a href="{% url 'products' %}{% if selected_category %}?category={{ selected_category }}{% endif %}{% if current_sort %}{% if selected_category %}&{% else %}?{% endif %}sort={{ current_sort }}{% endif %}"
+               class="text-decoration-none text-muted px-2"><i class="bi bi-x-lg"></i></a>
+            {% endif %}
+            <button type="submit" aria-label="Search"><i class="bi bi-search"></i></button>
+          </div>
         </form>
       </div>
-      <div class="col-md-4">
-        <select class="form-select" onchange="window.location.href=this.value">
-          <option value="{% url 'products' %}">All Categories</option>
-          {% for cat in categories %}
-            <option value="{% url 'products' %}?category={{ cat.slug }}" {% if selected_category == cat.slug %}selected{% endif %}>{{ cat.name }}</option>
-          {% endfor %}
+      <div class="col-lg-3 text-lg-end">
+        <select class="sort-select" id="sortSelect" aria-label="Sort products">
+          <option value="">Sort: Default</option>
+          <option value="price_low" {% if current_sort == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+          <option value="price_high" {% if current_sort == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+          <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>Newest First</option>
+          <option value="rating" {% if current_sort == 'rating' %}selected{% endif %}>Highest Rated</option>
+          <option value="name" {% if current_sort == 'name' %}selected{% endif %}>Name A-Z</option>
         </select>
       </div>
     </div>
 
-    {% if products %}
+    <!-- Loading Indicator -->
+    <div class="loader-wrap" id="productLoader">
+      <div class="spinner"></div>
+      <p class="text-muted">Loading delightful flavours…</p>
+    </div>
+
+    <!-- Product Grid -->
+    <div id="productGrid">
+      {% if products %}
       <div class="row g-4">
         {% for product in products %}
-          <div class="col-md-4 col-lg-3 col-6">
-            <div class="card border-0 shadow-sm h-100 product-card">
-              <div class="product-img-wrapper">
-                {% if product.image %}
-                  <img src="{{ product.image.url }}" class="card-img-top product-img" alt="{{ product.name }}">
+        <div class="col-md-4 col-lg-3 col-6 fade-in stagger-{{ forloop.counter|stringformat:'d'|slice:':1'|default:'1' }}">
+          <div class="product-card card border-0 shadow-sm h-100" data-product-id="{{ product.id }}">
+            <!-- Image -->
+            <div class="product-img-wrap">
+              {% if product.image %}
+              <img src="{{ product.image.url }}" alt="{{ product.name }}" loading="lazy" class="card-img-top">
+              {% else %}
+              <div class="d-flex align-items-center justify-content-center h-100 text-muted bg-light">
+                <i class="bi bi-cup-straw fs-1"></i>
+              </div>
+              {% endif %}
+              <!-- Badges -->
+              <div class="product-badges">
+                {% if not product.is_available or product.stock == 0 %}
+                <span class="badge bg-secondary">Out of Stock</span>
                 {% else %}
-                  <div class="card-img-top product-img d-flex align-items-center justify-content-center bg-light text-muted">
-                    <i class="bi bi-image fs-1"></i>
-                  </div>
-                {% endif %}
-                {% if product.is_featured %}
-                  <span class="badge bg-warning text-dark position-absolute top-0 end-0 m-2">Featured</span>
+                  {% if product.is_featured %}<span class="badge bg-warning text-dark">Featured</span>{% endif %}
+                  {% if product.is_best_seller %}<span class="badge bg-success">Best Seller</span>{% endif %}
+                  {% if product.is_new_arrival %}<span class="badge bg-info text-dark">New</span>{% endif %}
+                  {% if product.stock > 0 and product.stock < 5 %}<span class="badge bg-warning text-dark stock-badge">Only {{ product.stock }} left</span>{% endif %}
                 {% endif %}
               </div>
-              <div class="card-body text-center d-flex flex-column">
-                <h6 class="fw-bold mb-1">{{ product.name }}</h6>
-                <p class="text-muted small mb-2">{{ product.description|truncatewords:10 }}</p>
-                <p class="text-success fw-bold fs-5 mb-3">₹{{ product.price }}</p>
-                <div class="mt-auto">
-                  <a href="{% url 'product_detail' product.slug %}" class="btn btn-outline-primary btn-sm w-100 mb-1">View Details</a>
-                  <a href="{% url 'order' %}?flavour={{ product.name|urlencode }}" class="btn btn-primary btn-sm w-100">Order Now</a>
-                </div>
+              <!-- Quick View -->
+              <button class="quick-view-btn" data-product-id="{{ product.id }}" data-bs-toggle="modal" data-bs-target="#quickViewModal">
+                <i class="bi bi-eye"></i> Quick View
+              </button>
+            </div>
+            <!-- Body -->
+            <div class="card-body d-flex flex-column p-3">
+              {% if product.category %}
+              <small class="text-primary fw-semibold mb-1">{{ product.category.name }}</small>
+              {% endif %}
+              <h6 class="fw-bold mb-1" style="font-size:1rem">{{ product.name }}</h6>
+              <!-- Rating -->
+              <div class="product-rating mb-1">
+                <span class="stars">
+                  {% for i in "12345"|make_list %}
+                    {% if forloop.counter <= product.rating|floatformat:"0" %}★{% else %}☆{% endif %}
+                  {% endfor %}
+                </span>
+                <span class="text-muted small">({{ product.rating }})</span>
               </div>
+              <p class="text-muted small mb-2 lh-sm flex-grow-1">{{ product.description|truncatewords:12 }}</p>
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-success fw-bold fs-5">₹{{ product.price }}</span>
+              </div>
+              <!-- Add to Cart -->
+              {% if product.is_available and product.stock > 0 %}
+              <button class="btn btn-primary add-cart-btn" data-product-id="{{ product.id }}" data-product-name="{{ product.name }}" data-product-price="{{ product.price }}">
+                <i class="bi bi-cart-plus"></i> Add to Cart
+              </button>
+              {% else %}
+              <button class="btn btn-secondary add-cart-btn" disabled>
+                <i class="bi bi-x-circle"></i> Unavailable
+              </button>
+              {% endif %}
             </div>
           </div>
+        </div>
         {% endfor %}
       </div>
 
+      <!-- Pagination -->
       {% if is_paginated %}
-        <nav class="mt-4">
-          <ul class="pagination justify-content-center">
-            {% if page_obj.has_previous %}
-              <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}">Previous</a></li>
+      <nav class="mt-5" aria-label="Product pagination">
+        <ul class="pagination justify-content-center">
+          {% if page_obj.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" aria-label="Previous">
+              <i class="bi bi-chevron-left"></i>
+            </a>
+          </li>
+          {% endif %}
+          {% for num in page_obj.paginator.page_range %}
+            {% if num == page_obj.number %}
+            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">{{ num }}</a>
+            </li>
             {% endif %}
-            <li class="page-item active"><span class="page-link">{{ page_obj.number }}</span></li>
-            {% if page_obj.has_next %}
-              <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}">Next</a></li>
-            {% endif %}
-          </ul>
-        </nav>
+          {% endfor %}
+          {% if page_obj.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" aria-label="Next">
+              <i class="bi bi-chevron-right"></i>
+            </a>
+          </li>
+          {% endif %}
+        </ul>
+      </nav>
       {% endif %}
 
-    {% else %}
-      <div class="text-center py-5">
-        <i class="bi bi-emoji-frown fs-1 text-muted"></i>
-        <p class="text-muted mt-2">No products found.</p>
-        <a href="{% url 'products' %}" class="btn btn-primary">View All</a>
+      {% else %}
+      <!-- Empty State -->
+      <div class="empty-state">
+        <i class="bi bi-emoji-frown"></i>
+        <h4 class="fw-bold mb-2">No products found</h4>
+        <p class="text-muted mb-3">We couldn't find any ice creams matching your criteria. Try a different category or search term.</p>
+        <a href="{% url 'products' %}" class="btn btn-primary btn-lg rounded-pill px-5">
+          <i class="bi bi-arrow-counterclockwise"></i> Reset Filters
+        </a>
       </div>
-    {% endif %}
+      {% endif %}
+    </div>
   </div>
 </section>
 
+<!-- Quick View Modal -->
+<div class="modal fade" id="quickViewModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0 shadow" style="border-radius:16px;overflow:hidden">
+      <div class="modal-body p-0">
+        <div class="row g-0">
+          <div class="col-md-6">
+            <div id="qvImage" class="d-flex align-items-center justify-content-center bg-light" style="min-height:350px;height:100%">
+              <div class="text-center p-4">
+                <div class="spinner-border text-primary mb-3" role="status"></div>
+                <p class="text-muted small">Loading...</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 p-4 d-flex flex-column">
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal"></button>
+            <div id="qvContent">
+              <div class="text-center py-5">
+                <div class="spinner-border text-primary mb-3" role="status"></div>
+                <p class="text-muted">Loading product details…</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast notification -->
+<div class="toast-menu" id="cartToast"></div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+{% csrf_token %}
+<script>
+(function() {
+  // Sort change handler
+  const sortSelect = document.getElementById('sortSelect');
+  if (sortSelect) {
+    sortSelect.addEventListener('change', function() {
+      const url = new URL(window.location.href);
+      if (this.value) {
+        url.searchParams.set('sort', this.value);
+      } else {
+        url.searchParams.delete('sort');
+      }
+      url.searchParams.delete('page');
+      window.location.href = url.toString();
+    });
+  }
+
+  // Add to cart via AJAX
+  document.querySelectorAll('.add-cart-btn:not([disabled])').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var btn = this;
+      var originalHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Adding...';
+
+      var formData = new FormData();
+      formData.append('action', 'add');
+      formData.append('ice_cream_type', 'Scooped Ice Cream');
+      formData.append('flavour', btn.dataset.productName);
+      formData.append('size', 'Single Scoop');
+      formData.append('toppings', 'No Toppings');
+      formData.append('quantity', '1');
+      formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+
+      fetch("{% url 'cart_api' %}", {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        btn.innerHTML = '<i class="bi bi-check-lg"></i> Added!';
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-success');
+        setTimeout(function() {
+          btn.innerHTML = '<i class="bi bi-cart-plus"></i> Add to Cart';
+          btn.classList.remove('btn-success');
+          btn.classList.add('btn-primary');
+          btn.disabled = false;
+        }, 2000);
+        if (data.cart_count !== undefined) {
+          updateCartBadge(data.cart_count);
+        }
+        showToast('Added ' + btn.dataset.productName + ' to cart!');
+      })
+      .catch(function() {
+        btn.innerHTML = originalHtml;
+        btn.disabled = false;
+        showToast('Error adding to cart. Please try again.');
+      });
+    });
+  });
+
+  function updateCartBadge(count) {
+    var badge = document.querySelector('.navbar .position-absolute.top-0.start-100.translate-middle.badge');
+    if (badge) {
+      if (count > 0) {
+        badge.textContent = count;
+        badge.style.display = '';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+  }
+
+  function showToast(msg) {
+    var toast = document.getElementById('cartToast');
+    if (!toast) return;
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toast._hide);
+    toast._hide = setTimeout(function() { toast.classList.remove('show'); }, 3000);
+  }
+
+  // Quick View
+  var qvModal = document.getElementById('quickViewModal');
+  if (qvModal) {
+    qvModal.addEventListener('show.bs.modal', function(e) {
+      var btn = e.relatedTarget;
+      var productId = btn.dataset.productId;
+      var qvImage = document.getElementById('qvImage');
+      var qvContent = document.getElementById('qvContent');
+
+      qvImage.innerHTML = '<div class="text-center p-4"><div class="spinner-border text-primary mb-3"></div><p class="text-muted small">Loading...</p></div>';
+      qvContent.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary mb-3"></div><p class="text-muted">Loading product details…</p></div>';
+
+      var detailUrl = "{% url 'product_detail' 'PLACEHOLDER' %}".replace('PLACEHOLDER', '__SLUG__');
+      var slug = '';
+      var card = btn.closest('.product-card');
+      if (card) {
+        var link = card.querySelector('a[href*="product/"]');
+        if (link) {
+          var parts = link.getAttribute('href').split('/');
+          slug = parts[parts.length - 2] || '';
+        }
+      }
+
+      if (!slug) {
+        qvContent.innerHTML = '<div class="text-center py-5"><p class="text-danger">Could not load product.</p><button class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Close</button></div>';
+        return;
+      }
+
+      var fetchUrl = "{% url 'product_detail' 'PLACEHOLDER' %}".replace('PLACEHOLDER', slug);
+      fetch(fetchUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(function(r) { return r.text(); })
+        .then(function(html) {
+          var parser = new DOMParser();
+          var doc = parser.parseFromString(html, 'text/html');
+
+          var img = doc.querySelector('.product-img-wrapper img, [src*="products/"]');
+          if (img && img.src) {
+            qvImage.innerHTML = '<img src="' + img.src + '" alt="Product" style="width:100%;height:100%;object-fit:cover;max-height:450px">';
+          } else {
+            qvImage.innerHTML = '<div class="text-center text-muted"><i class="bi bi-cup-straw fs-1"></i><p class="mt-2">No image</p></div>';
+          }
+
+          var name = (doc.querySelector('h1') || doc.querySelector('.fw-bold')).textContent.trim();
+          var cat = doc.querySelector('.badge.bg-primary');
+          cat = cat ? cat.textContent.trim() : '';
+          var price = (doc.querySelector('h2.text-success') || doc.querySelector('.text-success.fw-bold')).textContent.trim();
+          var desc = doc.querySelector('.text-muted.lead');
+          desc = desc ? desc.textContent.trim() : '';
+          var stockEl = doc.querySelector('.badge.bg-success, .badge.bg-danger');
+          var stock = stockEl ? stockEl.textContent.trim() : 'In Stock';
+
+          var stars = '<div class="product-rating mb-2"><span class="stars" style="color:#f59e0b;font-size:1.2rem">';
+          var ratingEl = doc.querySelector('.product-rating .stars');
+          if (ratingEl) stars += ratingEl.innerHTML;
+          else stars += '☆☆☆☆☆';
+          stars += '</span></div>';
+
+          var inStock = stock && stock.toLowerCase().includes('in stock');
+          var cartBtn = inStock
+            ? '<button class="btn btn-primary w-100 rounded-pill py-2 qv-add-cart" data-product-name="' + name.replace(/'/g, "\\'") + '" data-product-price="' + price.replace(/[^0-9.]/g, '') + '"><i class="bi bi-cart-plus"></i> Add to Cart — ' + price + '</button>'
+            : '<button class="btn btn-secondary w-100 rounded-pill py-2" disabled><i class="bi bi-x-circle"></i> Out of Stock</button>';
+
+          qvContent.innerHTML = '<div>' +
+            (cat ? '<span class="badge bg-primary mb-2">' + cat + '</span>' : '') +
+            '<h3 class="fw-bold mb-2">' + name + '</h3>' +
+            stars +
+            '<h4 class="text-success fw-bold mb-2">' + price + '</h4>' +
+            (desc ? '<p class="text-muted mb-3">' + desc + '</p>' : '') +
+            '<p class="small text-muted mb-3"><i class="bi bi-' + (inStock ? 'check-circle-fill text-success' : 'x-circle-fill text-danger') + '"></i> ' + stock + '</p>' +
+            '<div class="mt-auto pt-3 border-top">' +
+              '<a href="' + fetchUrl + '" class="btn btn-outline-primary w-100 rounded-pill py-2 mb-2"><i class="bi bi-info-circle"></i> Full Details</a>' +
+              cartBtn +
+            '</div>' +
+          '</div>';
+
+          // Attach add-to-cart handler to quick view button
+          var qvAddBtn = qvContent.querySelector('.qv-add-cart');
+          if (qvAddBtn) {
+            qvAddBtn.addEventListener('click', function() {
+              var formData = new FormData();
+              formData.append('action', 'add');
+              formData.append('ice_cream_type', 'Scooped Ice Cream');
+              formData.append('flavour', this.dataset.productName);
+              formData.append('size', 'Single Scoop');
+              formData.append('toppings', 'No Toppings');
+              formData.append('quantity', '1');
+              formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+
+              this.disabled = true;
+              this.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Adding...';
+
+              fetch("{% url 'cart_api' %}", {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+              })
+              .then(function(r) { return r.json(); })
+              .then(function(data) {
+                showToast('Added ' + qvAddBtn.dataset.productName + ' to cart!');
+                if (data.cart_count !== undefined) updateCartBadge(data.cart_count);
+                var modal = bootstrap.Modal.getInstance(document.getElementById('quickViewModal'));
+                if (modal) modal.hide();
+              })
+              .catch(function() {
+                showToast('Error adding to cart.');
+                qvAddBtn.disabled = false;
+                qvAddBtn.innerHTML = '<i class="bi bi-cart-plus"></i> Add to Cart — ' + qvAddBtn.dataset.productPrice;
+              });
+            });
+          }
+        })
+        .catch(function() {
+          qvContent.innerHTML = '<div class="text-center py-5"><i class="bi bi-exclamation-triangle text-danger fs-1"></i><p class="text-danger mt-2">Failed to load product.</p><button class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Close</button></div>';
+        });
+    });
+  }
+})();
+</script>
 {% endblock %}

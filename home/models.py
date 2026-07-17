@@ -39,7 +39,17 @@ class Product(models.Model):
     image = models.ImageField(upload_to='products/', blank=True)
     is_available = models.BooleanField(default=True)
     is_featured = models.BooleanField(default=False)
+    is_best_seller = models.BooleanField(default=False)
+    is_new_arrival = models.BooleanField(default=False)
     stock = models.PositiveIntegerField(default=0)
+    rating = models.DecimalField(
+        max_digits=3, decimal_places=1, default=Decimal('0.0'),
+        validators=[MinValueValidator(Decimal('0.0')), MaxValueValidator(Decimal('5.0'))]
+    )
+    ingredients = models.TextField(blank=True, help_text="List of ingredients")
+    flavours = models.JSONField(default=list, blank=True, help_text="Available flavours as JSON array")
+    sizes = models.JSONField(default=list, blank=True, help_text="Available sizes as JSON array")
+    toppings = models.JSONField(default=list, blank=True, help_text="Available toppings as JSON array")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -49,10 +59,31 @@ class Product(models.Model):
             models.Index(fields=['slug']),
             models.Index(fields=['category']),
             models.Index(fields=['is_available']),
+            models.Index(fields=['is_featured']),
+            models.Index(fields=['is_best_seller']),
+            models.Index(fields=['is_new_arrival']),
         ]
 
     def __str__(self):
         return self.name
+
+
+class ProductImage(models.Model):
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name='images'
+    )
+    image = models.ImageField(upload_to='products/gallery/')
+    alt_text = models.CharField(max_length=200, blank=True)
+    is_primary = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Product Image"
+        verbose_name_plural = "Product Images"
+        ordering = ['-is_primary', 'created_at']
+
+    def __str__(self):
+        return f"Image for {self.product.name}"
 
 
 class Contact(models.Model):
