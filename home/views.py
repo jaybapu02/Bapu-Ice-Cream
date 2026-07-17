@@ -21,7 +21,10 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
 from django_ratelimit.decorators import ratelimit
 
-from .models import Order, OrderItem, Product, Category, Review, Newsletter, Wishlist
+from .models import (
+    Order, OrderItem, Product, Category, Review, Newsletter, Wishlist,
+    Service, ServiceCategory, ServiceTestimonial, ServiceFAQ,
+)
 from .forms import (
     ContactForm, CateringEnquiryForm, OrderCustomerForm,
     ReviewForm, NewsletterForm, RegisterForm
@@ -67,6 +70,39 @@ class AboutView(TemplateView):
 
 class ServicesView(TemplateView):
     template_name = "services.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        search_q = self.request.GET.get('q', '')
+        category_slug = self.request.GET.get('category', '')
+
+        services = Service.objects.filter(is_active=True).select_related('category')
+        if search_q:
+            services = services.filter(
+                Q(title__icontains=search_q) |
+                Q(short_description__icontains=search_q) |
+                Q(full_description__icontains=search_q)
+            )
+        if category_slug:
+            services = services.filter(category__slug=category_slug)
+
+        context['services'] = services
+        context['categories'] = ServiceCategory.objects.annotate(
+            service_count=Count('services', filter=Q(services__is_active=True))
+        )
+        context['featured_services'] = Service.objects.filter(
+            is_active=True, is_featured=True
+        ).select_related('category')[:4]
+        context['popular_services'] = Service.objects.filter(
+            is_active=True, is_popular=True
+        ).select_related('category')[:4]
+        context['testimonials'] = ServiceTestimonial.objects.filter(
+            is_active=True
+        ).select_related('service')[:12]
+        context['faqs'] = ServiceFAQ.objects.filter(is_active=True)[:30]
+        context['search_query'] = search_q
+        context['selected_category'] = category_slug
+        return context
 
 
 class ProductsView(ListView):

@@ -14,7 +14,8 @@ from django.db.models import Q, Count
 
 from .models import (
     Contact, CateringEnquiry, Order, OrderItem,
-    Product, Category, ProductImage, Review, Newsletter, Wishlist
+    Product, Category, ProductImage, Review, Newsletter, Wishlist,
+    Service, ServiceCategory, ServiceTestimonial, ServiceFAQ,
 )
 from .cadmin import custom_admin_site
 
@@ -322,6 +323,105 @@ class ProductImageAdmin(admin.ModelAdmin):
             return format_html('<img src="{}" style="width:60px;height:60px;object-fit:cover;border-radius:6px;" />', obj.image.url)
         return ""
     thumbnail.short_description = "Image"
+
+
+# ──────────────────────────────────────────────
+# Services Admin
+# ──────────────────────────────────────────────
+
+class ServiceTestimonialInline(admin.TabularInline):
+    model = ServiceTestimonial
+    extra = 1
+    fields = ["name", "rating", "content", "is_active"]
+    verbose_name = "Testimonial"
+    verbose_name_plural = "Testimonials"
+
+
+class ServiceFAQInline(admin.TabularInline):
+    model = ServiceFAQ
+    extra = 1
+    fields = ["question", "answer", "sort_order", "is_active"]
+    verbose_name = "FAQ"
+    verbose_name_plural = "FAQs"
+
+
+@admin.register(ServiceCategory, site=custom_admin_site)
+class ServiceCategoryAdmin(admin.ModelAdmin):
+    list_display = ["name", "slug", "service_count", "created_at"]
+    search_fields = ["name", "description"]
+    prepopulated_fields = {"slug": ("name",)}
+    readonly_fields = ["created_at"]
+
+    def service_count(self, obj):
+        count = obj.services.filter(is_active=True).count()
+        return count
+    service_count.short_description = "Active Services"
+
+
+@admin.register(Service, site=custom_admin_site)
+class ServiceAdmin(admin.ModelAdmin):
+    inlines = [ServiceTestimonialInline, ServiceFAQInline]
+    list_display = [
+        "title", "category", "price_display", "is_featured",
+        "is_popular", "is_active", "sort_order", "created_at"
+    ]
+    list_editable = ["is_featured", "is_popular", "is_active", "sort_order"]
+    list_filter = ["category", "is_featured", "is_popular", "is_active"]
+    search_fields = ["title", "short_description", "full_description"]
+    prepopulated_fields = {"slug": ("title",)}
+    list_per_page = 25
+    ordering = ["sort_order", "title"]
+    save_on_top = True
+    readonly_fields = ["created_at", "updated_at"]
+    fieldsets = [
+        (None, {
+            "fields": ["category", "title", "slug"]
+        }),
+        ("Description", {
+            "fields": ["short_description", "full_description"]
+        }),
+        ("Media & Icon", {
+            "fields": ["icon", "image"],
+            "classes": ["collapse"]
+        }),
+        ("Pricing & CTA", {
+            "fields": ["price", "cta_text", "cta_url"],
+            "classes": ["collapse"]
+        }),
+        ("Status", {
+            "fields": ["is_featured", "is_popular", "is_active", "sort_order"],
+            "classes": ["collapse"]
+        }),
+        ("Timestamps", {
+            "fields": ["created_at", "updated_at"],
+            "classes": ["collapse"]
+        }),
+    ]
+
+    def price_display(self, obj):
+        if obj.price:
+            return format_html('<span style="font-weight:600;color:#0d6efd;">₹{}</span>', obj.price)
+        return format_html('<span class="text-muted">—</span>')
+    price_display.short_description = "Price"
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("category")
+
+
+@admin.register(ServiceTestimonial, site=custom_admin_site)
+class ServiceTestimonialAdmin(admin.ModelAdmin):
+    list_display = ["name", "service", "rating", "is_active", "created_at"]
+    list_filter = ["service", "rating", "is_active"]
+    search_fields = ["name", "content", "service__title"]
+    readonly_fields = ["created_at"]
+
+
+@admin.register(ServiceFAQ, site=custom_admin_site)
+class ServiceFAQAdmin(admin.ModelAdmin):
+    list_display = ["question", "service", "sort_order", "is_active"]
+    list_filter = ["service", "is_active"]
+    search_fields = ["question", "answer", "service__title"]
+    list_editable = ["sort_order", "is_active"]
 
 
 # ──────────────────────────────────────────────

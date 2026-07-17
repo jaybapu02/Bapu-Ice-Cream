@@ -302,3 +302,92 @@ class Wishlist(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.product.name}"
+
+
+class ServiceCategory(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(max_length=100, unique=True)
+    description = models.TextField(blank=True)
+    icon = models.CharField(max_length=50, blank=True, help_text="Bootstrap icon class (e.g. bi-cup-straw)")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name_plural = "Service Categories"
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
+class Service(models.Model):
+    category = models.ForeignKey(
+        ServiceCategory, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='services'
+    )
+    title = models.CharField(max_length=200)
+    slug = models.SlugField(max_length=200, unique=True)
+    short_description = models.TextField(blank=True, help_text="Brief description shown on cards")
+    full_description = models.TextField(blank=True, help_text="Detailed description shown on detail section")
+    icon = models.CharField(max_length=50, blank=True, help_text="Bootstrap icon class (e.g. bi-cup-straw)")
+    image = models.ImageField(upload_to='services/', blank=True)
+    price = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
+    is_featured = models.BooleanField(default=False)
+    is_popular = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    sort_order = models.PositiveIntegerField(default=0)
+    cta_text = models.CharField(max_length=100, blank=True, default="Book Now")
+    cta_url = models.CharField(max_length=200, blank=True, default="/catering/",
+                                help_text="URL to redirect to (e.g. /catering/ or /order/)")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['sort_order', 'title']
+        indexes = [
+            models.Index(fields=['slug']),
+            models.Index(fields=['is_active']),
+            models.Index(fields=['is_featured']),
+            models.Index(fields=['is_popular']),
+        ]
+
+    def __str__(self):
+        return self.title
+
+
+class ServiceTestimonial(models.Model):
+    service = models.ForeignKey(
+        Service, on_delete=models.CASCADE, related_name='testimonials'
+    )
+    name = models.CharField(max_length=100)
+    location = models.CharField(max_length=100, blank=True)
+    rating = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)]
+    )
+    content = models.TextField()
+    image = models.ImageField(upload_to='testimonials/', blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.name} - {self.service.title}"
+
+
+class ServiceFAQ(models.Model):
+    service = models.ForeignKey(
+        Service, on_delete=models.CASCADE, related_name='faqs'
+    )
+    question = models.CharField(max_length=300)
+    answer = models.TextField()
+    sort_order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['sort_order']
+        verbose_name = "Service FAQ"
+        verbose_name_plural = "Service FAQs"
+
+    def __str__(self):
+        return self.question
