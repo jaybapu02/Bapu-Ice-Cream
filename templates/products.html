@@ -254,7 +254,7 @@
               </div>
               <!-- Add to Cart -->
               {% if product.is_available and product.stock > 0 %}
-              <button class="btn btn-primary add-cart-btn" data-product-id="{{ product.id }}" data-product-name="{{ product.name }}" data-product-price="{{ product.price }}">
+              <button class="btn btn-primary add-cart-btn" data-login-required data-product-id="{{ product.id }}" data-product-name="{{ product.name }}" data-product-price="{{ product.price }}">
                 <i class="bi bi-cart-plus"></i> Add to Cart
               </button>
               {% else %}
@@ -490,7 +490,7 @@
 
           var inStock = stock && stock.toLowerCase().includes('in stock');
           var cartBtn = inStock
-            ? '<button class="btn btn-primary w-100 rounded-pill py-2 qv-add-cart" data-product-name="' + name.replace(/'/g, "\\'") + '" data-product-price="' + price.replace(/[^0-9.]/g, '') + '"><i class="bi bi-cart-plus"></i> Add to Cart — ' + price + '</button>'
+            ? '<button class="btn btn-primary w-100 rounded-pill py-2 qv-add-cart" data-login-required data-product-name="' + name.replace(/'/g, "\\'") + '" data-product-price="' + price.replace(/[^0-9.]/g, '') + '"><i class="bi bi-cart-plus"></i> Add to Cart — ' + price + '</button>'
             : '<button class="btn btn-secondary w-100 rounded-pill py-2" disabled><i class="bi bi-x-circle"></i> Out of Stock</button>';
 
           qvContent.innerHTML = '<div>' +

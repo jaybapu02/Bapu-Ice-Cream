@@ -1,6 +1,7 @@
 import json
 import logging
 from decimal import Decimal
+from urllib.parse import quote
 
 import razorpay
 from django.conf import settings
@@ -8,7 +9,7 @@ from django.contrib import messages
 from django.db import transaction, IntegrityError, DatabaseError
 from django.db.models import Q, Count
 from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils.crypto import get_random_string
 from django.views import View
 from django.views.generic import TemplateView, FormView, DetailView, ListView
@@ -33,6 +34,46 @@ from .exceptions import OrderProcessingError
 from .product_images import annotate_products_with_images
 
 logger = logging.getLogger('home.views')
+
+
+class LoginRequiredMixin:
+    """Require login for all request methods. Returns JSON for AJAX, redirect for regular requests."""
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return self._handle_unauthenticated(request)
+        return super().dispatch(request, *args, **kwargs)
+
+    def _handle_unauthenticated(self, request):
+        messages.warning(request, "Please log in to continue.")
+        login_url = reverse('login') + '?next=' + quote(request.get_full_path())
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'login_required': True,
+                'redirect_url': login_url,
+                'message': 'Please log in to continue.',
+            }, status=401)
+        return redirect(login_url)
+
+
+class LoginRequiredPostMixin:
+    """Require login only for POST requests. GET (page view) is public."""
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.method == 'POST' and not request.user.is_authenticated:
+            return self._handle_unauthenticated(request)
+        return super().dispatch(request, *args, **kwargs)
+
+    def _handle_unauthenticated(self, request):
+        messages.warning(request, "Please log in to continue.")
+        login_url = reverse('login') + '?next=' + quote(request.get_full_path())
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'login_required': True,
+                'redirect_url': login_url,
+                'message': 'Please log in to continue.',
+            }, status=401)
+        return redirect(login_url)
 
 
 class LandingView(TemplateView):
@@ -182,7 +223,7 @@ class ProductDetailView(DetailView):
 
 
 @method_decorator(ratelimit(key='ip', rate='5/m', block=True), name='dispatch')
-class ContactView(FormView):
+class ContactView(LoginRequiredPostMixin, FormView):
     template_name = "contact.html"
     form_class = ContactForm
     success_url = reverse_lazy('contact')
@@ -203,7 +244,7 @@ class ContactView(FormView):
 
 
 @method_decorator(ratelimit(key='ip', rate='5/m', block=True), name='dispatch')
-class CateringView(FormView):
+class CateringView(LoginRequiredPostMixin, FormView):
     template_name = "catering.html"
     form_class = CateringEnquiryForm
     success_url = reverse_lazy("catering")
@@ -409,7 +450,7 @@ def _send_order_notifications(order):
 # AJAX Cart API
 # ──────────────────────────────────────────────
 
-class CartAPIView(View):
+class CartAPIView(LoginRequiredMixin, View):
     """Generic AJAX cart endpoint — add, update, remove, get"""
 
     def post(self, request):
@@ -517,7 +558,7 @@ class OrderView(View):
 # Cart Page
 # ──────────────────────────────────────────────
 
-class CartView(TemplateView):
+class CartView(LoginRequiredMixin, TemplateView):
     template_name = "cart.html"
 
     def get_context_data(self, **kwargs):
@@ -532,7 +573,7 @@ class CartView(TemplateView):
 # Legacy cart endpoints (redirect-based)
 # ──────────────────────────────────────────────
 
-class AddToCartView(View):
+class AddToCartView(LoginRequiredMixin, View):
     def post(self, request):
         try:
             cart = request.session.get("cart", [])
@@ -558,7 +599,7 @@ class AddToCartView(View):
         return redirect("cart")
 
 
-class RemoveFromCartView(View):
+class RemoveFromCartView(LoginRequiredMixin, View):
     def get(self, request, index):
         cart = request.session.get("cart", [])
         if 0 <= index < len(cart):
@@ -572,7 +613,7 @@ class RemoveFromCartView(View):
 # Checkout & Payment
 # ──────────────────────────────────────────────
 
-class CheckoutView(View):
+class CheckoutView(LoginRequiredMixin, View):
     """Collect customer details and redirect to payment"""
     template_name = "checkout.html"
 
@@ -860,20 +901,21 @@ class RazorpaySuccessWebhookView(View):
 
 
 def register(request):
+    next_url = request.POST.get('next') or request.GET.get('next') or 'landing'
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)
             messages.success(request, f"Welcome, {user.username}!")
-            return redirect('landing')
+            return redirect(next_url)
         else:
             for field, errors in form.errors.items():
                 for error in errors:
                     messages.error(request, f"{field}: {error}")
     else:
         form = RegisterForm()
-    return render(request, 'register.html', {'form': form})
+    return render(request, 'register.html', {'form': form, 'next': next_url})
 
 
 @login_required

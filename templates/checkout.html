@@ -30,7 +30,7 @@
           <div class="card-body p-4">
             <h4 class="fw-bold mb-1"><i class="bi bi-pen text-primary"></i> Delivery Details</h4>
             <p class="text-muted small mb-4">Enter your details to complete the order</p>
-            <form id="checkout-form" method="post" novalidate>
+            <form id="checkout-form" method="post" novalidate data-login-required>
               {% csrf_token %}
               <div class="row g-3">
                 <div class="col-md-6">
