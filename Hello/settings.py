@@ -126,6 +126,11 @@ RAZORPAY_KEY_SECRET = config('RAZORPAY_KEY_SECRET', default='')
 # ──────────────────────────────────────────────
 # Auth
 # ──────────────────────────────────────────────
+AUTHENTICATION_BACKENDS = [
+    "home.backends.EmailOrUsernameModelBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'landing'
 LOGOUT_REDIRECT_URL = 'landing'
