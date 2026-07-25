@@ -1,5 +1,6 @@
 import json
 import logging
+import threading
 from decimal import Decimal
 from urllib.parse import quote
 
@@ -686,8 +687,9 @@ class CheckoutView(LoginRequiredMixin, View):
                 request.session["cart"] = []
                 request.session.pop("customer", None)
 
-                logger.info(f"Order {order.order_id} created ({payment_mode})")
-                _send_order_notifications(order)
+            logger.info(f"Order {order.order_id} created ({payment_mode})")
+
+            threading.Thread(target=_send_order_notifications, args=(order,), daemon=True).start()
 
             if request.headers.get("X-Requested-With") == "XMLHttpRequest":
                 return JsonResponse({"success": True, "order_id": order.order_id, "payment_mode": payment_mode})
