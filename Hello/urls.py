@@ -2,6 +2,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
+from django.views.generic import TemplateView
 from home.cadmin import custom_admin_site
 
 urlpatterns = [
@@ -9,6 +10,7 @@ urlpatterns = [
     path("", include("home.urls")),
     path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('robots.txt', TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),
 ]
 
 if settings.DEBUG:

@@ -5,6 +5,7 @@ python-decouple
 dj-database-url
 psycopg2-binary
 django-jazzmin==3.0.5
+django-ratelimit
 openpyxl
 reportlab
 pillow

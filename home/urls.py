@@ -3,6 +3,8 @@ from home import views
 
 urlpatterns = [
     path("", views.LandingView.as_view(), name="landing"),
+    path("ping/", views.ping, name="ping"),
+    path("health/", views.ping, name="health"),
     path("home/", views.HomeView.as_view(), name="home"),
     path("register/", views.register, name="register"),
     path("about/", views.AboutView.as_view(), name="about"),

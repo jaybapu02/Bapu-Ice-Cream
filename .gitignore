@@ -3,4 +3,6 @@ __pycache__/
 .env
 *.pyc
 staticfiles/
-static/
+media/
+*.log
+local_settings.py

@@ -1,0 +1,11 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /login/
+Disallow: /register/
+Disallow: /cart/
+Disallow: /checkout/
+Disallow: /payment/
+Disallow: /profile/
+Disallow: /wishlist/
+
+Sitemap: https://bapu-ice-cream.onrender.com/sitemap.xml

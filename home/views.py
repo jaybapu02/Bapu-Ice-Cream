@@ -13,11 +13,9 @@ from django.urls import reverse, reverse_lazy
 from django.utils.crypto import get_random_string
 from django.views import View
 from django.views.generic import TemplateView, FormView, DetailView, ListView
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
 from django_ratelimit.decorators import ratelimit
@@ -30,7 +28,6 @@ from .forms import (
     ContactForm, CateringEnquiryForm, OrderCustomerForm,
     ReviewForm, NewsletterForm, RegisterForm
 )
-from .exceptions import OrderProcessingError
 from .product_images import annotate_products_with_images
 
 logger = logging.getLogger('home.views')
@@ -795,25 +792,6 @@ class RazorpayCallbackView(View):
         return response
 
 
-class OrderTrackView(View):
-    def get(self, request):
-        order_id = request.GET.get("order_id", "")
-        order = None
-        if order_id:
-            try:
-                order = Order.objects.prefetch_related("items").get(order_id=order_id.upper())
-            except Order.DoesNotExist:
-                messages.error(request, "Order not found. Please check your order ID.")
-        return render(request, "order_track.html", {"order": order, "order_id": order_id})
-
-    def post(self, request):
-        order_id = request.POST.get("order_id", "").upper().strip()
-        if not order_id:
-            messages.error(request, "Please enter an order ID.")
-            return redirect("order_track")
-        return redirect(f"{reverse_lazy('order_track')}?order_id={order_id}")
-
-
 class NewsletterSubscribeView(View):
     def post(self, request):
         form = NewsletterForm(request.POST)
@@ -898,6 +876,10 @@ class RazorpaySuccessWebhookView(View):
         except Exception as e:
             logger.error(f"Webhook error: {e}")
             return HttpResponse(status=400)
+
+
+def ping(request):
+    return JsonResponse({"status": "ok", "app": "Bapu Ice Cream"}, status=200)
 
 
 def register(request):

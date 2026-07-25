@@ -3,6 +3,14 @@
 {% block title %}Welcome{% endblock %}
 
 {% block extra_head %}
+<link rel="preload" href="{% static 'hero-icecream.jpg' %}" as="image" fetchpriority="high">
+<meta property="og:title" content="Bapu Ice Cream — Handcrafted Artisan Ice Cream">
+<meta property="og:description" content="50+ handcrafted flavours made with love. Order online for home delivery.">
+<meta property="og:image" content="{% static 'hero-icecream.jpg' %}">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Bapu Ice Cream">
+<meta name="twitter:description" content="50+ handcrafted flavours made with love. Order online for home delivery.">
 <style>
   /* ========== LANDING LIGHT THEME ========== */
   .premium-hero {
@@ -222,7 +230,7 @@
       </div>
       <div class="col-lg-6 text-center d-none d-lg-block">
         <div class="hero-img-wrap">
-          <img src="{% static 'hero-icecream.jpg' %}" alt="Ice Cream Delight" class="hero-main-img">
+          <img src="{% static 'hero-icecream.jpg' %}" alt="Ice Cream Delight" class="hero-main-img" fetchpriority="high">
         </div>
       </div>
     </div>
@@ -286,7 +294,7 @@
   <div class="container">
     <div class="row g-5 align-items-center">
       <div class="col-lg-5">
-        <img src="{% static 'jay.jpeg' %}" alt="Founder" class="img-fluid rounded-4 shadow-lg">
+        <img src="{% static 'jay.jpeg' %}" alt="Founder" class="img-fluid rounded-4 shadow-lg" loading="lazy">
       </div>
       <div class="col-lg-7">
         <span class="section-subtitle"><i class="bi bi-bookmark-heart"></i> Our Story</span>
