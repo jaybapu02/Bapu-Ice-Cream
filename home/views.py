@@ -887,7 +887,7 @@ def ping(request):
     from django.conf import settings
     ctx = {"status": "ok", "app": "Bapu Ice Cream"}
     ctx["db_vendor"] = connection.vendor
-    ctx["has_db_url"] = bool(os.environ.get("DATABASE_URL") or settings.DATABASES["default"].get("NAME", ""))
+    ctx["has_db_url"] = bool(os.environ.get("DATABASE_URL"))
     try:
         with connection.cursor() as c:
             c.execute("SELECT 1")
