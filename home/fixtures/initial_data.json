@@ -1,0 +1,334 @@
+[
+{
+  "model": "home.category",
+  "pk": 1,
+  "fields": {
+    "name": "Classic",
+    "slug": "classic",
+    "image": "",
+    "description": "",
+    "created_at": "2026-07-16T06:55:38.602Z"
+  }
+},
+{
+  "model": "home.category",
+  "pk": 2,
+  "fields": {
+    "name": "Premium",
+    "slug": "premium",
+    "image": "",
+    "description": "",
+    "created_at": "2026-07-16T06:55:38.610Z"
+  }
+},
+{
+  "model": "home.category",
+  "pk": 3,
+  "fields": {
+    "name": "Seasonal",
+    "slug": "seasonal",
+    "image": "",
+    "description": "",
+    "created_at": "2026-07-16T06:55:38.613Z"
+  }
+},
+{
+  "model": "home.category",
+  "pk": 4,
+  "fields": {
+    "name": "Sugar-Free",
+    "slug": "sugar-free",
+    "image": "",
+    "description": "",
+    "created_at": "2026-07-16T06:55:38.622Z"
+  }
+},
+{
+  "model": "home.product",
+  "pk": 1,
+  "fields": {
+    "category": 1,
+    "name": "Mango Magic",
+    "slug": "mango-magic",
+    "description": "Seasonal Alphonso mango",
+    "price": "140.00",
+    "image": "",
+    "is_available": true,
+    "is_featured": true,
+    "is_best_seller": false,
+    "is_new_arrival": false,
+    "stock": 8,
+    "rating": "0.0",
+    "ingredients": "",
+    "flavours": [],
+    "sizes": [],
+    "toppings": [],
+    "created_at": "2026-07-16T06:55:38.622Z",
+    "updated_at": "2026-07-17T18:26:56.276Z"
+  }
+},
+{
+  "model": "home.product",
+  "pk": 2,
+  "fields": {
+    "category": 1,
+    "name": "Vanilla Classic",
+    "slug": "vanilla-classic",
+    "description": "Pure creamy vanilla beans",
+    "price": "120.00",
+    "image": "",
+    "is_available": true,
+    "is_featured": true,
+    "is_best_seller": false,
+    "is_new_arrival": false,
+    "stock": 50,
+    "rating": "0.0",
+    "ingredients": "",
+    "flavours": [],
+    "sizes": [],
+    "toppings": [],
+    "created_at": "2026-07-16T06:55:38.630Z",
+    "updated_at": "2026-07-17T18:26:56.294Z"
+  }
+},
+{
+  "model": "home.product",
+  "pk": 3,
+  "fields": {
+    "category": 1,
+    "name": "Chocolate Delight",
+    "slug": "chocolate-delight",
+    "description": "Rich Belgian chocolate",
+    "price": "160.00",
+    "image": "",
+    "is_available": true,
+    "is_featured": true,
+    "is_best_seller": false,
+    "is_new_arrival": false,
+    "stock": 35,
+    "rating": "0.0",
+    "ingredients": "",
+    "flavours": [],
+    "sizes": [],
+    "toppings": [],
+    "created_at": "2026-07-16T06:55:38.641Z",
+    "updated_at": "2026-07-17T18:26:56.307Z"
+  }
+},
+{
+  "model": "home.product",
+  "pk": 4,
+  "fields": {
+    "category": 3,
+    "name": "Strawberry Bliss",
+    "slug": "strawberry-bliss",
+    "description": "Fresh strawberry pulp",
+    "price": "130.00",
+    "image": "",
+    "is_available": true,
+    "is_featured": true,
+    "is_best_seller": false,
+    "is_new_arrival": false,
+    "stock": 20,
+    "rating": "0.0",
+    "ingredients": "",
+    "flavours": [],
+    "sizes": [],
+    "toppings": [],
+    "created_at": "2026-07-16T06:55:38.646Z",
+    "updated_at": "2026-07-17T18:26:56.315Z"
+  }
+},
+{
+  "model": "home.product",
+  "pk": 5,
+  "fields": {
+    "category": 2,
+    "name": "Butterscotch Crunch",
+    "slug": "butterscotch-crunch",
+    "description": "Caramel flavor with crunchy nuts",
+    "price": "150.00",
+    "image": "",
+    "is_available": true,
+    "is_featured": true,
+    "is_best_seller": false,
+    "is_new_arrival": false,
+    "stock": 42,
+    "rating": "0.0",
+    "ingredients": "",
+    "flavours": [],
+    "sizes": [],
+    "toppings": [],
+    "created_at": "2026-07-16T06:55:38.648Z",
+    "updated_at": "2026-07-17T18:26:56.326Z"
+  }
+},
+{
+  "model": "home.product",
+  "pk": 6,
+  "fields": {
+    "category": 2,
+    "name": "Kesar Pista Royal",
+    "slug": "kesar-pista-royal",
+    "description": "Saffron infused with pista",
+    "price": "170.00",
+    "image": "",
+    "is_available": true,
+    "is_featured": true,
+    "is_best_seller": false,
+    "is_new_arrival": false,
+    "stock": 25,
+    "rating": "0.0",
+    "ingredients": "",
+    "flavours": [],
+    "sizes": [],
+    "toppings": [],
+    "created_at": "2026-07-16T06:55:38.653Z",
+    "updated_at": "2026-07-17T18:26:56.334Z"
+  }
+},
+{
+  "model": "home.product",
+  "pk": 7,
+  "fields": {
+    "category": 2,
+    "name": "Black Currant Twist",
+    "slug": "black-currant-twist",
+    "description": "Tangy black currant flavor",
+    "price": "145.00",
+    "image": "",
+    "is_available": true,
+    "is_featured": true,
+    "is_best_seller": false,
+    "is_new_arrival": false,
+    "stock": 12,
+    "rating": "0.0",
+    "ingredients": "",
+    "flavours": [],
+    "sizes": [],
+    "toppings": [],
+    "created_at": "2026-07-16T06:55:38.653Z",
+    "updated_at": "2026-07-17T18:26:56.341Z"
+  }
+},
+{
+  "model": "home.product",
+  "pk": 8,
+  "fields": {
+    "category": 2,
+    "name": "Dry Fruit Special",
+    "slug": "dry-fruit-special",
+    "description": "Loaded with premium dry fruits",
+    "price": "180.00",
+    "image": "",
+    "is_available": true,
+    "is_featured": true,
+    "is_best_seller": false,
+    "is_new_arrival": false,
+    "stock": 18,
+    "rating": "0.0",
+    "ingredients": "",
+    "flavours": [],
+    "sizes": [],
+    "toppings": [],
+    "created_at": "2026-07-16T06:55:38.667Z",
+    "updated_at": "2026-07-17T18:26:56.350Z"
+  }
+},
+{
+  "model": "home.product",
+  "pk": 9,
+  "fields": {
+    "category": 1,
+    "name": "Cookies & Cream",
+    "slug": "cookies-cream",
+    "description": "Crunchy cookies in creamy milk",
+    "price": "155.00",
+    "image": "",
+    "is_available": true,
+    "is_featured": true,
+    "is_best_seller": false,
+    "is_new_arrival": false,
+    "stock": 30,
+    "rating": "0.0",
+    "ingredients": "",
+    "flavours": [],
+    "sizes": [],
+    "toppings": [],
+    "created_at": "2026-07-16T06:55:38.670Z",
+    "updated_at": "2026-07-17T18:26:56.350Z"
+  }
+},
+{
+  "model": "home.product",
+  "pk": 10,
+  "fields": {
+    "category": 3,
+    "name": "Tender Coconut Fresh",
+    "slug": "tender-coconut-fresh",
+    "description": "Natural coconut flavor",
+    "price": "150.00",
+    "image": "",
+    "is_available": true,
+    "is_featured": false,
+    "is_best_seller": false,
+    "is_new_arrival": false,
+    "stock": 6,
+    "rating": "0.0",
+    "ingredients": "",
+    "flavours": [],
+    "sizes": [],
+    "toppings": [],
+    "created_at": "2026-07-16T06:55:38.680Z",
+    "updated_at": "2026-07-17T18:26:56.363Z"
+  }
+},
+{
+  "model": "home.product",
+  "pk": 11,
+  "fields": {
+    "category": 2,
+    "name": "Coffee Mocha",
+    "slug": "coffee-mocha",
+    "description": "Strong coffee with chocolate touch",
+    "price": "165.00",
+    "image": "",
+    "is_available": true,
+    "is_featured": false,
+    "is_best_seller": false,
+    "is_new_arrival": false,
+    "stock": 15,
+    "rating": "0.0",
+    "ingredients": "",
+    "flavours": [],
+    "sizes": [],
+    "toppings": [],
+    "created_at": "2026-07-16T06:55:38.687Z",
+    "updated_at": "2026-07-17T18:26:56.370Z"
+  }
+},
+{
+  "model": "home.product",
+  "pk": 12,
+  "fields": {
+    "category": 3,
+    "name": "Rainbow Fantasy",
+    "slug": "rainbow-fantasy",
+    "description": "Colorful mix of fruity flavors",
+    "price": "140.00",
+    "image": "",
+    "is_available": true,
+    "is_featured": false,
+    "is_best_seller": false,
+    "is_new_arrival": false,
+    "stock": 3,
+    "rating": "0.0",
+    "ingredients": "",
+    "flavours": [],
+    "sizes": [],
+    "toppings": [],
+    "created_at": "2026-07-16T06:55:38.689Z",
+    "updated_at": "2026-07-17T18:26:56.378Z"
+  }
+}
+]
