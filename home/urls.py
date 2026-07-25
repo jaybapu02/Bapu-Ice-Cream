@@ -1,9 +1,12 @@
 from django.urls import path
 from home import views
+from home.cadmin import admin_ping, admin_jazzmin_test
 
 urlpatterns = [
     path("", views.LandingView.as_view(), name="landing"),
     path("ping/", views.ping, name="ping"),
+    path("admin_ping/", admin_ping, name="admin_ping"),
+    path("admin_jazzmin_test/", admin_jazzmin_test, name="admin_jazzmin_test"),
     path("health/", views.ping, name="health"),
     path("home/", views.HomeView.as_view(), name="home"),
     path("register/", views.register, name="register"),

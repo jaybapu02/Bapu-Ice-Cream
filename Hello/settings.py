@@ -145,7 +145,7 @@ MESSAGE_TAGS = {
 # ──────────────────────────────────────────────
 SESSION_COOKIE_AGE = 7 * 24 * 60 * 60
 SESSION_COOKIE_HTTPONLY = True
-CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = False
 
 # Logging
 LOGGING = {
