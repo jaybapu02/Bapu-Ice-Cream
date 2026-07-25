@@ -60,9 +60,20 @@ WSGI_APPLICATION = "Hello.wsgi.application"
 DATABASES = {
     "default": dj_database_url.config(
         default="sqlite:///" + str(BASE_DIR / "db.sqlite3"),
-        conn_max_age=60,
+        conn_max_age=0,
     )
 }
+
+if "sqlite" in DATABASES["default"]["ENGINE"]:
+    from django.db.backends.signals import connection_created
+
+    def activate_wal(sender, connection, **kwargs):
+        if connection.vendor == "sqlite":
+            with connection.cursor() as c:
+                c.execute("PRAGMA journal_mode=WAL;")
+                c.execute("PRAGMA synchronous=NORMAL;")
+
+    connection_created.connect(activate_wal, weak=False)
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
