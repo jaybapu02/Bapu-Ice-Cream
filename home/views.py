@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 import threading
 from decimal import Decimal
 from urllib.parse import quote
@@ -883,7 +884,10 @@ class RazorpaySuccessWebhookView(View):
 def ping(request):
     from django.db import connection
     from django.contrib.auth import get_user_model
+    from django.conf import settings
     ctx = {"status": "ok", "app": "Bapu Ice Cream"}
+    ctx["db_vendor"] = connection.vendor
+    ctx["has_db_url"] = bool(os.environ.get("DATABASE_URL") or settings.DATABASES["default"].get("NAME", ""))
     try:
         with connection.cursor() as c:
             c.execute("SELECT 1")
