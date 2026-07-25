@@ -879,7 +879,18 @@ class RazorpaySuccessWebhookView(View):
 
 
 def ping(request):
-    return JsonResponse({"status": "ok", "app": "Bapu Ice Cream"}, status=200)
+    from django.db import connection
+    from django.contrib.auth import get_user_model
+    ctx = {"status": "ok", "app": "Bapu Ice Cream"}
+    try:
+        with connection.cursor() as c:
+            c.execute("SELECT 1")
+            ctx["db"] = "connected"
+    except Exception as e:
+        ctx["db"] = f"error: {e}"
+    user_count = get_user_model().objects.count() if "db" in ctx and ctx["db"] == "connected" else "? (db not connected)"
+    ctx["users"] = user_count
+    return JsonResponse(ctx, status=200)
 
 
 def register(request):
