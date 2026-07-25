@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django_ratelimit",
 ]
 
 MIDDLEWARE = [
@@ -60,8 +61,7 @@ WSGI_APPLICATION = "Hello.wsgi.application"
 DATABASES = {
     "default": dj_database_url.config(
         default="sqlite:///" + str(BASE_DIR / "db.sqlite3"),
-        conn_max_age=600,
-        conn_health_checks=True,
+        conn_max_age=60,
     )
 }
 

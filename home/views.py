@@ -898,10 +898,17 @@ def register(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            login(request, user)
-            messages.success(request, f"Welcome, {user.username}!")
-            return redirect(next_url)
+            logger.info("Register form valid, saving user")
+            try:
+                user = form.save()
+                logger.info(f"User saved: {user.username}")
+                login(request, user)
+                logger.info(f"User logged in: {user.username}")
+                messages.success(request, f"Welcome, {user.username}!")
+                return redirect(next_url)
+            except Exception as e:
+                logger.error(f"Register error: {e}", exc_info=True)
+                messages.error(request, f"Registration failed: {e}")
         else:
             for field, errors in form.errors.items():
                 for error in errors:
