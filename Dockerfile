@@ -15,4 +15,4 @@ RUN printf "SECRET_KEY=docker-build-only-not-for-production\nDEBUG=False\nALLOWE
     python manage.py collectstatic --noinput --clear && \
     rm .env
 
-CMD ["gunicorn", "Hello.wsgi:application", "--bind", "0.0.0.0:8000"]
+CMD python manage.py migrate --noinput && gunicorn Hello.wsgi:application --bind 0.0.0.0:8000 --workers 2 --threads 4 --timeout 60 --access-logfile - --log-level info

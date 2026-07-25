@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from decouple import config, Csv
 from django.contrib.messages import constants as messages
@@ -5,7 +6,7 @@ import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = config('SECRET_KEY')
+SECRET_KEY = os.environ.get('SECRET_KEY') or config('SECRET_KEY', default='')
 
 DEBUG = config('DEBUG', default=False, cast=bool)
 
