@@ -380,9 +380,14 @@ class ServiceAdmin(admin.ModelAdmin):
         ("Description", {
             "fields": ["short_description", "full_description"]
         }),
-        ("Media & Icon", {
-            "fields": ["icon", "image"],
-            "classes": ["collapse"]
+        ("Icon (required — choose a Bootstrap icon)", {
+            "fields": ["icon"],
+            "description": "Enter a Bootstrap icon class like <code>bi-truck</code>, <code>bi-gem</code>, <code>bi-stars</code>. See <a href='https://icons.getbootstrap.com/' target='_blank'>Bootstrap Icons</a> for options. This replaces photos on the services page."
+        }),
+        ("Image (optional — not used on the public site)", {
+            "fields": ["image"],
+            "classes": ["collapse"],
+            "description": "Images are not displayed on the public services page. Icons are used instead."
         }),
         ("Pricing & CTA", {
             "fields": ["price", "cta_text", "cta_url"],

@@ -1246,6 +1246,8 @@ footer .border-secondary {
 }
 
 /* Services Hero */
+.inset-0 { top: 0; left: 0; right: 0; bottom: 0; }
+
 .services-hero {
   padding: clamp(2.5rem, 5vw, 4.5rem) 0;
   position: relative;
@@ -1440,18 +1442,7 @@ footer .border-secondary {
   transform: scale(1.1) rotate(-5deg);
 }
 
-.service-card-img-wrap {
-  position: relative;
-  overflow: hidden;
-}
-
-.service-card-img-wrap img {
-  transition: transform 0.45s ease;
-}
-
-.service-card:hover .service-card-img-wrap img {
-  transform: scale(1.05);
-}
+/* Service card image styles removed — using icon-based cards */
 
 /* ============================
    FLAVOUR CARDS
