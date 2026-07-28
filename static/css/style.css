@@ -1440,6 +1440,19 @@ footer .border-secondary {
   transform: scale(1.1) rotate(-5deg);
 }
 
+.service-card-img-wrap {
+  position: relative;
+  overflow: hidden;
+}
+
+.service-card-img-wrap img {
+  transition: transform 0.45s ease;
+}
+
+.service-card:hover .service-card-img-wrap img {
+  transform: scale(1.05);
+}
+
 /* ============================
    FLAVOUR CARDS
    ============================ */

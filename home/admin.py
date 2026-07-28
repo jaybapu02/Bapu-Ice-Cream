@@ -399,9 +399,11 @@ class ServiceAdmin(admin.ModelAdmin):
     ]
 
     def price_display(self, obj):
-        if obj.price:
-            return format_html('<span style="font-weight:600;color:#0d6efd;">₹{}</span>', obj.price)
-        return format_html('<span class="text-muted">—</span>')
+        if obj.price is None:
+            return format_html('<span class="text-muted">—</span>')
+        if obj.price == 0:
+            return format_html('<span style="font-weight:600;color:#16a34a;">Free</span>')
+        return format_html('<span style="font-weight:600;color:#0d6efd;">₹{}</span>', obj.price)
     price_display.short_description = "Price"
 
     def get_queryset(self, request):
