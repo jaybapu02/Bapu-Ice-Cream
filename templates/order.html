@@ -4,41 +4,124 @@
 {% block extra_head %}
 <meta name="description" content="Order handcrafted ice cream online from Bapu Ice Cream. Choose from 12+ flavours, custom sizes, and toppings for home delivery.">
 <style>
-.toast-notification{position:fixed;top:80px;right:20px;z-index:9999;background:var(--success);color:#fff;padding:.75rem 1.25rem;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.15);font-weight:500;transform:translateX(120%);transition:transform .35s ease;max-width:350px}
+.toast-notification{position:fixed;top:80px;right:20px;z-index:9999;background:var(--success);color:#fff;padding:.75rem 1.25rem;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.15);font-weight:500;transform:translateX(120%);transition:transform .35s ease;max-width:350px;font-size:.9rem}
 .toast-notification.show{transform:translateX(0)}
 .toast-notification.error{background:#dc3545}
 
-.flavour-card{position:relative;border:2px solid var(--input-border);border-radius:16px;padding:clamp(.75rem,2vw,1.25rem);cursor:pointer;transition:all .25s;text-align:center;background:var(--bg-card);min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
-.flavour-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,79,154,.03),transparent 60%);opacity:0;transition:opacity .3s;pointer-events:none}
-.flavour-card:hover{border-color:var(--primary);box-shadow:0 6px 24px rgba(255,79,154,.1);transform:translateY(-3px)}
-.flavour-card:hover::before{opacity:1}
-.flavour-card.selected{border-color:var(--primary);background:rgba(255,79,154,.04)}
-.flavour-card.selected::after{content:'✓';position:absolute;top:6px;right:10px;font-size:.7rem;font-weight:800;color:var(--primary)}
-.flavour-card .emoji{font-size:clamp(1.6rem,3vw,2.5rem);margin-bottom:.3rem;line-height:1}
-.flavour-card .name{font-weight:700;font-size:clamp(.82rem,1.1vw,.95rem);color:var(--text)}
-.flavour-card .price-tag{font-size:clamp(.7rem,1vw,.8rem);color:var(--primary);font-weight:600;margin-top:.15rem}
-
-#customize-panel{border-radius:20px;border:1px solid var(--border);background:var(--bg-card);transition:all .3s}
-#customize-panel .form-label{font-size:.85rem;margin-bottom:.35rem}
-#customize-panel .form-select,#customize-panel .form-control{border-radius:12px;border:2px solid var(--input-border);background:var(--input-bg);color:var(--text);font-size:.9rem;padding:.45rem .75rem}
-#customize-panel .form-select:focus,#customize-panel .form-control:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(255,79,154,.1)}
-#customize-panel .opt-total{font-size:1.15rem;font-weight:800;color:var(--primary)}
-
-.cart-item{padding:.85rem 0;border-bottom:1px solid var(--border)}
-.cart-item:last-child{border-bottom:none}
-
-.order-hero{background:var(--gradient-bg);border-bottom:1px solid var(--border);padding:clamp(1.5rem,3vw,2.5rem) 0}
-.order-hero h1{font-weight:900;font-size:clamp(1.3rem,2.5vw,1.75rem);color:var(--text)}
-.order-hero p{color:var(--text-muted);font-size:clamp(.85rem,.9vw,.95rem);max-width:540px}
+.order-hero{background:var(--gradient-bg);border-bottom:1px solid var(--border);padding:clamp(1.25rem,2.5vw,2rem) 0}
+.order-hero h1{font-weight:900;font-size:clamp(1.2rem,2vw,1.6rem);color:var(--text);margin:0}
+.order-hero p{color:var(--text-muted);font-size:clamp(.82rem,.85vw,.9rem);margin:.15rem 0 0}
 [data-theme="dark"] .order-hero{background:linear-gradient(160deg,#151214,#1D191C)}
 
-@media(max-width:768px){
-  #customize-panel .row{gap:.75rem}
-  .cart-sidebar{position:static!important;max-height:none!important;margin-top:1.5rem}
+/* ─── Layout Grid ─── */
+.order-layout{display:grid;grid-template-columns:3fr 2fr 2fr;gap:1.5rem;align-items:start}
+.order-sec{background:var(--bg-card);border:1px solid var(--border);border-radius:20px;overflow:hidden;transition:border-color .3s}
+.order-sec__head{padding:1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.5rem}
+.order-sec__head h5{margin:0;font-weight:800;font-size:1rem}
+.order-sec__body{padding:1.25rem}
+
+/* ─── Product Grid ─── */
+.p-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem}
+.f-c{position:relative;border:2px solid var(--input-border);border-radius:16px;padding:.85rem .5rem;cursor:pointer;transition:all .25s;text-align:center;background:var(--bg-card);min-height:110px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.25rem;-webkit-tap-highlight-color:transparent}
+.f-c::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,79,154,.04),transparent 60%);opacity:0;transition:opacity .3s;border-radius:14px;pointer-events:none}
+.f-c:hover{border-color:var(--primary);box-shadow:0 4px 16px rgba(255,79,154,.08);transform:translateY(-3px)}
+.f-c:hover::before{opacity:1}
+.f-c.selected{border-color:var(--primary);box-shadow:0 0 0 3px rgba(255,79,154,.15),0 4px 16px rgba(255,79,154,.1)}
+.f-c.selected::after{content:'✓';position:absolute;top:6px;right:9px;font-size:.7rem;font-weight:800;color:#fff;background:var(--primary);width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;line-height:1}
+.f-c .e{font-size:clamp(1.5rem,2.2vw,2.2rem);line-height:1}
+.f-c .n{font-weight:700;font-size:clamp(.73rem,.85vw,.83rem);color:var(--text);line-height:1.3;max-width:100%;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.f-c .p-t{font-size:clamp(.66rem,.7vw,.73rem);color:var(--primary);font-weight:600}
+
+/* ─── Customize ─── */
+.opt-g{margin-bottom:1rem}
+.opt-g:last-child{margin-bottom:0}
+.opt-l{display:block;font-weight:700;font-size:.82rem;color:var(--text);margin-bottom:.5rem}
+.opt-b{display:flex;flex-wrap:wrap;gap:.45rem}
+.opt-b__btn{position:relative;padding:.4rem .9rem;border-radius:50px;border:2px solid var(--input-border);background:var(--input-bg);color:var(--text-muted);font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;line-height:1.3}
+.opt-b__btn:hover{border-color:var(--primary);color:var(--primary)}
+.opt-b__btn.active{border-color:var(--primary);background:rgba(255,79,154,.08);color:var(--primary);padding-right:1.6rem}
+.opt-b__btn.active::after{content:'✓';position:absolute;right:.5rem;top:50%;transform:translateY(-50%);font-size:.6rem;font-weight:800;color:var(--primary)}
+.opt-b__btn small{display:block;font-weight:400;font-size:.65rem;color:inherit;opacity:.65;margin-top:1px}
+
+.qty-w{display:flex;align-items:center;gap:.6rem}
+.qty-b{width:36px;height:36px;border-radius:50%;border:2px solid var(--input-border);background:var(--input-bg);color:var(--text);font-weight:700;font-size:1.15rem;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;user-select:none;line-height:1}
+.qty-b:hover{background:var(--primary);color:#fff;border-color:var(--primary);box-shadow:0 2px 12px rgba(255,79,154,.25)}
+.qty-v{min-width:34px;text-align:center;font-weight:800;font-size:1.15rem;color:var(--text)}
+
+.opt-t-r{display:flex;align-items:center;justify-content:space-between;padding:.75rem 0;margin:.75rem 0;border-top:1px solid var(--border)}
+.opt-t-r span:first-child{font-weight:600;font-size:.85rem;color:var(--text-muted)}
+.opt-t-r span:last-child{font-size:1.4rem;font-weight:900;color:var(--primary);white-space:nowrap}
+#add-to-cart-btn{width:100%;padding:.7rem;border-radius:50px;font-weight:700;font-size:.95rem;border:none;background:linear-gradient(135deg,#FF4F9A,#8B5CF6);color:#fff;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:.5rem}
+#add-to-cart-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(255,79,154,.35)}
+#add-to-cart-btn:active{transform:translateY(0)}
+
+/* ─── Customize placeholder (no flavour selected) ─── */
+#customize-panel{display:none}
+#customize-panel.show{display:block;animation:fadeSlide .35s ease}
+@keyframes fadeSlide{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:translateY(0)}}
+.cp-placeholder{text-align:center;padding:2rem 1rem;color:var(--text-muted)}
+.cp-placeholder i{font-size:2rem;margin-bottom:.75rem;opacity:.4}
+.cp-placeholder p{font-size:.9rem;margin:0}
+
+/* ─── Cart ─── */
+.c-i-wrap{max-height:340px;overflow-y:auto}
+.c-i-wrap::-webkit-scrollbar{width:4px}
+.c-i-wrap::-webkit-scrollbar-thumb{background:var(--text-light);border-radius:10px}
+.c-i{padding:.8rem 0;border-bottom:1px solid var(--border)}
+.c-i:last-child{border-bottom:none}
+.c-i__top{display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem;margin-bottom:.5rem}
+.c-i__info{min-width:0;flex:1}
+.c-i__n{font-weight:700;font-size:.85rem;color:var(--text);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.c-i__m{font-size:.72rem;color:var(--text-muted);display:block}
+.c-i__rm{width:26px;height:26px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--text-muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;flex-shrink:0;font-size:.65rem;padding:0}
+.c-i__rm:hover{background:#fee2e2;border-color:#fca5a5;color:#dc2626}
+.c-i__bot{display:flex;justify-content:space-between;align-items:center}
+.c-i__bot .qty-b{width:28px;height:28px;font-size:.85rem}
+.c-i__bot .qty-v{min-width:22px;font-size:.9rem}
+
+.c-t{padding-top:.75rem}
+.c-t__r{display:flex;justify-content:space-between;align-items:center;padding:.25rem 0}
+.c-t__r span:first-child{color:var(--text-muted);font-size:.82rem}
+.c-t__r span:last-child{font-weight:600;font-size:.85rem;color:var(--text);white-space:nowrap}
+.c-t__d{height:1px;background:var(--border);margin:.45rem 0}
+.c-t__g{display:flex;justify-content:space-between;align-items:center;padding:.5rem 0}
+.c-t__g span:first-child{font-weight:700;font-size:1rem;color:var(--text)}
+.c-t__g span:last-child{font-size:1.2rem;font-weight:900;color:var(--primary);white-space:nowrap}
+.c-t__free{font-size:.74rem;color:var(--success);margin-top:.2rem;display:flex;align-items:center;gap:.3rem}
+#checkout-btn{width:100%;padding:.7rem;border-radius:50px;font-weight:700;font-size:.95rem;border:none;background:var(--success);color:#fff;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:.5rem;text-decoration:none;margin-top:.75rem}
+#checkout-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(22,163,74,.3);color:#fff}
+#checkout-btn:active{transform:translateY(0)}
+#clear-cart-btn{width:100%;padding:.45rem;border-radius:50px;font-weight:600;font-size:.82rem;border:2px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;transition:all .15s;margin-top:.5rem}
+#clear-cart-btn:hover{background:rgba(220,38,38,.06);border-color:#fca5a5;color:#dc2626}
+
+/* ─── Responsive ─── */
+@media(max-width:1199px){
+  .order-layout{grid-template-columns:1fr 1fr;gap:1.25rem}
+  .order-cart{grid-column:1/-1}
+  .p-grid{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:899px){
+  .order-layout{grid-template-columns:1fr;gap:1rem}
+  .order-cart{grid-column:auto}
+  .p-grid{grid-template-columns:repeat(3,1fr)}
 }
 @media(max-width:576px){
-  .flavour-card{min-height:100px;padding:.6rem}
-  .flavour-card .emoji{font-size:1.5rem}
+  .container{padding-left:12px;padding-right:12px}
+  .order-sec__body{padding:1rem}
+  .p-grid{grid-template-columns:repeat(2,1fr);gap:.5rem}
+  .f-c{min-height:95px;padding:.65rem .4rem}
+  .f-c .e{font-size:1.35rem}
+  .f-c .n{font-size:.72rem}
+  .opt-b__btn{padding:.35rem .75rem;font-size:.76rem}
+  .opt-b__btn.active{padding-right:1.4rem}
+  .opt-t-r span:last-child{font-size:1.2rem}
+  #add-to-cart-btn{padding:.6rem;font-size:.9rem}
+}
+@media(max-width:374px){
+  .p-grid{gap:.4rem}
+  .f-c{min-height:85px;padding:.5rem .3rem}
+  .opt-b{gap:.35rem}
+  .opt-b__btn{font-size:.72rem;padding:.3rem .6rem}
 }
 </style>
 {% endblock %}
@@ -48,125 +131,145 @@
 <div id="loading-overlay"><div class="spinner-big"></div><p class="mt-3 fw-semibold" style="color:var(--bg)">Updating cart…</p></div>
 <div id="cart-toast" class="toast-notification"><i class="bi bi-check-circle"></i> <span id="toast-msg"></span></div>
 
-<!-- ═══ Hero ═══ -->
 <section class="order-hero">
   <div class="container">
-    <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
+    <div class="d-flex align-items-center justify-content-between gap-3">
       <div>
-        <h1><i class="bi bi-ice-cream" style="color:var(--primary)"></i> Choose Your Flavour</h1>
-        <p>Pick a flavour, choose your size and toppings, then add to cart.</p>
+        <h1><i class="bi bi-ice-cream" style="color:var(--primary)"></i> Order Ice Cream</h1>
+        <p>Pick a flavour, customise your scoop, and add to cart.</p>
       </div>
-      <a href="{% url 'cart' %}" class="btn btn-outline-primary rounded-pill position-relative flex-shrink-0">
-        <i class="bi bi-cart3"></i> Cart <span id="nav-cart-badge" class="badge bg-danger rounded-pill ms-1">0</span>
+      <a href="{% url 'cart' %}" class="btn btn-outline-primary rounded-pill flex-shrink-0 position-relative" style="font-size:.85rem;padding:.4rem 1rem">
+        <i class="bi bi-cart3"></i> Cart <span class="badge bg-danger rounded-pill ms-1" id="nav-cart-badge">0</span>
       </a>
     </div>
   </div>
 </section>
 
-<!-- ═══ Main ═══ -->
 <section class="py-4">
   <div class="container">
-    <div class="row g-4">
+    <div class="order-layout">
 
-      <!-- Left: Flavours + Customization -->
-      <div class="col-lg-8">
-
-        <div class="row g-3" id="flavour-grid">
-          {% for flavour in flavour_options %}
-          <div class="col-md-4 col-6">
-            <div class="flavour-card" data-flavour="{{ flavour }}">
-              <div class="emoji">
+      <!-- ═══ PRODUCTS ═══ -->
+      <div class="order-sec">
+        <div class="order-sec__head">
+          <i class="bi bi-grid-3x3-gap-fill" style="color:var(--primary);font-size:.9rem"></i>
+          <h5>Choose Your Flavour</h5>
+          <span class="ms-auto badge rounded-pill bg-primary bg-opacity-10 text-primary" style="font-size:.7rem;font-weight:600">{{ flavour_options|length }}</span>
+        </div>
+        <div class="order-sec__body">
+          <div class="p-grid" id="flavour-grid">
+            {% for flavour in flavour_options %}
+            <div class="f-c" data-flavour="{{ flavour }}">
+              <div class="e">
                 {% if "Mango" in flavour %}🥭{% elif "Vanilla" in flavour %}🍦{% elif "Chocolate" in flavour %}🍫{% elif "Strawberry" in flavour %}🍓{% elif "Butterscotch" in flavour %}🍯{% elif "Pista" in flavour %}🟢{% elif "Black Currant" in flavour %}🫐{% elif "Dry Fruit" in flavour %}🥜{% elif "Cookies" in flavour %}🍪{% elif "Coconut" in flavour %}🥥{% elif "Coffee" in flavour %}☕{% elif "Rainbow" in flavour %}🌈{% else %}🍨{% endif %}
               </div>
-              <div class="name">{{ flavour }}</div>
-              <div class="price-tag">Starting ₹120</div>
+              <div class="n">{{ flavour }}</div>
+              <div class="p-t">from ₹120</div>
             </div>
+            {% endfor %}
           </div>
-          {% endfor %}
         </div>
+      </div>
 
-        <!-- Customization -->
-        <div class="card border-0 shadow-sm mt-4" id="customize-panel" style="display:none">
-          <div class="card-body p-3 p-md-4">
-            <h5 class="fw-bold mb-1"><i class="bi bi-sliders text-primary"></i> Customize Your Order</h5>
-            <p class="text-muted small mb-3" id="selected-flavour-display">Selected: <strong></strong></p>
-            <div class="row g-2 g-md-3">
-              <div class="col-6 col-md-4">
-                <label class="form-label fw-semibold">Type</label>
-                <select id="opt-type" class="form-select">
-                  <option value="Scooped Ice Cream">Scooped Ice Cream — ₹120</option>
-                  <option value="Softy Cone">Softy Cone — ₹80</option>
-                  <option value="Family Pack">Family Pack — ₹350</option>
-                </select>
+      <!-- ═══ CUSTOMIZE ═══ -->
+      <div id="customize-panel">
+        <div class="order-sec">
+          <div class="order-sec__head">
+            <i class="bi bi-sliders" style="color:var(--primary)"></i>
+            <h5>Customise Your Order</h5>
+          </div>
+          <div class="order-sec__body" id="customize-body">
+            <div class="cp-placeholder" id="cp-placeholder">
+              <i class="bi bi-hand-index-thumb"></i>
+              <p>Select a flavour above to customise</p>
+            </div>
+            <div id="customize-content" style="display:none">
+              <p style="font-size:.82rem;color:var(--text-muted);margin-bottom:1rem">
+                Selected: <strong id="selected-flavour-display" style="color:var(--text)"></strong>
+              </p>
+
+              <div class="opt-g">
+                <label class="opt-l">Type</label>
+                <div class="opt-b" data-for="opt-type">
+                  <button class="opt-b__btn active" data-value="Scooped Ice Cream">Scooped <small>₹120</small></button>
+                  <button class="opt-b__btn" data-value="Softy Cone">Softy Cone <small>₹80</small></button>
+                  <button class="opt-b__btn" data-value="Family Pack">Family Pack <small>₹350</small></button>
+                </div>
+                <select id="opt-type" hidden><option value="Scooped Ice Cream" selected>Scooped Ice Cream</option><option value="Softy Cone">Softy Cone</option><option value="Family Pack">Family Pack</option></select>
               </div>
-              <div class="col-6 col-md-4">
-                <label class="form-label fw-semibold">Size</label>
-                <select id="opt-size" class="form-select">
-                  <option value="Single Scoop">Single Scoop — ₹0</option>
-                  <option value="Double Scoop">Double Scoop — +₹40</option>
-                  <option value="500 ml">500 ml — +₹150</option>
-                  <option value="1 Liter">1 Liter — +₹280</option>
-                </select>
+
+              <div class="opt-g">
+                <label class="opt-l">Size</label>
+                <div class="opt-b" data-for="opt-size">
+                  <button class="opt-b__btn active" data-value="Single Scoop">Single <small>₹0</small></button>
+                  <button class="opt-b__btn" data-value="Double Scoop">Double <small>+₹40</small></button>
+                  <button class="opt-b__btn" data-value="500 ml">500 ml <small>+₹150</small></button>
+                  <button class="opt-b__btn" data-value="1 Liter">1 L <small>+₹280</small></button>
+                </div>
+                <select id="opt-size" hidden><option value="Single Scoop" selected>Single Scoop</option><option value="Double Scoop">Double Scoop</option><option value="500 ml">500 ml</option><option value="1 Liter">1 Liter</option></select>
               </div>
-              <div class="col-6 col-md-4">
-                <label class="form-label fw-semibold">Toppings</label>
-                <select id="opt-toppings" class="form-select">
-                  <option value="No Toppings">No Toppings — ₹0</option>
-                  <option value="Choco Chips">Choco Chips — +₹30</option>
-                  <option value="Nuts">Nuts — +₹40</option>
-                  <option value="Caramel Syrup">Caramel Syrup — +₹25</option>
-                </select>
+
+              <div class="opt-g">
+                <label class="opt-l">Toppings</label>
+                <div class="opt-b" data-for="opt-toppings">
+                  <button class="opt-b__btn active" data-value="No Toppings">None <small>₹0</small></button>
+                  <button class="opt-b__btn" data-value="Choco Chips">Choco Chips <small>+₹30</small></button>
+                  <button class="opt-b__btn" data-value="Nuts">Nuts <small>+₹40</small></button>
+                  <button class="opt-b__btn" data-value="Caramel Syrup">Caramel <small>+₹25</small></button>
+                </div>
+                <select id="opt-toppings" hidden><option value="No Toppings" selected>No Toppings</option><option value="Choco Chips">Choco Chips</option><option value="Nuts">Nuts</option><option value="Caramel Syrup">Caramel Syrup</option></select>
               </div>
-              <div class="col-6 col-md-3">
-                <label class="form-label fw-semibold">Quantity</label>
-                <input type="number" id="opt-qty" class="form-control" value="1" min="1" max="99">
+
+              <div class="opt-g">
+                <label class="opt-l">Quantity</label>
+                <div class="qty-w">
+                  <button class="qty-b" id="qty-minus">−</button>
+                  <span class="qty-v" id="opt-qty-display">1</span>
+                  <button class="qty-b" id="qty-plus">+</button>
+                  <input type="number" id="opt-qty" value="1" min="1" max="99" hidden>
+                </div>
               </div>
-              <div class="col-6 col-md-3 d-flex flex-column justify-content-end">
-                <label class="form-label fw-semibold">Total</label>
-                <div class="opt-total">₹<span id="opt-total">0</span></div>
+
+              <div class="opt-t-r">
+                <span>Total</span>
+                <span>₹<span id="opt-total">0</span></span>
               </div>
-              <div class="col-12 col-md-6 d-flex align-items-end">
-                <button class="btn btn-primary rounded-pill w-100 py-2" id="add-to-cart-btn" data-login-required>
-                  <i class="bi bi-cart-plus"></i> Add to Cart
-                </button>
-              </div>
+
+              <button id="add-to-cart-btn" data-login-required><i class="bi bi-cart-plus"></i> Add to Cart</button>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Right: Cart Sidebar -->
-      <div class="col-lg-4">
-        <div class="cart-sidebar">
-          <div class="card border-0 shadow-sm">
-            <div class="card-body p-3 p-md-4">
-              <h5 class="fw-bold mb-3"><i class="bi bi-cart3 text-primary"></i> Your Cart</h5>
-              <div id="cart-items-container">
-                <p class="text-muted text-center py-4" id="empty-cart-msg"><i class="bi bi-cart-x fs-3 d-block mb-2"></i>Your cart is empty</p>
-              </div>
-              <div id="cart-totals" style="display:none">
-                <hr>
-                <div class="d-flex justify-content-between mb-1"><span class="text-muted small">Subtotal</span><span id="c-subtotal" class="fw-semibold">₹0</span></div>
-                <div class="d-flex justify-content-between mb-1"><span class="text-muted small">Tax (5%)</span><span id="c-tax" class="fw-semibold">₹0</span></div>
-                <div class="d-flex justify-content-between mb-1">
-                  <span class="text-muted small">Delivery</span>
-                  <span id="c-delivery" class="fw-semibold">₹{{ delivery_charge }}</span>
-                </div>
-                <div class="small text-success mb-2" id="c-free-del-msg"><i class="bi bi-check-circle"></i> Free delivery above ₹{{ free_delivery_above }}</div>
-                <hr>
-                <div class="d-flex justify-content-between fs-5 fw-bold">
-                  <span>Total</span>
-                  <span style="color:var(--primary)" id="c-grand">₹0</span>
-                </div>
-                <a href="{% url 'checkout' %}" class="btn btn-success w-100 rounded-pill mt-3 py-2" data-login-required>
-                  <i class="bi bi-credit-card"></i> Proceed to Checkout
-                </a>
-              </div>
-              <button class="btn btn-outline-danger btn-sm w-100 mt-2 rounded-pill" id="clear-cart-btn" style="display:none">
-                <i class="bi bi-trash"></i> Clear Cart
-              </button>
+      <!-- ═══ CART ═══ -->
+      <div class="order-sec order-cart">
+        <div class="order-sec__head">
+          <i class="bi bi-cart3" style="color:var(--primary)"></i>
+          <h5>Your Cart</h5>
+          <span class="ms-auto badge rounded-pill bg-primary bg-opacity-10 text-primary" style="font-size:.7rem;font-weight:600" id="cart-count-badge">0</span>
+        </div>
+        <div class="order-sec__body">
+          <div class="c-i-wrap" id="cart-items-container">
+            <div class="text-muted text-center py-4" id="empty-cart-msg" style="font-size:.85rem">
+              <i class="bi bi-cart-x fs-3 d-block mb-2"></i>Your cart is empty
             </div>
           </div>
+          <div id="cart-totals" style="display:none">
+            <div class="c-t">
+              <div class="c-t__r"><span>Subtotal</span><span id="c-subtotal">₹0</span></div>
+              <div class="c-t__r"><span>Tax (5%)</span><span id="c-tax">₹0</span></div>
+              <div class="c-t__r"><span>Delivery</span><span id="c-delivery">₹{{ delivery_charge }}</span></div>
+              <div class="c-t__free" id="c-free-del-msg"><i class="bi bi-check-circle"></i> Free delivery above ₹{{ free_delivery_above }}</div>
+              <div class="c-t__d"></div>
+              <div class="c-t__g"><span>Total</span><span id="c-grand">₹0</span></div>
+            </div>
+            <a href="{% url 'checkout' %}" id="checkout-btn" data-login-required>
+              <i class="bi bi-credit-card"></i> Proceed to Checkout
+            </a>
+          </div>
+          <button id="clear-cart-btn" style="display:none">
+            <i class="bi bi-trash"></i> Clear Cart
+          </button>
         </div>
       </div>
 
@@ -185,24 +288,29 @@
   var sizePrices = {{ size_prices_json|safe }};
   var toppingPrices = {{ topping_prices_json|safe }};
 
-  const flavourCards = document.querySelectorAll('.flavour-card');
-  const customizePanel = document.getElementById('customize-panel');
-  const selectedFlavourDisplay = document.querySelector('#selected-flavour-display strong');
-  const optType = document.getElementById('opt-type');
-  const optSize = document.getElementById('opt-size');
-  const optToppings = document.getElementById('opt-toppings');
-  const optQty = document.getElementById('opt-qty');
-  const optTotal = document.getElementById('opt-total');
-  const addBtn = document.getElementById('add-to-cart-btn');
-  const cartItemsContainer = document.getElementById('cart-items-container');
-  const emptyCartMsg = document.getElementById('empty-cart-msg');
-  const cartTotals = document.getElementById('cart-totals');
-  const clearBtn = document.getElementById('clear-cart-btn');
-  const loadingOverlay = document.getElementById('loading-overlay');
-  const toast = document.getElementById('cart-toast');
-  const toastMsg = document.getElementById('toast-msg');
+  var flavourCards = document.querySelectorAll('.f-c');
+  var customizePanel = document.getElementById('customize-panel');
+  var customizeContent = document.getElementById('customize-content');
+  var cpPlaceholder = document.getElementById('cp-placeholder');
+  var selectedFlavourDisplay = document.getElementById('selected-flavour-display');
+  var optType = document.getElementById('opt-type');
+  var optSize = document.getElementById('opt-size');
+  var optToppings = document.getElementById('opt-toppings');
+  var optQty = document.getElementById('opt-qty');
+  var optQtyDisplay = document.getElementById('opt-qty-display');
+  var qtyMinus = document.getElementById('qty-minus');
+  var qtyPlus = document.getElementById('qty-plus');
+  var optTotal = document.getElementById('opt-total');
+  var addBtn = document.getElementById('add-to-cart-btn');
+  var cartItemsContainer = document.getElementById('cart-items-container');
+  var cartTotals = document.getElementById('cart-totals');
+  var clearBtn = document.getElementById('clear-cart-btn');
+  var cartCountBadge = document.getElementById('cart-count-badge');
+  var loadingOverlay = document.getElementById('loading-overlay');
+  var toast = document.getElementById('cart-toast');
+  var toastMsg = document.getElementById('toast-msg');
 
-  let selectedFlavour = '';
+  var selectedFlavour = '';
 
   function showToast(msg, error) {
     toastMsg.textContent = msg;
@@ -211,15 +319,29 @@
     setTimeout(function() { toast.classList.remove('show'); }, 3000);
   }
 
+  /* ─── Option buttons ─── */
+  function setupOptBtns(container) {
+    var btns = container.querySelectorAll('.opt-b__btn');
+    var select = document.getElementById(container.dataset.for);
+    btns.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        btns.forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        select.value = btn.dataset.value;
+        select.dispatchEvent(new Event('change'));
+      });
+    });
+  }
+  document.querySelectorAll('.opt-b').forEach(setupOptBtns);
+
+  /* ─── Calc total ─── */
   function calcTotal() {
     var type = optType.value;
     var size = optSize.value;
     var topping = optToppings.value;
     var qty = parseInt(optQty.value) || 1;
     var base = (prices[type] || 100) + (sizePrices[size] || 0) + (toppingPrices[topping] || 0);
-    var total = base * qty;
-    optTotal.textContent = total;
-    return { base: base, total: total, qty: qty };
+    optTotal.textContent = base * qty;
   }
 
   [optType, optSize, optToppings, optQty].forEach(function(el) {
@@ -227,24 +349,36 @@
     el.addEventListener('input', calcTotal);
   });
 
+  /* ─── Qty ─── */
+  function syncQty() { optQtyDisplay.textContent = optQty.value; calcTotal(); }
+  qtyMinus.addEventListener('click', function() {
+    var v = parseInt(optQty.value) || 1;
+    if (v > 1) { optQty.value = v - 1; syncQty(); }
+  });
+  qtyPlus.addEventListener('click', function() {
+    var v = parseInt(optQty.value) || 1;
+    if (v < 99) { optQty.value = v + 1; syncQty(); }
+  });
+
+  /* ─── Flavour select ─── */
   flavourCards.forEach(function(card) {
     card.addEventListener('click', function() {
       flavourCards.forEach(function(c) { c.classList.remove('selected'); });
       card.classList.add('selected');
       selectedFlavour = card.dataset.flavour;
       selectedFlavourDisplay.textContent = selectedFlavour;
-      customizePanel.style.display = 'block';
+      cpPlaceholder.style.display = 'none';
+      customizeContent.style.display = 'block';
+      customizePanel.classList.add('show');
       calcTotal();
-      customizePanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     });
   });
 
+  /* ─── API ─── */
   function apiCall(action, data, cb) {
     loadingOverlay.classList.add('show');
     var body = new URLSearchParams({ action: action, csrfmiddlewaretoken: csrf });
-    if (data) {
-      Object.keys(data).forEach(function(k) { body.append(k, data[k]); });
-    }
+    if (data) Object.keys(data).forEach(function(k) { body.append(k, data[k]); });
     fetch('{% url "cart_api" %}', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
@@ -253,51 +387,40 @@
     .then(function(r) { return r.json(); })
     .then(function(resp) {
       loadingOverlay.classList.remove('show');
-      if (resp.success) {
-        if (cb) cb(resp);
-        renderCart(resp);
-        updateNavBadge(resp.cart_count);
-        showToast(resp.message);
-      } else {
-        showToast(resp.message || 'Error', true);
-      }
+      if (resp.success) { if (cb) cb(resp); renderCart(resp); updateBadges(resp.cart_count); showToast(resp.message); }
+      else { showToast(resp.message || 'Error', true); }
     })
-    .catch(function() {
-      loadingOverlay.classList.remove('show');
-      showToast('Network error', true);
-    });
+    .catch(function() { loadingOverlay.classList.remove('show'); showToast('Network error', true); });
   }
 
+  /* ─── Render cart ─── */
   function renderCart(data) {
     cartItemsContainer.innerHTML = '';
     if (!data.cart || data.cart.length === 0) {
-      cartItemsContainer.innerHTML = '<p class="text-muted text-center py-4" id="empty-cart-msg"><i class="bi bi-cart-x fs-3 d-block mb-2"></i>Your cart is empty</p>';
-      cartTotals.style.display = 'none';
-      clearBtn.style.display = 'none';
-      return;
+      cartItemsContainer.innerHTML = '<div class="text-muted text-center py-4" style="font-size:.85rem"><i class="bi bi-cart-x fs-3 d-block mb-2"></i>Your cart is empty</div>';
+      cartTotals.style.display = 'none'; clearBtn.style.display = 'none'; return;
     }
-    emptyCartMsg.style.display = 'none';
-    cartTotals.style.display = 'block';
-    clearBtn.style.display = 'block';
+    cartTotals.style.display = 'block'; clearBtn.style.display = 'block';
 
     data.cart.forEach(function(item, idx) {
       var div = document.createElement('div');
-      div.className = 'cart-item';
+      div.className = 'c-i';
       div.innerHTML =
-        '<div class="d-flex justify-content-between align-items-start">' +
-          '<div class="min-w-0 flex-grow-1 pe-2"><strong>' + item.flavour + '</strong><br>' +
-          '<small class="text-muted">' + item.type + ' | ' + item.size + '</small>' +
-          (item.toppings && item.toppings !== 'No Toppings' ? '<br><small class="text-muted">+ ' + item.toppings + '</small>' : '') +
+        '<div class="c-i__top">' +
+          '<div class="c-i__info">' +
+            '<span class="c-i__n">' + item.flavour + '</span>' +
+            '<span class="c-i__m">' + item.type + ' &middot; ' + item.size + '</span>' +
+            (item.toppings && item.toppings !== 'No Toppings' ? '<span class="c-i__m">+ ' + item.toppings + '</span>' : '') +
           '</div>' +
-          '<button class="btn btn-sm btn-outline-danger rounded-circle p-0 flex-shrink-0" style="width:28px;height:28px;" onclick="removeItem(' + idx + ')"><i class="bi bi-x small"></i></button>' +
+          '<button class="c-i__rm" onclick="rmItem(' + idx + ')"><i class="bi bi-x"></i></button>' +
         '</div>' +
-        '<div class="d-flex justify-content-between align-items-center mt-2">' +
-          '<div class="qty-control">' +
-            '<button onclick="updateQty(' + idx + ', -1)">−</button>' +
-            '<span class="qty-val">' + item.quantity + '</span>' +
-            '<button onclick="updateQty(' + idx + ', 1)">+</button>' +
+        '<div class="c-i__bot">' +
+          '<div class="qty-w" style="gap:.25rem">' +
+            '<button class="qty-b" style="width:28px;height:28px;font-size:.85rem" onclick="updQty(' + idx + ',-1)">−</button>' +
+            '<span class="qty-v" style="min-width:22px;font-size:.9rem">' + item.quantity + '</span>' +
+            '<button class="qty-b" style="width:28px;height:28px;font-size:.85rem" onclick="updQty(' + idx + ',1)">+</button>' +
           '</div>' +
-          '<span class="fw-bold" style="color:var(--primary);font-size:.95rem">₹' + item.total + '</span>' +
+          '<span style="color:var(--primary);font-weight:700;font-size:.9rem;white-space:nowrap">₹' + item.total + '</span>' +
         '</div>';
       cartItemsContainer.appendChild(div);
     });
@@ -306,45 +429,33 @@
     document.getElementById('c-tax').textContent = '₹' + data.tax;
     document.getElementById('c-delivery').textContent = data.delivery_charge == 0 ? 'FREE' : '₹' + data.delivery_charge;
     document.getElementById('c-grand').textContent = '₹' + data.grand_total;
-    document.getElementById('c-free-del-msg').style.display = data.delivery_charge > 0 ? 'block' : 'none';
+    document.getElementById('c-free-del-msg').style.display = data.delivery_charge > 0 ? 'flex' : 'none';
   }
 
-  window.updateQty = function(idx, delta) {
-    var current = 0;
-    var items = cartItemsContainer.querySelectorAll('.cart-item');
-    if (items[idx]) {
-      var qtyEl = items[idx].querySelector('.qty-val');
-      if (qtyEl) current = parseInt(qtyEl.textContent);
-    }
-    var newQty = Math.max(1, current + delta);
-    apiCall('update', { index: idx, quantity: newQty });
+  window.updQty = function(idx, delta) {
+    var items = document.querySelectorAll('.c-i');
+    var qtyEl = items[idx] && items[idx].querySelector('.qty-v');
+    var cur = qtyEl ? parseInt(qtyEl.textContent) : 0;
+    apiCall('update', { index: idx, quantity: Math.max(1, cur + delta) });
   };
+  window.rmItem = function(idx) { apiCall('remove', { index: idx }); };
 
-  window.removeItem = function(idx) {
-    apiCall('remove', { index: idx });
-  };
-
-  function updateNavBadge(count) {
-    var badge = document.getElementById('nav-cart-badge');
-    if (badge) badge.textContent = count;
+  function updateBadges(count) {
+    var b = document.getElementById('nav-cart-badge');
+    if (b) b.textContent = count;
+    if (cartCountBadge) cartCountBadge.textContent = count;
   }
 
-  clearBtn.addEventListener('click', function() {
-    apiCall('clear', {});
-  });
+  clearBtn.addEventListener('click', function() { apiCall('clear', {}); });
 
   addBtn.addEventListener('click', function() {
     if (!selectedFlavour) { showToast('Please select a flavour first.', true); return; }
-    var type = optType.value;
-    var size = optSize.value;
-    var toppings = optToppings.value;
-    var qty = parseInt(optQty.value) || 1;
     apiCall('add', {
-      ice_cream_type: type,
+      ice_cream_type: optType.value,
       flavour: selectedFlavour,
-      size: size,
-      toppings: toppings,
-      quantity: qty,
+      size: optSize.value,
+      toppings: optToppings.value,
+      quantity: parseInt(optQty.value) || 1,
     });
   });
 
