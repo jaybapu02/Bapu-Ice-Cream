@@ -3,14 +3,6 @@
 {% block title %}Your Cart — Bapu Ice Cream{% endblock %}
 {% block extra_head %}
 <style>
-  .qty-control { display: inline-flex; align-items: center; gap: 0.25rem; }
-  .qty-control button { width: 32px; height: 32px; border-radius: 50%; border: 1px solid #dee2e6; background: #fff; font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; }
-  .qty-control button:hover { background: #0d6efd; color: #fff; border-color: #0d6efd; }
-  .qty-control .qty-val { min-width: 28px; text-align: center; font-weight: 700; font-size: 1.05rem; }
-  #loading-overlay { display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(255,255,255,0.85); justify-content: center; align-items: center; flex-direction: column; }
-  #loading-overlay.show { display: flex; }
-  .spinner-big { width: 4rem; height: 4rem; border: 5px solid #e9ecef; border-top-color: #0d6efd; border-radius: 50%; animation: spin 0.8s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 {% endblock %}
 {% block body %}

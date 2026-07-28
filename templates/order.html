@@ -4,41 +4,14 @@
 {% block extra_head %}
 <meta name="description" content="Order handcrafted ice cream online from Bapu Ice Cream. Choose from 12+ flavours, custom sizes, and toppings for home delivery.">
 <style>
-  .flavour-card {
-    border: 2px solid #dee2e6; border-radius: 14px; padding: 1.25rem;
-    cursor: pointer; transition: all 0.25s; text-align: center; background: #fff;
-  }
-  .flavour-card:hover { border-color: #0d6efd; box-shadow: 0 6px 24px rgba(13,110,253,0.1); transform: translateY(-2px); }
-  .flavour-card.selected { border-color: #0d6efd; background: #f0f6ff; }
-  .flavour-card .emoji { font-size: 2.5rem; margin-bottom: 0.5rem; }
-  .flavour-card .name { font-weight: 700; font-size: 0.95rem; }
-  .flavour-card .price-tag { font-size: 0.85rem; color: #0d6efd; font-weight: 600; }
-
-  .cart-sidebar {
-    position: sticky; top: 80px; max-height: calc(100vh - 100px); overflow-y: auto;
-  }
-  .cart-item { border-bottom: 1px solid #f0f0f0; padding: 0.75rem 0; }
-  .cart-item:last-child { border-bottom: none; }
-  .qty-control { display: inline-flex; align-items: center; gap: 0.25rem; }
-  .qty-control button { width: 30px; height: 30px; border-radius: 50%; border: 1px solid #dee2e6; background: #fff; font-weight: 700; font-size: 1rem; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; }
-  .qty-control button:hover { background: #0d6efd; color: #fff; border-color: #0d6efd; }
-  .qty-control .qty-val { min-width: 24px; text-align: center; font-weight: 700; }
-
   .toast-notification {
     position: fixed; top: 80px; right: 20px; z-index: 9999;
-    background: #198754; color: #fff; padding: 0.75rem 1.25rem; border-radius: 10px;
+    background: var(--success); color: #fff; padding: 0.75rem 1.25rem; border-radius: 10px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.15); font-weight: 500;
     transform: translateX(120%); transition: transform 0.35s ease; max-width: 350px;
   }
   .toast-notification.show { transform: translateX(0); }
   .toast-notification.error { background: #dc3545; }
-
-  #loading-overlay { display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(255,255,255,0.85); justify-content: center; align-items: center; flex-direction: column; }
-  #loading-overlay.show { display: flex; }
-  .spinner-big { width: 4rem; height: 4rem; border: 5px solid #e9ecef; border-top-color: #0d6efd; border-radius: 50%; animation: spin 0.8s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  @media (max-width: 992px) { .cart-sidebar { position: static; max-height: none; } }
 </style>
 {% endblock %}
 {% block body %}
@@ -46,7 +19,7 @@
 <div id="loading-overlay"><div class="spinner-big"></div><p class="mt-3 fw-semibold text-muted">Updating cart…</p></div>
 <div id="cart-toast" class="toast-notification"><i class="bi bi-check-circle"></i> <span id="toast-msg"></span></div>
 
-<section class="py-4 bg-light">
+<section class="py-4">
   <div class="container">
     <div class="row g-4">
       <!-- Product Grid -->

@@ -5,111 +5,28 @@
 {% block extra_head %}
 <style>
   .menu-header {
-    background: linear-gradient(160deg, #faf5ff, #fff0f5, #fffbeb);
-    padding: 50px 0 40px;
+    background: var(--gradient-bg);
+    padding: clamp(30px, 6vw, 50px) 0 clamp(25px, 5vw, 40px);
     text-align: center;
   }
 
-  .pill-filter {
-    display: inline-block;
-    padding: 7px 20px;
-    border-radius: 50px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    border: 2px solid #e5e7eb;
-    color: #6b7280;
-    transition: all 0.25s ease;
-    text-decoration: none;
-    background: #fff;
-  }
-  .pill-filter:hover, .pill-filter.active {
-    background: linear-gradient(135deg, #ec4899, #a855f7);
-    border-color: transparent;
-    color: #fff;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(236,72,153,0.25);
-  }
-
-  .product-card-v2 {
-    border-radius: 20px;
-    overflow: hidden;
-    border: none;
-    background: #fff;
-    transition: all 0.35s ease;
-    position: relative;
-  }
-  .product-card-v2:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 20px 40px -8px rgba(0,0,0,0.12);
-  }
-  .product-card-v2 .img-wrap {
-    height: 200px;
-    overflow: hidden;
-    position: relative;
-  }
-  .product-card-v2 .img-wrap img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.5s ease;
-  }
-  .product-card-v2:hover .img-wrap img {
-    transform: scale(1.08);
-  }
-  .product-card-v2 .card-body {
-    padding: 1.2rem;
-  }
-  .product-card-v2 .name {
-    font-weight: 700;
-    font-size: 1rem;
-    margin-bottom: 2px;
-  }
-  .product-card-v2 .desc {
-    font-size: 0.82rem;
-    color: #9ca3af;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    margin-bottom: 8px;
-  }
-  .product-card-v2 .price {
-    font-size: 1.25rem;
-    font-weight: 800;
-    color: #059669;
-  }
   .product-card-v2 .actions {
     display: flex;
     gap: 6px;
     margin-top: 12px;
   }
   .product-card-v2 .actions .btn {
-    font-size: 0.8rem;
+    font-size: clamp(0.7rem, 1vw, 0.8rem);
     padding: 7px 0;
     border-radius: 50px;
     flex: 1;
   }
 
-  .search-field {
-    border-radius: 50px;
-    padding: 10px 18px;
-    border: 2px solid #e5e7eb;
-    transition: border-color 0.3s, box-shadow 0.3s;
-    background: #fff;
-  }
-  .search-field:focus {
-    border-color: #ec4899;
-    box-shadow: 0 0 0 3px rgba(236,72,153,0.12);
-  }
-
-  .menu-cta-card {
-    background: linear-gradient(135deg, #fdf2f8, #faf5ff);
-    border-radius: 20px;
-    border: none;
-  }
-
-  @media (max-width: 576px) {
-    .product-card-v2 .img-wrap { height: 160px; }
+  .product-card-v2 .desc {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 </style>
 {% endblock %}
@@ -130,7 +47,7 @@
 </section>
 
 <!-- ==================== FILTER BAR ==================== -->
-<section class="py-3 bg-white border-bottom sticky-top" style="top:56px;z-index:999;">
+<section class="py-3 border-bottom sticky-top" style="top:56px;z-index:999;">
   <div class="container">
     <div class="row g-2 align-items-center">
       <div class="col-lg-8">
@@ -226,7 +143,7 @@
 </section>
 
 <!-- ==================== FEATURES STRIP ==================== -->
-<section class="py-4 border-top bg-white" style="border-color:#f3f4f6 !important;">
+<section class="py-4 border-top">
   <div class="container">
     <div class="row text-center g-2">
       <div class="col-6 col-md-3">
