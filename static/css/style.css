@@ -1650,6 +1650,14 @@ footer .border-secondary {
 }
 
 /* ============================
+   CART SIDEBAR
+   ============================ */
+.cart-sidebar {
+  position: sticky;
+  top: 90px;
+}
+
+/* ============================
    QUANTITY CONTROLS
    ============================ */
 .qty-control {

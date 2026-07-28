@@ -5,15 +5,35 @@
 <meta name="description" content="Explore Bapu Ice Cream's range of services — home delivery, catering, birthday parties, weddings, corporate events, bulk orders, and more. Handcrafted ice cream experiences tailored for you.">
 <style>
 :root{--sv-primary:#FF4F9A;--sv-secondary:#8B5CF6;--sv-gold:#FFB703;--sv-mint:#4ADE80;--sv-cream:#FFF7ED;--sv-dark:#151214}
-.sv-hero{background:linear-gradient(160deg,#151214 0%,#241F21 40%,#1A1520 70%,#151214 100%);position:relative;overflow:hidden;padding:clamp(2.5rem,5vw,4.5rem) 0}
-.sv-hero::before{content:'';position:absolute;top:-50%;left:-40%;width:180%;height:180%;background:radial-gradient(circle at 30% 50%,rgba(255,79,154,.08) 0%,transparent 50%),radial-gradient(circle at 70% 30%,rgba(139,92,246,.06) 0%,transparent 50%);pointer-events:none}
-.sv-hero::after{content:'';position:absolute;bottom:0;left:0;right:0;height:80px;background:linear-gradient(to top,var(--bg),transparent)}
-.sv-orb{position:absolute;border-radius:50%;pointer-events:none;opacity:.08}
-.sv-orb--1{width:500px;height:500px;background:radial-gradient(circle,#FF4F9A,transparent 70%);top:-200px;right:-100px;animation:svDrift 12s ease-in-out infinite}
-.sv-orb--2{width:300px;height:300px;background:radial-gradient(circle,#8B5CF6,transparent 70%);bottom:-80px;left:-60px;animation:svDrift 16s ease-in-out infinite reverse}
-.sv-orb--3{width:200px;height:200px;background:radial-gradient(circle,#FFB703,transparent 70%);top:20%;left:15%;animation:svDrift 10s ease-in-out infinite 2s}
+
+/* ─── Hero — Light (default) ─── */
+.sv-hero{background:var(--gradient-bg);position:relative;overflow:hidden;padding:clamp(2.5rem,5vw,4.5rem) 0;color:var(--text)}
+.sv-hero h1{color:var(--text)}
+.sv-hero .lead{opacity:.75}
+.sv-hero::before{content:'';position:absolute;top:-50%;left:-40%;width:180%;height:180%;background:radial-gradient(circle at 30% 50%,rgba(255,79,154,.06) 0%,transparent 50%),radial-gradient(circle at 70% 30%,rgba(139,92,246,.04) 0%,transparent 50%);pointer-events:none}
+.sv-hero::after{content:'';position:absolute;bottom:0;left:0;right:0;height:60px;background:linear-gradient(to top,var(--bg),transparent)}
+.sv-orb{position:absolute;border-radius:50%;pointer-events:none}
+.sv-orb--1{width:500px;height:500px;background:radial-gradient(circle,var(--sv-primary),transparent 70%);top:-200px;right:-100px;animation:svDrift 12s ease-in-out infinite}
+.sv-orb--2{width:300px;height:300px;background:radial-gradient(circle,var(--sv-secondary),transparent 70%);bottom:-80px;left:-60px;animation:svDrift 16s ease-in-out infinite reverse}
+.sv-orb--3{width:200px;height:200px;background:radial-gradient(circle,var(--sv-gold),transparent 70%);top:20%;left:15%;animation:svDrift 10s ease-in-out infinite 2s}
 @keyframes svDrift{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,-30px)}}
-.sv-dots{position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,.04) 1px,transparent 1px);background-size:40px 40px;pointer-events:none}
+.sv-dots{position:absolute;inset:0;background-image:radial-gradient(circle,var(--border) 1px,transparent 1px);background-size:40px 40px;pointer-events:none}
+
+/* ─── Hero — Dark ─── */
+[data-theme="dark"] .sv-hero{background:linear-gradient(160deg,#151214 0%,#241F21 40%,#1A1520 70%,#151214 100%);color:#FFF7ED}
+[data-theme="dark"] .sv-hero h1{color:#FFF7ED}
+[data-theme="dark"] .sv-hero .lead{opacity:.85}
+[data-theme="dark"] .sv-hero::before{background:radial-gradient(circle at 30% 50%,rgba(255,79,154,.08) 0%,transparent 50%),radial-gradient(circle at 70% 30%,rgba(139,92,246,.06) 0%,transparent 50%)}
+[data-theme="dark"] .sv-orb{opacity:.08}
+[data-theme="dark"] .sv-dots{background-image:radial-gradient(circle,rgba(255,255,255,.04) 1px,transparent 1px)}
+
+/* ─── Theme-aware outline button ─── */
+.sv-btn-outline{color:var(--text);border-color:var(--border);background:transparent}
+.sv-btn-outline:hover{color:#fff;background:var(--gradient-pink);border-color:transparent}
+[data-theme="dark"] .sv-btn-outline{color:#FFF7ED;border-color:rgba(255,255,255,.3)}
+[data-theme="dark"] .sv-btn-outline:hover{color:#fff;background:var(--gradient-pink);border-color:transparent}
+
+
 
 /* ─── Featured Card ─── */
 .feat-card{position:relative;border-radius:24px;overflow:hidden;background:var(--bg-card);border:1px solid var(--border);height:100%;display:flex;flex-direction:column;transition:all .4s cubic-bezier(.4,0,.2,1)}
@@ -49,6 +69,17 @@
 .sv-empty__icon{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,rgba(255,79,154,.08),rgba(139,92,246,.08));display:flex;align-items:center;justify-content:center;margin:0 auto 1rem}
 .sv-empty__icon i{font-size:2rem;background:linear-gradient(135deg,#FF4F9A,#8B5CF6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 
+/* ─── CTA Section ─── */
+.sv-cta{background:var(--gradient-bg);color:var(--text)}
+.sv-cta h2{color:var(--text)}
+.sv-cta .lead{opacity:.7}
+.sv-cta__orb{position:absolute;border-radius:50%;pointer-events:none}
+.sv-cta__orb--pink{top:-30%;right:-20%;width:400px;height:400px;background:radial-gradient(circle,rgba(255,79,154,.06),transparent 70%)}
+.sv-cta__orb--purple{bottom:-30%;left:-20%;width:300px;height:300px;background:radial-gradient(circle,rgba(139,92,246,.06),transparent 70%)}
+[data-theme="dark"] .sv-cta{background:linear-gradient(160deg,#151214 0%,#241F21 40%,#1A1520 70%,#151214 100%);color:#FFF7ED}
+[data-theme="dark"] .sv-cta h2{color:#FFF7ED}
+[data-theme="dark"] .sv-cta .lead{opacity:.75}
+
 /* ─── Decorated Section Heading ─── */
 .sv-heading{text-align:center;margin-bottom:2rem}
 .sv-heading__label{display:inline-flex;align-items:center;gap:.4rem;padding:.3rem 1rem;border-radius:50px;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;border:1px solid rgba(255,79,154,.2);color:var(--primary);margin-bottom:.75rem}
@@ -81,10 +112,10 @@
       <i class="bi bi-cup-straw"></i> Handcrafted With Love
     </span>
     <h1 class="fw-black mb-3" style="font-size:clamp(2rem,5vw,3.2rem);line-height:1.1">Our Services</h1>
-    <p class="lead mx-auto mb-4" style="max-width:580px;opacity:.85;font-size:clamp(1rem,1.3vw,1.15rem)">From doorstep delivery to grand celebrations — every scoop is an experience crafted just for you.</p>
+    <p class="lead mx-auto mb-4" style="max-width:580px;font-size:clamp(1rem,1.3vw,1.15rem)">From doorstep delivery to grand celebrations — every scoop is an experience crafted just for you.</p>
     <div class="d-flex justify-content-center gap-3 flex-wrap">
       <a href="{% url 'order' %}" class="btn btn-lg btn-primary rounded-pill px-4 px-lg-5 shadow-sm"><i class="bi bi-cart-plus"></i> Order Now</a>
-      <a href="{% url 'catering' %}" class="btn btn-lg btn-outline-light rounded-pill px-4 px-lg-5 border-2"><i class="bi bi-calendar-check"></i> Book Catering</a>
+      <a href="{% url 'catering' %}" class="btn btn-lg sv-btn-outline rounded-pill px-4 px-lg-5 border-2"><i class="bi bi-calendar-check"></i> Book Catering</a>
     </div>
   </div>
 </section>
@@ -352,16 +383,16 @@
 {% endif %}
 
 <!-- ═══ CTA ═══ -->
-<section class="py-5" style="background:linear-gradient(160deg,#151214 0%,#241F21 40%,#1A1520 70%,#151214 100%);position:relative;overflow:hidden">
-  <div style="position:absolute;top:-30%;right:-20%;width:400px;height:400px;background:radial-gradient(circle,rgba(255,79,154,.06),transparent 70%);border-radius:50%;pointer-events:none"></div>
-  <div style="position:absolute;bottom:-30%;left:-20%;width:300px;height:300px;background:radial-gradient(circle,rgba(139,92,246,.06),transparent 70%);border-radius:50%;pointer-events:none"></div>
-  <div class="container text-center text-white position-relative" style="z-index:1">
+<section class="py-5 sv-cta" style="position:relative;overflow:hidden">
+  <div class="sv-cta__orb sv-cta__orb--pink"></div>
+  <div class="sv-cta__orb sv-cta__orb--purple"></div>
+  <div class="container text-center position-relative" style="z-index:1">
     <h2 class="fw-black mb-3" style="font-size:clamp(1.5rem,3vw,2rem)">Ready to Get Started?</h2>
-    <p class="lead mb-4 opacity-75 mx-auto" style="max-width:520px;font-size:clamp(.95rem,1.2vw,1.1rem)">Whether it's a scoop for one or catering for a hundred — we've got you covered.</p>
+    <p class="lead mb-4 mx-auto" style="max-width:520px;font-size:clamp(.95rem,1.2vw,1.1rem)">Whether it's a scoop for one or catering for a hundred — we've got you covered.</p>
     <div class="d-flex justify-content-center gap-3 flex-wrap">
       <a href="{% url 'order' %}" class="btn btn-lg btn-primary rounded-pill px-4 px-lg-5 shadow-sm"><i class="bi bi-cart-plus"></i> Order Now</a>
-      <a href="{% url 'catering' %}" class="btn btn-lg btn-outline-light rounded-pill px-4 px-lg-5 border-2"><i class="bi bi-calendar-check"></i> Book Catering</a>
-      <a href="{% url 'contact' %}" class="btn btn-lg btn-outline-light rounded-pill px-4 px-lg-5 border-2"><i class="bi bi-chat-dots"></i> Contact Us</a>
+      <a href="{% url 'catering' %}" class="btn btn-lg sv-btn-outline rounded-pill px-4 px-lg-5 border-2"><i class="bi bi-calendar-check"></i> Book Catering</a>
+      <a href="{% url 'contact' %}" class="btn btn-lg sv-btn-outline rounded-pill px-4 px-lg-5 border-2"><i class="bi bi-chat-dots"></i> Contact Us</a>
     </div>
   </div>
 </section>
