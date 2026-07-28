@@ -99,30 +99,30 @@
     {% endif %}
 
     {% if all_products %}
-      <div class="row g-4">
+      <div class="row g-3 g-lg-4 product-grid">
         {% for product in all_products %}
           <div class="col-md-4 col-lg-3 col-6">
-            <div class="card product-card-v2 shadow-sm">
+            <div class="card product-card-v2 shadow-sm h-100">
               <div class="img-wrap">
-                  <img src="{{ product.display_image }}" alt="{{ product.name }}" style="width:100%;height:100%;object-fit:cover">
+                  <img src="{{ product.display_image }}" alt="{{ product.name }}" loading="lazy" width="300" height="300">
                 {% if product.is_featured %}
                   <span class="badge bg-warning text-dark position-absolute top-0 start-0 m-2">⭐ Featured</span>
                 {% endif %}
                 {% if product.category %}
-                  <span class="badge bg-white text-dark border position-absolute top-0 end-0 m-2">
+                  <span class="badge bg-white text-dark border position-absolute top-0 end-0 m-2 small">
                     {{ product.category.name }}
                   </span>
                 {% endif %}
               </div>
-              <div class="card-body">
+              <div class="card-body d-flex flex-column">
                 <h6 class="name">{{ product.name }}</h6>
-                <p class="desc">{{ product.description|default:"Delicious homemade ice cream" }}</p>
-                <div class="price">₹{{ product.price }}</div>
-                <div class="actions">
-                  <a href="{% url 'order' %}?flavour={{ product.name|urlencode }}" class="btn btn-primary btn-sm">
+                <p class="desc text-muted small">{{ product.description|default:"Delicious homemade ice cream" }}</p>
+                <div class="price mt-auto">₹{{ product.price }}</div>
+                <div class="actions mt-2">
+                  <a href="{% url 'order' %}?flavour={{ product.name|urlencode }}" class="btn btn-primary btn-sm rounded-pill">
                     <i class="bi bi-cart-plus"></i> Order
                   </a>
-                  <a href="{% url 'product_detail' product.slug %}" class="btn btn-outline-secondary btn-sm">
+                  <a href="{% url 'product_detail' product.slug %}" class="btn btn-outline-secondary btn-sm rounded-pill">
                     <i class="bi bi-eye"></i> View
                   </a>
                 </div>

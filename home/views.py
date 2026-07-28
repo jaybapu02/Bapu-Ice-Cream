@@ -83,6 +83,19 @@ class LandingView(TemplateView):
         context['featured_products'] = annotate_products_with_images(
             Product.objects.filter(is_available=True, is_featured=True)[:6]
         )
+        try:
+            from django.contrib.auth import get_user_model
+            from django.db.models import Count, Avg
+            context['total_customers'] = get_user_model().objects.count()
+            context['total_orders'] = Order.objects.count()
+            context['total_products'] = Product.objects.filter(is_available=True).count()
+            avg = Review.objects.aggregate(Avg('rating'))['rating__avg']
+            context['avg_rating'] = round(float(avg), 1) if avg else 4.9
+        except Exception:
+            context['total_customers'] = 0
+            context['total_orders'] = 0
+            context['total_products'] = 0
+            context['avg_rating'] = 4.9
         return context
 
 
@@ -230,14 +243,20 @@ class ContactView(LoginRequiredPostMixin, FormView):
     def form_valid(self, form):
         try:
             form.save()
-            messages.success(self.request, "Your message has been sent successfully!")
             logger.info(f"New contact submission from {form.cleaned_data['email']}")
+            if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': True, 'message': 'Message sent successfully!'})
+            messages.success(self.request, "Your message has been sent successfully!")
         except DatabaseError as e:
             logger.error(f"Database error while saving contact: {e}")
+            if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': False, 'message': 'A database error occurred. Please try again.'}, status=500)
             messages.error(self.request, "A database error occurred. Please try again later.")
         return super().form_valid(form)
 
     def form_invalid(self, form):
+        if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'errors': form.errors}, status=400)
         messages.error(self.request, "Please correct the errors below.")
         return super().form_invalid(form)
 
@@ -449,12 +468,21 @@ def _send_order_notifications(order):
 # AJAX Cart API
 # ──────────────────────────────────────────────
 
-class CartAPIView(LoginRequiredMixin, View):
+class CartAPIView(View):
     """Generic AJAX cart endpoint — add, update, remove, get"""
 
     def post(self, request):
         action = request.POST.get("action", "")
         cart = request.session.get("cart", [])
+
+        # Require login for mutations, list is public
+        MUTATION_ACTIONS = ("add", "update", "remove", "clear")
+        if action in MUTATION_ACTIONS and not request.user.is_authenticated:
+            return JsonResponse({
+                'login_required': True,
+                'redirect_url': reverse('login') + '?next=' + quote(request.get_full_path()),
+                'message': 'Please log in to continue.',
+            }, status=401)
 
         try:
             if action == "add":
@@ -557,7 +585,8 @@ class OrderView(View):
 # Cart Page
 # ──────────────────────────────────────────────
 
-class CartView(LoginRequiredMixin, TemplateView):
+class CartView(TemplateView):
+    """Cart page - viewable by anyone. Login required to modify cart."""
     template_name = "cart.html"
 
     def get_context_data(self, **kwargs):

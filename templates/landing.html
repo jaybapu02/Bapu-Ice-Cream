@@ -12,10 +12,6 @@
 <meta name="twitter:title" content="Bapu Ice Cream">
 <meta name="twitter:description" content="50+ handcrafted flavours made with love. Order online for home delivery.">
 <style>
-  .hero-img-wrap {
-    position: relative;
-    display: inline-block;
-  }
   .hero-img-wrap::after {
     content: '';
     position: absolute;
@@ -23,15 +19,8 @@
     border-radius: 24px;
     background: linear-gradient(135deg, rgba(255, 79, 154, 0.15), rgba(139, 92, 246, 0.15));
     transform: rotate(-3deg);
-    z-index: -1;
-  }
-
-  @media (max-width: 768px) {
-    .premium-hero { padding: 90px 0 50px; }
-  }
-
-  @media (max-width: 425px) {
-    .premium-hero { padding: 80px 0 40px; }
+    z-index: 0;
+    pointer-events: none;
   }
 </style>
 {% endblock %}
@@ -40,47 +29,51 @@
 
 <!-- ==================== HERO ==================== -->
 <section class="premium-hero">
-  <div class="container position-relative">
-    <div class="row g-5 align-items-center">
-      <div class="col-lg-6">
-        <div class="brand-tag">
-          <i class="bi bi-award-fill"></i> India's Favourite Since 2010
-        </div>
-        <h1 class="display-3 fw900 mb-3" style="line-height:1.1;">
-          Every Scoop is a
-          <span class="text-gradient">Hug</span> of Happiness
-        </h1>
-        <p class="lead text-muted mb-4" style="max-width:480px;">
-          Handcrafted artisan ice cream made with love, premium ingredients, and 50+ unforgettable flavours. Delivered fresh to your doorstep.
-        </p>
-        <div class="d-flex flex-wrap gap-3">
-          <a href="{% url 'products' %}" class="btn btn-lg btn-primary rounded-pill px-5 py-3 shadow-sm">
-            <i class="bi bi-cart-plus"></i> Explore Menu
-          </a>
-          <a href="{% url 'about' %}" class="btn btn-lg btn-outline-dark rounded-pill px-5 py-3">
-            Our Story
-          </a>
-        </div>
-        <div class="hero-stats">
-          <div class="hero-stat">
-            <div class="num">50+</div>
-            <div class="label">Flavours</div>
+  <div class="container">
+    <div class="row g-0 align-items-center">
+      <!-- Left column: Content -->
+      <div class="col-lg-6 pe-lg-5">
+        <div class="hero-content">
+          <div class="brand-tag">
+            <i class="bi bi-award-fill"></i> India's Favourite Since 2010
           </div>
-          <div class="hero-stat-divider"></div>
-          <div class="hero-stat">
-            <div class="num">10K+</div>
-            <div class="label">Happy Customers</div>
+          <h1 class="fw900">
+            Every Scoop is a
+            <span class="text-gradient">Hug</span> of Happiness
+          </h1>
+          <p class="lead text-muted">
+            Handcrafted artisan ice cream made with love, premium ingredients, and 50+ unforgettable flavours. Delivered fresh to your doorstep.
+          </p>
+          <div class="d-flex flex-wrap gap-3 mt-1">
+            <a href="{% url 'products' %}" class="btn btn-lg btn-primary rounded-pill px-4 px-lg-5 py-3 shadow-sm">
+              <i class="bi bi-cart-plus"></i> Explore Menu
+            </a>
+            <a href="{% url 'about' %}" class="btn btn-lg btn-outline-dark rounded-pill px-4 px-lg-5 py-3">
+              Our Story
+            </a>
           </div>
-          <div class="hero-stat-divider"></div>
-          <div class="hero-stat">
-            <div class="num">4.9</div>
-            <div class="label">Avg Rating ★</div>
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <div class="num">{{ total_products }}+</div>
+              <div class="label">Flavours</div>
+            </div>
+            <div class="hero-stat-divider"></div>
+            <div class="hero-stat">
+              <div class="num">10K+</div>
+              <div class="label">Happy Customers</div>
+            </div>
+            <div class="hero-stat-divider"></div>
+            <div class="hero-stat">
+              <div class="num">{{ avg_rating }}</div>
+              <div class="label">Avg Rating ★</div>
+            </div>
           </div>
         </div>
       </div>
-      <div class="col-lg-6 text-center d-none d-lg-block">
+      <!-- Right column: Image -->
+      <div class="col-lg-6 hero-image-col">
         <div class="hero-img-wrap">
-          <img src="{% static 'hero-icecream.jpg' %}" alt="Ice Cream Delight" class="hero-main-img" fetchpriority="high">
+          <img src="{% static 'hero-icecream.jpg' %}" alt="Delicious Bapu Ice Cream served in a cone with colourful sprinkles" class="hero-main-img" fetchpriority="high" width="600" height="450">
         </div>
       </div>
     </div>
@@ -120,7 +113,7 @@
           </div>
           <div>
             <h6 class="fw-bold mb-0 small">Free Delivery</h6>
-            <small class="text-muted">Above ₹500</small>
+            <small class="text-muted">Above ₹200</small>
           </div>
         </div>
       </div>
@@ -144,7 +137,7 @@
   <div class="container">
     <div class="row g-5 align-items-center">
       <div class="col-lg-5">
-        <img src="{% static 'jay.jpeg' %}" alt="Founder" class="img-fluid rounded-4 shadow-lg" loading="lazy">
+        <img src="{% static 'jay.jpeg' %}" alt="Jaychandra Das - Founder of Bapu Ice Cream" class="img-fluid rounded-4 shadow-lg" loading="lazy" width="500" height="500">
       </div>
       <div class="col-lg-7">
         <span class="section-subtitle"><i class="bi bi-bookmark-heart"></i> Our Story</span>
@@ -158,7 +151,7 @@
         <div class="row g-3 mt-4">
           <div class="col-4">
             <div class="text-center p-3 rounded-3" style="background:#fdf2f8;">
-              <h3 class="fw-bold text-pink mb-0">50+</h3>
+              <h3 class="fw-bold text-pink mb-0">{{ total_products }}+</h3>
               <small class="text-muted">Flavours</small>
             </div>
           </div>
@@ -192,14 +185,16 @@
       <h2 class="fw-bold">Our Most Loved <span class="text-gradient">Flavours</span></h2>
       <p class="text-muted">The ones everyone keeps coming back for</p>
     </div>
-    <div class="row g-4">
+    <div class="row g-3 g-lg-4">
       {% for product in featured_products %}
       <div class="col-md-4 col-lg-2 col-6">
-        <div class="card flavour-card shadow-sm h-100">
-            <img src="{{ product.display_image }}" class="card-img-top" alt="{{ product.name }}" style="height:200px;object-fit:cover">
-          <div class="card-body text-center p-3">
-            <h6 class="fw-bold mb-1">{{ product.name }}</h6>
-            <p class="text-success fw-bold fs-5 mb-2">₹{{ product.price }}</p>
+        <div class="card h-100 border-0 shadow-sm" style="border-radius:16px;overflow:hidden">
+          <div style="aspect-ratio:1/1;overflow:hidden;background:var(--border-light)">
+            <img src="{{ product.display_image }}" alt="{{ product.name }}" loading="lazy" style="width:100%;height:100%;object-fit:cover;transition:transform 0.4s ease" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
+          </div>
+          <div class="card-body text-center p-3 d-flex flex-column">
+            <h6 class="fw-bold mb-1" style="font-size:clamp(0.8rem,1.2vw,0.95rem)">{{ product.name }}</h6>
+            <p class="text-success fw-bold fs-6 mb-2 mt-auto">₹{{ product.price }}</p>
             <a href="{% url 'product_detail' product.slug %}" class="btn btn-sm btn-outline-primary rounded-pill w-100">
               View <i class="bi bi-arrow-right"></i>
             </a>
@@ -250,7 +245,7 @@
             <i class="bi bi-truck text-success"></i>
           </div>
           <h5 class="fw-bold mt-3">Home Delivery</h5>
-          <p class="text-muted small">Fast, contactless delivery right to your doorstep. Free above ₹500.</p>
+          <p class="text-muted small">Fast, contactless delivery right to your doorstep. Free above ₹200.</p>
           <a href="{% url 'order' %}" class="btn btn-outline-primary rounded-pill mt-auto">Order Now</a>
         </div>
       </div>

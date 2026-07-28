@@ -19,7 +19,7 @@
 <section class="menu-hero text-white text-center">
   <div class="container position-relative">
     <h1 class="fw-black mb-2">🍦 Our Ice Cream Menu</h1>
-    <p class="lead mx-auto" style="max-width:600px">Handcrafted with premium ingredients — explore our collection of artisanal flavours, from timeless classics to bold new creations.</p>
+    <p class="lead mx-auto mb-0" style="max-width:600px">Handcrafted with premium ingredients — explore our collection of artisanal flavours, from timeless classics to bold new creations.</p>
   </div>
 </section>
 
@@ -34,15 +34,15 @@
       </div>
       <div class="featured-scroll">
         {% for p in featured_products %}
-        <div class="product-card">
+        <div class="product-card shadow-sm">
           <div class="product-img-wrap">
-            <img src="{{ p.display_image }}" alt="{{ p.name }}" loading="lazy">
+            <img src="{{ p.display_image }}" alt="{{ p.name }}" loading="lazy" width="300" height="225">
             <div class="product-badges"><span class="badge bg-warning text-dark">Featured</span></div>
           </div>
-          <div class="card-body text-center p-3">
+          <div class="card-body text-center p-3 d-flex flex-column">
             <h6 class="fw-bold mb-1">{{ p.name }}</h6>
-            <p class="text-success fw-bold fs-5 mb-2">₹{{ p.price }}</p>
-            <a href="{% url 'product_detail' p.slug %}" class="btn btn-sm btn-outline-primary w-100">View</a>
+            <p class="text-success fw-bold fs-5 mb-2 mt-auto">₹{{ p.price }}</p>
+            <a href="{% url 'product_detail' p.slug %}" class="btn btn-sm btn-outline-primary w-100 rounded-pill">View</a>
           </div>
         </div>
         {% endfor %}
@@ -56,15 +56,15 @@
       </div>
       <div class="featured-scroll">
         {% for p in best_sellers %}
-        <div class="product-card">
+        <div class="product-card shadow-sm">
           <div class="product-img-wrap">
-            <img src="{{ p.display_image }}" alt="{{ p.name }}" loading="lazy">
+            <img src="{{ p.display_image }}" alt="{{ p.name }}" loading="lazy" width="300" height="225">
             <div class="product-badges"><span class="badge bg-success">Best Seller</span></div>
           </div>
-          <div class="card-body text-center p-3">
+          <div class="card-body text-center p-3 d-flex flex-column">
             <h6 class="fw-bold mb-1">{{ p.name }}</h6>
-            <p class="text-success fw-bold fs-5 mb-2">₹{{ p.price }}</p>
-            <a href="{% url 'product_detail' p.slug %}" class="btn btn-sm btn-outline-primary w-100">View</a>
+            <p class="text-success fw-bold fs-5 mb-2 mt-auto">₹{{ p.price }}</p>
+            <a href="{% url 'product_detail' p.slug %}" class="btn btn-sm btn-outline-primary w-100 rounded-pill">View</a>
           </div>
         </div>
         {% endfor %}
@@ -78,15 +78,15 @@
       </div>
       <div class="featured-scroll">
         {% for p in new_arrivals %}
-        <div class="product-card">
+        <div class="product-card shadow-sm">
           <div class="product-img-wrap">
-            <img src="{{ p.display_image }}" alt="{{ p.name }}" loading="lazy">
+            <img src="{{ p.display_image }}" alt="{{ p.name }}" loading="lazy" width="300" height="225">
             <div class="product-badges"><span class="badge bg-info text-dark">New</span></div>
           </div>
-          <div class="card-body text-center p-3">
+          <div class="card-body text-center p-3 d-flex flex-column">
             <h6 class="fw-bold mb-1">{{ p.name }}</h6>
-            <p class="text-success fw-bold fs-5 mb-2">₹{{ p.price }}</p>
-            <a href="{% url 'product_detail' p.slug %}" class="btn btn-sm btn-outline-primary w-100">View</a>
+            <p class="text-success fw-bold fs-5 mb-2 mt-auto">₹{{ p.price }}</p>
+            <a href="{% url 'product_detail' p.slug %}" class="btn btn-sm btn-outline-primary w-100 rounded-pill">View</a>
           </div>
         </div>
         {% endfor %}
@@ -153,13 +153,13 @@
     <!-- Product Grid -->
     <div id="productGrid">
       {% if products %}
-      <div class="row g-4">
+      <div class="row g-3 g-lg-4 product-grid">
         {% for product in products %}
         <div class="col-md-4 col-lg-3 col-6 fade-in stagger-{{ forloop.counter|stringformat:'d'|slice:':1'|default:'1' }}">
           <div class="product-card card border-0 shadow-sm h-100" data-product-id="{{ product.id }}" data-product-slug="{{ product.slug }}">
             <!-- Image -->
             <div class="product-img-wrap">
-              <img src="{{ product.display_image }}" alt="{{ product.name }}" loading="lazy" class="card-img-top" data-product-id="{{ product.id }}" data-product-slug="{{ product.slug }}" data-bs-toggle="modal" data-bs-target="#quickViewModal" style="cursor:pointer">
+              <img src="{{ product.display_image }}" alt="{{ product.name }}" loading="lazy" class="card-img-top" width="300" height="300" data-product-id="{{ product.id }}" data-product-slug="{{ product.slug }}" data-bs-toggle="modal" data-bs-target="#quickViewModal" style="cursor:pointer">
               <!-- Badges -->
               <div class="product-badges">
                 {% if not product.is_available or product.stock == 0 %}
@@ -181,7 +181,7 @@
               {% if product.category %}
               <small class="text-primary fw-semibold mb-1">{{ product.category.name }}</small>
               {% endif %}
-              <h6 class="fw-bold mb-1" style="font-size:1rem">{{ product.name }}</h6>
+              <h6 class="fw-bold mb-1">{{ product.name }}</h6>
               <!-- Rating -->
               <div class="product-rating mb-1">
                 <span class="stars">
@@ -192,7 +192,7 @@
                 <span class="text-muted small">({{ product.rating }})</span>
               </div>
               <p class="text-muted small mb-2 lh-sm flex-grow-1">{{ product.description|truncatewords:12 }}</p>
-              <div class="d-flex align-items-center justify-content-between mb-2">
+              <div class="d-flex align-items-center justify-content-between mb-2 mt-auto">
                 <span class="text-success fw-bold fs-5">₹{{ product.price }}</span>
               </div>
               <!-- Add to Cart -->
@@ -358,15 +358,17 @@
   });
 
   function updateCartBadge(count) {
-    var badge = document.querySelector('.navbar .position-absolute.top-0.start-100.translate-middle.badge');
-    if (badge) {
-      if (count > 0) {
-        badge.textContent = count;
-        badge.style.display = '';
-      } else {
-        badge.style.display = 'none';
+    var badges = document.querySelectorAll('.cart-badge, .navbar [class*="badge"]:not(.rounded-pill)');
+    badges.forEach(function(badge) {
+      if (badge && badge.tagName === 'SPAN' && !badge.classList.contains('rounded-pill')) {
+        if (count > 0) {
+          badge.textContent = count;
+          if (badge.classList.contains('d-none')) badge.classList.remove('d-none');
+        } else {
+          badge.textContent = '0';
+        }
       }
-    }
+    });
   }
 
   function showToast(msg) {

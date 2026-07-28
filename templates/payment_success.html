@@ -8,13 +8,20 @@
       <i class="bi bi-check-circle-fill text-success" style="font-size: 5rem;"></i>
       <h1 class="fw-bold mt-3">Payment Successful!</h1>
       <p class="lead text-muted">Thank you for ordering from Bapu Ice Cream 🍦</p>
+      {% if order %}
       <p class="text-muted">Order ID: <strong>{{ order.order_id }}</strong></p>
-      <div class="d-flex justify-content-center gap-3 mt-4">
+      {% endif %}
+      <div class="d-flex justify-content-center gap-3 mt-4 flex-wrap">
         <a href="{% url 'order' %}" class="btn btn-primary rounded-pill px-5 py-2">
           <i class="bi bi-cart-plus"></i> Order More
         </a>
+        {% if order %}
         <a href="{% url 'order_track' %}?order_id={{ order.order_id }}" class="btn btn-outline-primary rounded-pill px-5 py-2">
           <i class="bi bi-truck"></i> Track Order
+        </a>
+        {% endif %}
+        <a href="{% url 'products' %}" class="btn btn-outline-primary rounded-pill px-5 py-2">
+          <i class="bi bi-grid"></i> Browse Menu
         </a>
       </div>
     </div>

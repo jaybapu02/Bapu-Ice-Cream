@@ -139,7 +139,7 @@
         <!-- Action Buttons -->
         <div class="d-flex gap-3 mt-4 flex-wrap">
           {% if product.is_available and product.stock > 0 %}
-          <button class="btn btn-lg btn-primary rounded-pill px-5 add-cart-detail" data-login-required data-product-name="{{ product.name }}" data-product-price="{{ product.price }}">
+          <button class="btn btn-lg btn-primary rounded-pill px-4 px-lg-5 add-cart-detail" data-login-required data-product-name="{{ product.name }}" data-product-price="{{ product.price }}">
             <i class="bi bi-cart-plus"></i> Add to Cart
           </button>
           {% endif %}
@@ -149,10 +149,14 @@
           {% if user.is_authenticated %}
           <form method="post" action="{% url 'wishlist_toggle' product.id %}" class="d-inline">
             {% csrf_token %}
-            <button type="submit" class="btn btn-lg btn-outline-danger rounded-pill px-4">
+            <button type="submit" class="btn btn-lg btn-outline-danger rounded-pill px-4" aria-label="Toggle wishlist">
               <i class="bi bi-heart"></i>
             </button>
           </form>
+          {% else %}
+          <button class="btn btn-lg btn-outline-danger rounded-pill px-4" data-login-required aria-label="Add to wishlist">
+            <i class="bi bi-heart"></i>
+          </button>
           {% endif %}
         </div>
       </div>
@@ -232,11 +236,11 @@
       <div class="col-md-3 col-6">
         <div class="product-card card border-0 shadow-sm h-100">
           <div class="product-img-wrap">
-            <img src="{{ rp.display_image }}" alt="{{ rp.name }}" loading="lazy">
+            <img src="{{ rp.display_image }}" alt="{{ rp.name }}" loading="lazy" width="300" height="225">
           </div>
-          <div class="card-body text-center p-3">
+          <div class="card-body text-center p-3 d-flex flex-column">
             <h6 class="fw-bold mb-1">{{ rp.name }}</h6>
-            <p class="text-success fw-bold mb-2">₹{{ rp.price }}</p>
+            <p class="text-success fw-bold mb-2 mt-auto">₹{{ rp.price }}</p>
             <a href="{% url 'product_detail' rp.slug %}" class="btn btn-sm btn-outline-primary w-100 rounded-pill">View</a>
           </div>
         </div>
@@ -254,11 +258,11 @@
       <div class="col-md-3 col-6">
         <div class="product-card card border-0 shadow-sm h-100">
           <div class="product-img-wrap">
-            <img src="{{ rp.display_image }}" alt="{{ rp.name }}" loading="lazy">
+            <img src="{{ rp.display_image }}" alt="{{ rp.name }}" loading="lazy" width="300" height="225">
           </div>
-          <div class="card-body text-center p-3">
+          <div class="card-body text-center p-3 d-flex flex-column">
             <h6 class="fw-bold mb-1">{{ rp.name }}</h6>
-            <p class="text-success fw-bold mb-2">₹{{ rp.price }}</p>
+            <p class="text-success fw-bold mb-2 mt-auto">₹{{ rp.price }}</p>
             <a href="{% url 'product_detail' rp.slug %}" class="btn btn-sm btn-outline-primary w-100 rounded-pill">View</a>
           </div>
         </div>
@@ -302,11 +306,12 @@
         btn.classList.remove('btn-primary');
         btn.classList.add('btn-success');
         if (data.cart_count !== undefined) {
-          var badge = document.querySelector('.navbar .position-absolute.top-0.start-100.translate-middle.badge');
-          if (badge) {
-            if (data.cart_count > 0) { badge.textContent = data.cart_count; badge.style.display = ''; }
-            else { badge.style.display = 'none'; }
-          }
+          var badges = document.querySelectorAll('.cart-badge, .navbar [class*="badge"]');
+          badges.forEach(function(b) {
+            if (b && b.tagName === 'SPAN' && !b.classList.contains('rounded-pill')) {
+              b.textContent = data.cart_count > 0 ? data.cart_count : '0';
+            }
+          });
         }
         setTimeout(function() {
           btn.innerHTML = '<i class="bi bi-cart-plus"></i> Add to Cart';

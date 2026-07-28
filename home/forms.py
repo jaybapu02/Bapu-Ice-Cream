@@ -47,17 +47,19 @@ class ContactForm(forms.ModelForm):
         fields = ['name', 'email', 'phone', 'message']
         widgets = {
             'name': forms.TextInput(attrs={
-                'class': 'form-control', 'placeholder': 'Your Name'
+                'class': 'form-control', 'placeholder': 'Your full name',
+                'autocomplete': 'name', 'maxlength': '100'
             }),
             'email': forms.EmailInput(attrs={
-                'class': 'form-control', 'placeholder': 'Your Email'
+                'class': 'form-control', 'placeholder': 'your@email.com',
+                'autocomplete': 'email'
             }),
             'phone': forms.TextInput(attrs={
                 'class': 'form-control', 'placeholder': 'e.g. +919876543210',
-                'type': 'tel'
+                'type': 'tel', 'autocomplete': 'tel'
             }),
             'message': forms.Textarea(attrs={
-                'class': 'form-control', 'placeholder': 'Your Message',
+                'class': 'form-control', 'placeholder': 'Tell us how we can help you...',
                 'rows': 4
             }),
         }

@@ -37,17 +37,17 @@
                   <tbody>
                     {% for order in orders %}
                       <tr>
-                        <td><strong>{{ order.order_id }}</strong></td>
-                        <td>{{ order.created_at|date:"M d, Y" }}</td>
-                        <td>{{ order.items.count }}</td>
-                        <td class="fw-bold">₹{{ order.total_price }}</td>
+                        <td><strong class="small">{{ order.order_id }}</strong></td>
+                        <td class="small">{{ order.created_at|date:"M d, Y" }}</td>
+                        <td class="small">{{ order.items.count }}</td>
+                        <td class="fw-bold small">₹{{ order.total_price }}</td>
                         <td>
-                          <span class="badge {% if order.status == 'DELIVERED' %}bg-success{% elif order.status == 'CANCELLED' %}bg-danger{% elif order.status == 'PENDING' %}bg-warning{% elif order.status == 'CONFIRMED' %}bg-info{% elif order.status == 'PREPARING' %}bg-primary{% elif order.status == 'OUT_FOR_DELIVERY' %}bg-dark{% else %}bg-secondary{% endif %}">
+                          <span class="badge {% if order.status == 'DELIVERED' %}bg-success{% elif order.status == 'CANCELLED' %}bg-danger{% elif order.status == 'PENDING' %}bg-warning text-dark{% elif order.status == 'CONFIRMED' %}bg-info text-dark{% elif order.status == 'PREPARING' %}bg-primary{% elif order.status == 'OUT_FOR_DELIVERY' %}bg-dark{% else %}bg-secondary{% endif %} fs-6">
                             {{ order.get_status_display }}
                           </span>
                         </td>
                         <td>
-                          <a href="{% url 'order_track' %}?order_id={{ order.order_id }}" class="btn btn-sm btn-outline-primary rounded-pill">
+                          <a href="{% url 'order_track' %}?order_id={{ order.order_id }}" class="btn btn-sm btn-outline-primary rounded-pill" aria-label="Track order">
                             <i class="bi bi-truck"></i>
                           </a>
                         </td>
@@ -57,9 +57,10 @@
                 </table>
               </div>
             {% else %}
-              <p class="text-muted text-center py-3">No orders yet.</p>
-              <div class="text-center">
-                <a href="{% url 'order' %}" class="btn btn-primary rounded-pill">Order Now</a>
+              <div class="text-center py-5">
+                <i class="bi bi-box-seam display-4 text-muted"></i>
+                <p class="text-muted mt-3">No orders yet.</p>
+                <a href="{% url 'order' %}" class="btn btn-primary rounded-pill px-5">Order Now</a>
               </div>
             {% endif %}
           </div>

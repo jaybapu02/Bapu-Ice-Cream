@@ -3,9 +3,10 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Home{% endblock %} | Bapu Ice Cream</title>
   <meta name="description" content="Bapu Ice Cream - Handcrafted artisan ice cream made with love and premium ingredients">
+  <meta name="theme-color" content="#FF4F9A">
 
   <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
 
@@ -36,18 +37,21 @@
 </head>
 <body>
 
+  <!-- Skip to main content -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
   <!-- ==================== NAVBAR ==================== -->
-  <nav class="navbar navbar-expand-lg sticky-top">
+  <nav class="navbar navbar-expand-lg sticky-top" aria-label="Main navigation">
     <div class="container">
-      <a class="navbar-brand fw-bold" href="{% url 'landing' %}">
+      <a class="navbar-brand fw-bold" href="{% url 'landing' %}" aria-label="Bapu Ice Cream Home">
         <span class="text-gradient">🍦 Bapu Ice-Cream</span>
       </a>
 
-      <div class="d-flex align-items-center gap-2 d-lg-none">
-        <a href="{% url 'cart' %}" class="cart-btn">
-          <i class="bi bi-cart3"></i>
+      <div class="d-flex align-items-center gap-1 d-lg-none">
+        <a href="{% url 'cart' %}" class="text-decoration-none position-relative p-2" aria-label="Cart">
+          <i class="bi bi-cart3 fs-5" style="color:var(--text)"></i>
           {% if cart_count > 0 %}
-            <span class="cart-badge">{{ cart_count }}</span>
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:0.6rem;">{{ cart_count }}</span>
           {% endif %}
         </a>
         <button class="theme-toggle" id="themeToggleMobile" aria-label="Toggle theme">
@@ -84,7 +88,7 @@
         </ul>
 
         <div class="d-flex align-items-center gap-2">
-          <a href="{% url 'cart' %}" class="cart-btn d-none d-lg-inline-flex">
+          <a href="{% url 'cart' %}" class="cart-btn d-none d-lg-inline-flex" aria-label="Cart">
             <i class="bi bi-cart3"></i>
             {% if cart_count > 0 %}
               <span class="cart-badge">{{ cart_count }}</span>
@@ -98,7 +102,7 @@
 
           {% if user.is_authenticated %}
             <div class="dropdown">
-              <button class="btn btn-outline-light dropdown-toggle" data-bs-toggle="dropdown">
+              <button class="btn btn-outline-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" aria-label="User menu">
                 <i class="bi bi-person-circle"></i> <span class="d-none d-md-inline">{{ user.username }}</span>
               </button>
               <ul class="dropdown-menu dropdown-menu-end">
@@ -117,8 +121,8 @@
               </ul>
             </div>
           {% else %}
-            <a href="{% url 'login' %}" class="btn btn-outline-light">Login</a>
-            <a href="{% url 'register' %}" class="btn btn-primary">Register</a>
+            <a href="{% url 'login' %}" class="btn btn-outline-light rounded-pill px-3">Login</a>
+            <a href="{% url 'register' %}" class="btn btn-primary rounded-pill px-3">Register</a>
           {% endif %}
         </div>
       </div>
@@ -155,8 +159,11 @@
               <i class="bi bi-box-arrow-in-right"></i> Login
             </a>
             <a id="loginRequiredRegisterBtn" href="{% url 'register' %}" class="btn btn-outline-primary rounded-pill py-2 fw-semibold">
-              <i class="bi bi-person-plus"></i> Register
+              <i class="bi bi-person-plus"></i> Create Account
             </a>
+            <button type="button" class="btn btn-outline-secondary rounded-pill py-2 fw-semibold" data-bs-dismiss="modal">
+              Cancel
+            </button>
           </div>
         </div>
       </div>
@@ -164,57 +171,100 @@
   </div>
 
   <!-- ==================== MAIN CONTENT ==================== -->
-  <main>
+  <main id="main-content">
     {% block body %}{% endblock %}
   </main>
 
   <!-- ==================== FOOTER ==================== -->
-  <footer class="pt-5 pb-3 mt-auto">
+  <footer class="site-footer">
     <div class="container">
-      <div class="row g-4">
-        <div class="col-lg-4">
-          <h5 class="fw-bold mb-3"><span class="text-gradient">🍦 Bapu Ice-Cream</span></h5>
-          <p class="text-white-50">Handcrafted artisan ice cream made with love and premium ingredients. Delivering happiness in every scoop since 2010.</p>
-          <div class="d-flex gap-3 fs-5">
-            <a href="#" class="text-white-50"><i class="bi bi-facebook"></i></a>
-            <a href="#" class="text-white-50"><i class="bi bi-instagram"></i></a>
-            <a href="#" class="text-white-50"><i class="bi bi-twitter-x"></i></a>
-            <a href="#" class="text-white-50"><i class="bi bi-youtube"></i></a>
+      <div class="footer-grid">
+
+        <!-- Brand -->
+        <div class="footer-section footer-brand">
+          <h5 class="footer-brand-name"><span class="text-gradient">Bapu Ice-Cream</span></h5>
+          <p class="footer-brand-desc">Handcrafted artisan ice cream made with love and premium ingredients. Delivering happiness in every scoop since 2010.</p>
+          <div class="footer-social-row">
+            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" class="footer-social" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="footer-social" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" class="footer-social" aria-label="Twitter X"><i class="bi bi-twitter-x"></i></a>
+            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" class="footer-social" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
           </div>
         </div>
-        <div class="col-lg-2 col-md-4">
-          <h6 class="fw-bold mb-3">Quick Links</h6>
-          <ul class="list-unstyled">
-            <li class="mb-2"><a href="{% url 'landing' %}" class="text-white-50 text-decoration-none">Home</a></li>
-            <li class="mb-2"><a href="{% url 'products' %}" class="text-white-50 text-decoration-none">Products</a></li>
-            <li class="mb-2"><a href="{% url 'services' %}" class="text-white-50 text-decoration-none">Services</a></li>
-            <li class="mb-2"><a href="{% url 'about' %}" class="text-white-50 text-decoration-none">About Us</a></li>
-            <li class="mb-2"><a href="{% url 'contact' %}" class="text-white-50 text-decoration-none">Contact</a></li>
+
+        <!-- Quick Links -->
+        <div class="footer-section">
+          <h6 class="footer-heading">Quick Links</h6>
+          <ul class="footer-links">
+            <li><a href="{% url 'landing' %}">Home</a></li>
+            <li><a href="{% url 'products' %}">Products</a></li>
+            <li><a href="{% url 'services' %}">Services</a></li>
+            <li><a href="{% url 'about' %}">About Us</a></li>
+            <li><a href="{% url 'contact' %}">Contact</a></li>
           </ul>
         </div>
-        <div class="col-lg-2 col-md-4">
-          <h6 class="fw-bold mb-3">More</h6>
-          <ul class="list-unstyled">
-            <li class="mb-2"><a href="{% url 'catering' %}" class="text-white-50 text-decoration-none">Catering</a></li>
-            <li class="mb-2"><a href="{% url 'order_track' %}" class="text-white-50 text-decoration-none">Track Order</a></li>
-            <li class="mb-2"><a href="{% url 'cart' %}" class="text-white-50 text-decoration-none">Cart</a></li>
-            <li class="mb-2"><a href="{% url 'wishlist' %}" class="text-white-50 text-decoration-none">Wishlist</a></li>
+
+        <!-- More -->
+        <div class="footer-section">
+          <h6 class="footer-heading">More</h6>
+          <ul class="footer-links">
+            <li><a href="{% url 'catering' %}">Catering</a></li>
+            <li><a href="{% url 'order_track' %}">Track Order</a></li>
+            <li><a href="{% url 'cart' %}">Cart</a></li>
+            <li><a href="{% url 'wishlist' %}">Wishlist</a></li>
           </ul>
         </div>
-        <div class="col-lg-4 col-md-4">
-          <h6 class="fw-bold mb-3">Subscribe</h6>
-          <p class="text-white-50 small">Get updates on new flavours and offers!</p>
-          <form method="post" action="{% url 'newsletter_subscribe' %}" class="input-group">
+
+        <!-- Stay in Touch -->
+        <div class="footer-section footer-contact-wrap">
+          <h6 class="footer-heading">Stay in Touch</h6>
+          <ul class="footer-contact">
+            <li>
+              <i class="bi bi-geo-alt"></i>
+              <span>Balasore, Missile City, Odisha</span>
+            </li>
+            <li>
+              <i class="bi bi-telephone"></i>
+              <a href="tel:+919692244008">+91 9692244008</a>
+            </li>
+            <li>
+              <i class="bi bi-envelope"></i>
+              <a href="mailto:jaychandradasbapu05@gmail.com">jaychandradasbapu05@gmail.com</a>
+            </li>
+            <li>
+              <i class="bi bi-clock"></i>
+              <span>10 AM – 10 PM (All Days)</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Newsletter -->
+        <div class="footer-section footer-newsletter-wrap">
+          <h6 class="footer-heading">Get the Scoop!</h6>
+          <p class="footer-newsletter-text">Be the first to know about new flavours and exclusive offers.</p>
+          <form method="post" action="{% url 'newsletter_subscribe' %}" class="footer-newsletter-form" id="footerNewsletter">
             {% csrf_token %}
-            <input type="email" name="email" class="form-control" placeholder="Your Email" required>
-            <button class="btn btn-primary" type="submit"><i class="bi bi-send"></i></button>
+            <div class="footer-newsletter-input-row">
+              <input type="email" name="email" class="footer-newsletter-input" placeholder="Your email address" required aria-label="Email for newsletter" autocomplete="email">
+              <button type="submit" class="footer-newsletter-btn" aria-label="Subscribe"><i class="bi bi-arrow-right"></i></button>
+            </div>
+            <small class="footer-newsletter-note">No spam, unsubscribe anytime.</small>
           </form>
         </div>
+
       </div>
-      <hr class="border-secondary my-3">
-      <p class="text-center text-white-50 small mb-0">
-        &copy; {% now "Y" %} Bapu Ice-Cream. Crafted with <i class="bi bi-heart-fill text-danger"></i> in India.
-      </p>
+
+      <div class="footer-divider"></div>
+
+      <div class="footer-bottom">
+        <p class="footer-copy">&copy; {% now "Y" %} Bapu Ice-Cream. All rights reserved. Crafted with <i class="bi bi-heart-fill" style="color:var(--primary)"></i> in India.</p>
+        <div class="footer-bottom-links">
+          <a href="#">Privacy Policy</a>
+          <span class="footer-bottom-dot"></span>
+          <a href="#">Terms &amp; Conditions</a>
+        </div>
+      </div>
+
     </div>
   </footer>
 

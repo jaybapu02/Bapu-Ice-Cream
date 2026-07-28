@@ -1,66 +1,315 @@
 {% extends "base.html" %}
-{% block title %}Contact Us{% endblock %}
+{% load static %}
+{% block title %}Contact Us — Bapu Ice Cream{% endblock %}
+{% block extra_head %}
+<meta name="description" content="Get in touch with Bapu Ice Cream. Call, email, or visit us in Balasore, Odisha. We'd love to hear from you!">
+<style>
+  .contact-hero {
+    background: var(--gradient-bg);
+    padding: clamp(2.5rem, 5vw, 4rem) 0;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+  }
+  .contact-icon-box {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-radius: 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    transition: all 0.25s ease;
+  }
+  .contact-icon-box:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+  }
+  .contact-icon-box .icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+  .form-floating-custom .form-control:focus,
+  .form-floating-custom .form-control:not(:placeholder-shown) {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(255, 79, 154, 0.12);
+  }
+  .form-floating-custom .form-control.is-invalid {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.12);
+  }
+  .form-floating-custom .form-control.is-valid {
+    border-color: var(--success);
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.12);
+  }
+  .success-state {
+    display: none;
+  }
+  .success-state.show {
+    display: block;
+  }
+  .form-state {
+    display: block;
+  }
+  .form-state.hidden {
+    display: none;
+  }
+</style>
+{% endblock %}
 {% block body %}
+
+<!-- Hero -->
+<section class="contact-hero">
+  <div class="container">
+    <span class="section-subtitle"><i class="bi bi-chat-dots"></i> Get in Touch</span>
+    <h1 class="fw-bold display-5 mb-2">We'd Love to <span class="text-gradient">Hear</span> From You</h1>
+    <p class="lead text-muted mx-auto mb-0" style="max-width:540px">
+      Have a question, feedback, or want to explore catering options? Drop us a message and we'll get back to you within 2 hours during business hours.
+    </p>
+  </div>
+</section>
 
 <section class="py-5">
   <div class="container">
-    <div class="row g-5 align-items-center">
-      <div class="col-lg-5">
-        <h1 class="fw-bold mb-3">Get in <span class="text-gradient">Touch</span></h1>
-        <p class="lead text-muted mb-4">Have a question, feedback, or catering enquiry? We'd love to hear from you!</p>
+    <div class="row g-4 g-lg-5">
+
+      <!-- Left: Contact Info -->
+      <div class="col-lg-5 order-lg-1">
         <div class="d-flex flex-column gap-3">
-          <div class="d-flex align-items-center gap-3">
-            <i class="bi bi-geo-alt fs-4 text-pink"></i>
+
+          <div class="contact-icon-box">
+            <div class="icon" style="background:rgba(255,79,154,0.1);color:var(--primary)">
+              <i class="bi bi-geo-alt"></i>
+            </div>
             <div>
-              <h6 class="fw-bold mb-0">Address</h6>
+              <h6 class="fw-bold mb-0">Visit Us</h6>
               <small class="text-muted">Balasore, Missile City, Odisha</small>
             </div>
           </div>
-          <div class="d-flex align-items-center gap-3">
-            <i class="bi bi-telephone fs-4 text-pink"></i>
+
+          <div class="contact-icon-box">
+            <div class="icon" style="background:rgba(22,163,74,0.1);color:var(--success)">
+              <i class="bi bi-telephone"></i>
+            </div>
             <div>
-              <h6 class="fw-bold mb-0">Phone</h6>
-              <small class="text-muted">+91 9692244008</small>
+              <h6 class="fw-bold mb-0">Call or WhatsApp</h6>
+              <a href="tel:+919692244008" class="text-muted text-decoration-none small hover-primary">+91 9692244008</a>
             </div>
           </div>
-          <div class="d-flex align-items-center gap-3">
-            <i class="bi bi-envelope fs-4 text-pink"></i>
+
+          <div class="contact-icon-box">
+            <div class="icon" style="background:rgba(139,92,246,0.1);color:var(--secondary)">
+              <i class="bi bi-envelope"></i>
+            </div>
             <div>
-              <h6 class="fw-bold mb-0">Email</h6>
-              <small class="text-muted">jaychandradasbapu05@gmail.com</small>
+              <h6 class="fw-bold mb-0">Email Us</h6>
+              <a href="mailto:jaychandradasbapu05@gmail.com" class="text-muted text-decoration-none small hover-primary">jaychandradasbapu05@gmail.com</a>
             </div>
           </div>
-          <div class="d-flex align-items-center gap-3">
-            <i class="bi bi-clock fs-4 text-pink"></i>
+
+          <div class="contact-icon-box">
+            <div class="icon" style="background:rgba(255,183,3,0.1);color:var(--accent)">
+              <i class="bi bi-clock"></i>
+            </div>
             <div>
-              <h6 class="fw-bold mb-0">Hours</h6>
-              <small class="text-muted">10 AM – 10 PM (All Days)</small>
+              <h6 class="fw-bold mb-0">Opening Hours</h6>
+              <small class="text-muted">10:00 AM – 10:00 PM &middot; All Days</small>
             </div>
           </div>
+
+          <div class="card border-0 shadow-sm mt-2" style="border-radius:14px;overflow:hidden">
+            <div style="background:var(--gradient-pink);padding:1.5rem;text-align:center;color:#fff">
+              <i class="bi bi-stars fs-2"></i>
+              <h5 class="fw-bold mt-2 mb-1 text-white">Quick Response</h5>
+              <p class="small mb-0" style="opacity:0.9">We typically reply within 2 hours during business hours. For urgent catering enquiries, please call us directly.</p>
+            </div>
+          </div>
+
         </div>
       </div>
-      <div class="col-lg-7">
-        <div class="card border-0 shadow-lg">
+
+      <!-- Right: Contact Form -->
+      <div class="col-lg-7 order-lg-2">
+        <div class="card border-0 shadow-lg" style="border-radius:16px">
           <div class="card-body p-4 p-lg-5">
-            <h4 class="fw-bold mb-4">Send us a message</h4>
-            <form method="post" id="contact-form" data-login-required>
-              {% csrf_token %}
-              {% for field in form %}
-                <div class="mb-3">
-                  <label class="form-label fw-semibold">{{ field.label }}</label>
-                  {{ field }}
-                  {% if field.errors %}
-                    <div class="text-danger small">{{ field.errors.0 }}</div>
-                  {% endif %}
+
+            <!-- Success message -->
+            <div class="success-state text-center py-4" id="contactSuccess">
+              <div style="font-size:3.5rem;line-height:1">✅</div>
+              <h4 class="fw-bold mt-3 mb-2">Message Sent!</h4>
+              <p class="text-muted mb-0">Thank you for reaching out. We'll get back to you within 2 hours.</p>
+            </div>
+
+            <!-- Form -->
+            <div class="form-state" id="contactFormState">
+              <h4 class="fw-bold mb-1"><i class="bi bi-pencil-square text-primary"></i> Send us a message</h4>
+              <p class="text-muted small mb-4">Fill in the details below and we'll respond promptly.</p>
+
+              <form method="post" id="contact-form" novalidate data-login-required>
+                {% csrf_token %}
+
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold" for="id_name">Full Name <span class="text-danger">*</span></label>
+                    <input type="text" name="name" id="id_name" class="form-control" placeholder="Your full name" required maxlength="100" autocomplete="name" value="{{ form.name.value|default:'' }}">
+                    <div class="invalid-feedback" id="name-error"></div>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold" for="id_phone">Phone <span class="text-danger">*</span></label>
+                    <input type="tel" name="phone" id="id_phone" class="form-control" placeholder="e.g. +919876543210" required autocomplete="tel" value="{{ form.phone.value|default:'' }}">
+                    <div class="invalid-feedback" id="phone-error"></div>
+                    <div class="form-text">Indian: +919876543210 or 9876543210</div>
+                  </div>
+                  <div class="col-md-12">
+                    <label class="form-label fw-semibold" for="id_email">Email</label>
+                    <input type="email" name="email" id="id_email" class="form-control" placeholder="your@email.com" autocomplete="email" value="{{ form.email.value|default:'' }}">
+                    <div class="invalid-feedback" id="email-error"></div>
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label fw-semibold" for="id_message">Message <span class="text-danger">*</span></label>
+                    <textarea name="message" id="id_message" class="form-control" placeholder="Tell us how we can help you..." rows="4" required minlength="10">{{ form.message.value|default:'' }}</textarea>
+                    <div class="invalid-feedback" id="message-error"></div>
+                  </div>
                 </div>
-              {% endfor %}
-              <button type="submit" class="btn btn-primary w-100 rounded-pill py-2">Send Message <i class="bi bi-send"></i></button>
-            </form>
+
+                <div class="d-flex align-items-center gap-3 mt-4">
+                  <button type="submit" class="btn btn-primary rounded-pill px-5 py-2 fw-semibold" id="contact-submit-btn">
+                    <i class="bi bi-send me-1"></i> Send Message
+                  </button>
+                  <small class="text-muted">
+                    <i class="bi bi-lock"></i> We respect your privacy
+                  </small>
+                </div>
+              </form>
+            </div>
+
           </div>
         </div>
       </div>
+
     </div>
   </div>
 </section>
 
+{% endblock %}
+
+{% block extra_scripts %}
+{% csrf_token %}
+<script>
+(function() {
+  const form = document.getElementById('contact-form');
+  if (!form) return;
+
+  const submitBtn = document.getElementById('contact-submit-btn');
+  const formState = document.getElementById('contactFormState');
+  const successState = document.getElementById('contactSuccess');
+
+  function showFieldError(fieldId, message) {
+    const field = document.getElementById(fieldId);
+    if (!field) return;
+    field.classList.add('is-invalid');
+    const errorEl = document.getElementById(fieldId + '-error');
+    if (errorEl) errorEl.textContent = message;
+  }
+
+  function clearFieldErrors() {
+    form.querySelectorAll('.is-invalid').forEach(function(el) {
+      el.classList.remove('is-invalid');
+    });
+  }
+
+  // Server-side errors from Django
+  {% if form.errors %}
+  (function() {
+    {% for field, errors in form.errors.items %}
+      {% if field == 'name' %}
+        showFieldError('id_name', '{{ errors.0|escapejs }}');
+      {% elif field == 'phone' %}
+        showFieldError('id_phone', '{{ errors.0|escapejs }}');
+      {% elif field == 'email' %}
+        showFieldError('id_email', '{{ errors.0|escapejs }}');
+      {% elif field == 'message' %}
+        showFieldError('id_message', '{{ errors.0|escapejs }}');
+      {% endif %}
+    {% endfor %}
+  })();
+  {% endif %}
+
+  // Wait for messages to show from Django
+  {% if messages %}
+  (function() {
+    // Messages already handled by base.html toast
+  })();
+  {% endif %}
+
+  form.addEventListener('submit', function(e) {
+    {% if not user.is_authenticated %}
+    // Let the base.js data-login-required handler intercept
+    return;
+    {% endif %}
+
+    e.preventDefault();
+    clearFieldErrors();
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Sending...';
+
+    var formData = new FormData(form);
+
+    fetch('', {
+      method: 'POST',
+      body: formData,
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(function(r) {
+      return r.json().then(function(data) {
+        return { status: r.status, data: data };
+      });
+    })
+    .then(function(result) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="bi bi-send me-1"></i> Send Message';
+
+      if (result.status === 200 && result.data.success !== false) {
+        formState.classList.add('hidden');
+        successState.classList.add('show');
+        successState.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else if (result.data && result.data.errors) {
+        // Show field errors
+        Object.keys(result.data.errors).forEach(function(field) {
+          var fieldId = field === 'name' ? 'id_name'
+                      : field === 'phone' ? 'id_phone'
+                      : field === 'email' ? 'id_email'
+                      : field === 'message' ? 'id_message' : null;
+          if (fieldId) {
+            showFieldError(fieldId, result.data.errors[field][0]);
+          }
+        });
+        // Focus first error
+        var firstInvalid = form.querySelector('.is-invalid');
+        if (firstInvalid) firstInvalid.focus();
+      } else {
+        showFieldError('id_message', result.data.message || 'An error occurred. Please try again.');
+      }
+    })
+    .catch(function() {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="bi bi-send me-1"></i> Send Message';
+      showFieldError('id_message', 'Network error. Please check your connection and try again.');
+    });
+  });
+
+  // Clear validation on input
+  form.querySelectorAll('input, textarea').forEach(function(el) {
+    el.addEventListener('input', function() {
+      this.classList.remove('is-invalid');
+    });
+  });
+})();
+</script>
 {% endblock %}
