@@ -1262,15 +1262,37 @@ footer .border-secondary {
 
 /* Menu Hero */
 .menu-hero {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  background: linear-gradient(135deg, #151214 0%, #1D191C 50%, #151214 100%);
   padding: clamp(2rem, 5vw, 4rem) 0;
   position: relative;
   overflow: hidden;
+  color: #FFF7ED;
+}
+
+.menu-hero::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255, 92, 168, 0.08) 0%, transparent 50%);
+  animation: heroGlow 8s ease-in-out infinite;
+}
+
+@keyframes heroGlow {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(10%, 10%); }
 }
 
 .menu-hero h1 {
   font-size: clamp(1.75rem, 5vw, 3rem);
   font-weight: 900;
+  color: #FFF7ED;
+}
+
+.menu-hero .lead {
+  color: #E5E7EB;
 }
 
 /* Services Hero */
