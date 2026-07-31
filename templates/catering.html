@@ -22,10 +22,6 @@
     padding: 0.35rem 0;
   }
   .estimate-row + .estimate-row { border-top: 1px dashed var(--input-border); }
-
-  @media (max-width: 768px) {
-    .package-card { padding: 1rem; }
-  }
 </style>
 {% endblock %}
 {% block body %}
@@ -149,24 +145,24 @@
                 <p class="text-muted small mb-4">Select the option that best fits your event</p>
                 <div class="row g-3 mb-4">
                   {% for pkg in packages %}
-                  <div class="col-md-3 col-6">
+                  <div class="col-12 col-sm-6 col-lg-3">
                     <div class="package-card{% if forloop.first %} selected{% endif %}"
                          data-value="{{ pkg.slug }}"
                          data-price="{{ pkg.price_per_guest }}"
                          data-min="{{ pkg.minimum_guests }}">
-                      <div class="icon">{{ pkg.icon }}</div>
-                      <h6 class="fw-bold">{{ pkg.name }}</h6>
+                      <div class="package-card__icon" aria-hidden="true">{{ pkg.icon }}</div>
+                      <h6 class="package-card__name">{{ pkg.name }}</h6>
                       {% if pkg.price_per_guest == 0 %}
-                        <div class="price">Tailored</div>
+                        <div class="package-card__price">Tailored</div>
                       {% else %}
-                        <div class="price">₹{{ pkg.price_per_guest|floatformat:0 }}/head</div>
+                        <div class="package-card__price">₹{{ pkg.price_per_guest|floatformat:0 }}/head</div>
                       {% endif %}
-                      <ul>
+                      <ul class="package-card__features">
                         {% for feature in pkg.features %}
                         <li>{{ feature }}</li>
                         {% endfor %}
                       </ul>
-                      <div class="text-muted small mt-2">Min {{ pkg.minimum_guests }} guests</div>
+                      <div class="package-card__min-guests">Min {{ pkg.minimum_guests }} guests</div>
                     </div>
                   </div>
                   {% empty %}
