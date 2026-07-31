@@ -2401,8 +2401,10 @@ footer .border-secondary {
   padding-top: 0.5rem;
 }
 
-/* Consistent card heights in row */
-.row.g-4 > [class*="col-"] {
+/* Consistent card heights in row (only when a column holds a single card) */
+.row.g-4 > [class*="col-"]:has(> .card:only-child),
+.row.g-4 > [class*="col-"]:has(> .product-card:only-child),
+.row.g-4 > [class*="col-"]:has(> .product-card-v2:only-child) {
   display: flex;
 }
 

@@ -3,6 +3,43 @@
 {% block title %}Checkout — Bapu Ice Cream{% endblock %}
 {% block extra_head %}
 <style>
+.back-to-cart {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: auto;
+  margin-bottom: 1rem;
+  padding: 0.5rem 1.25rem;
+  border: 2px solid var(--border);
+  border-radius: 50px;
+  background: transparent;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  text-decoration: none;
+  transition: border-color 0.3s ease, color 0.3s ease, background-color 0.3s ease, transform 0.3s ease;
+}
+
+.back-to-cart:hover,
+.back-to-cart:focus-visible {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: rgba(255, 79, 154, 0.06);
+  transform: translateY(-2px);
+}
+
+.back-to-cart i {
+  font-size: 1rem;
+}
+
+@media (max-width: 575.98px) {
+  .back-to-cart {
+    width: 100%;
+    min-height: 44px;
+  }
+}
 </style>
 {% endblock %}
 {% block body %}
@@ -80,8 +117,9 @@
       </div>
 
       <!-- Order Summary -->
-      <div class="col-lg-5">
-        <div class="card border-0 shadow-sm">
+      <div class="col-lg-5 d-flex flex-column">
+        <a href="{% url 'cart' %}" class="back-to-cart"><i class="bi bi-arrow-left"></i> Back to Cart</a>
+        <div class="card border-0 shadow-sm flex-grow-1">
           <div class="card-body p-4">
             <h5 class="fw-bold mb-3"><i class="bi bi-receipt text-primary"></i> Order Summary</h5>
             <div id="order-items">
@@ -115,9 +153,6 @@
               <span class="text-success">₹{{ grand_total }}</span>
             </div>
           </div>
-        </div>
-        <div class="d-flex gap-2 mt-3">
-          <a href="{% url 'cart' %}" class="btn btn-outline-secondary w-100 rounded-pill"><i class="bi bi-arrow-left"></i> Back to Cart</a>
         </div>
       </div>
     </div>
