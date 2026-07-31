@@ -4,7 +4,7 @@ from django import forms
 from django.core.validators import RegexValidator, MinValueValidator, MaxValueValidator, ValidationError
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Contact, CateringEnquiry, Review, Newsletter
+from .models import Contact, CateringEnquiry, CateringPackage, Review, Newsletter
 
 
 def normalize_phone(value):
@@ -92,8 +92,8 @@ class CateringEnquiryForm(forms.ModelForm):
         model = CateringEnquiry
         fields = [
             'name', 'phone', 'email', 'event_type', 'event_date',
-            'venue', 'guests', 'catering_package', 'budget',
-            'special_requirements', 'message', 'reference_image',
+            'venue', 'guests', 'catering_package',
+            'special_requirements', 'message',
         ]
         widgets = {
             'name': forms.TextInput(attrs={
@@ -118,14 +118,10 @@ class CateringEnquiryForm(forms.ModelForm):
             }),
             'guests': forms.NumberInput(attrs={
                 'class': 'form-control', 'placeholder': 'Approx. number of guests',
-                'min': 1,
+                'min': 1, 'required': True,
             }),
-            'catering_package': forms.Select(attrs={
-                'class': 'form-select',
-            }),
-            'budget': forms.NumberInput(attrs={
-                'class': 'form-control', 'placeholder': 'Approx. budget in INR',
-                'min': 0, 'step': '100',
+            'catering_package': forms.HiddenInput(attrs={
+                'id': 'id_catering_package',
             }),
             'special_requirements': forms.Textarea(attrs={
                 'class': 'form-control', 'placeholder': 'Dietary restrictions, allergies, preferred flavours, etc.',
@@ -135,11 +131,15 @@ class CateringEnquiryForm(forms.ModelForm):
                 'class': 'form-control', 'placeholder': 'Any additional details or requests...',
                 'rows': 3,
             }),
-            'reference_image': forms.FileInput(attrs={
-                'class': 'form-control',
-                'accept': 'image/*',
-            }),
         }
+
+    def __init__(self, *args, **kwargs):
+        self.packages = kwargs.pop('packages', None)
+        super().__init__(*args, **kwargs)
+        if self.packages is None:
+            self.packages = CateringPackage.objects.filter(is_active=True)
+        if not self.packages:
+            self.fields['catering_package'].required = False
 
     def clean_name(self):
         name = self.cleaned_data.get('name', '').strip()
@@ -161,27 +161,28 @@ class CateringEnquiryForm(forms.ModelForm):
                 raise forms.ValidationError("Event date cannot be in the past.")
         return date
 
+    def clean_catering_package(self):
+        slug = self.cleaned_data.get('catering_package')
+        if not self.packages:
+            return slug
+        if not slug or not self.packages.filter(slug=slug).exists():
+            raise forms.ValidationError("Please select a valid package.")
+        return slug
+
     def clean_guests(self):
         guests = self.cleaned_data.get('guests')
-        if guests and guests > 50000:
-            raise forms.ValidationError("Please contact us directly for events with 50,000+ guests.")
+        if guests:
+            if guests > 50000:
+                raise forms.ValidationError("Please contact us directly for events with 50,000+ guests.")
+            package_slug = self.data.get('catering_package')
+            if package_slug:
+                package = self.packages.filter(slug=package_slug).first()
+                if package and guests < package.minimum_guests:
+                    raise forms.ValidationError(
+                        f"Please choose at least {package.minimum_guests} guests for the "
+                        f"{package.name} package."
+                    )
         return guests
-
-    def clean_budget(self):
-        budget = self.cleaned_data.get('budget')
-        if budget and budget > 99999999:
-            raise forms.ValidationError("Please enter a realistic budget amount.")
-        return budget
-
-    def clean_reference_image(self):
-        img = self.cleaned_data.get('reference_image')
-        if img:
-            if img.size > 5 * 1024 * 1024:
-                raise forms.ValidationError("Image must be less than 5 MB.")
-            allowed = {'image/jpeg', 'image/png', 'image/webp', 'image/gif'}
-            if hasattr(img, 'content_type') and img.content_type not in allowed:
-                raise forms.ValidationError("Only JPG, PNG, WebP, or GIF images are allowed.")
-        return img
 
 
 class OrderCustomerForm(forms.Form):

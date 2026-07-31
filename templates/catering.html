@@ -9,6 +9,20 @@
   .is-valid { border-color: var(--success) !important; }
   .is-invalid { border-color: #dc3545 !important; }
 
+  .estimate-summary {
+    position: sticky;
+    top: 76px;
+  }
+
+  .estimate-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.35rem 0;
+  }
+  .estimate-row + .estimate-row { border-top: 1px dashed var(--input-border); }
+
   @media (max-width: 768px) {
     .package-card { padding: 1rem; }
   }
@@ -32,8 +46,10 @@
 <!-- Form Section -->
 <section class="py-5">
   <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-lg-10">
+    <div class="row justify-content-center g-4">
+
+      <!-- Form Column -->
+      <div class="col-lg-8">
         <div class="card border-0 shadow-lg">
           <div class="card-body p-4 p-lg-5">
 
@@ -63,7 +79,7 @@
             </div>
 
             <!-- Form -->
-            <form id="catering-form" method="post" enctype="multipart/form-data" novalidate data-login-required>
+            <form id="catering-form" method="post" novalidate data-login-required>
               {% csrf_token %}
 
               <!-- Step 1: Personal Details -->
@@ -115,9 +131,10 @@
                     <div class="invalid-feedback"></div>
                   </div>
                   <div class="col-md-6">
-                    <label class="form-label fw-semibold">{{ form.guests.label }}</label>
+                    <label class="form-label fw-semibold">{{ form.guests.label }} <span class="text-danger">*</span></label>
                     {{ form.guests }}
                     <div class="invalid-feedback"></div>
+                    <div class="form-text">Your live budget estimate updates as you type</div>
                   </div>
                 </div>
                 <div class="d-flex justify-content-between mt-4">
@@ -131,43 +148,34 @@
                 <h4 class="fw-bold mb-1"><i class="bi bi-box-seam text-primary"></i> Choose a Package</h4>
                 <p class="text-muted small mb-4">Select the option that best fits your event</p>
                 <div class="row g-3 mb-4">
-                  {% for choice_val, choice_label in form.catering_package.field.choices %}
+                  {% for pkg in packages %}
                   <div class="col-md-3 col-6">
-                    <div class="package-card{% if choice_val == 'basic' %} selected{% endif %}" data-value="{{ choice_val }}">
-                      {% if choice_val == 'basic' %}
-                        <div class="icon">🍦</div>
-                        <h6 class="fw-bold">Basic</h6>
-                        <div class="price">₹99/head</div>
-                        <ul><li>Ice Cream Tub Service</li><li>3 Classic Flavours</li><li>Disposable Cups & Spoons</li></ul>
-                      {% elif choice_val == 'standard' %}
-                        <div class="icon">🍨</div>
-                        <h6 class="fw-bold">Standard</h6>
-                        <div class="price">₹149/head</div>
-                        <ul><li>Ice Cream + Toppings Bar</li><li>6 Flavours</li><li>Premium Serving</li></ul>
-                      {% elif choice_val == 'premium' %}
-                        <div class="icon">🧁</div>
-                        <h6 class="fw-bold">Premium</h6>
-                        <div class="price">₹249/head</div>
-                        <ul><li>Full Dessert Catering</li><li>10+ Flavours</li><li>Custom Decor & Setup</li></ul>
-                      {% elif choice_val == 'custom' %}
-                        <div class="icon">✨</div>
-                        <h6 class="fw-bold">Custom</h6>
+                    <div class="package-card{% if forloop.first %} selected{% endif %}"
+                         data-value="{{ pkg.slug }}"
+                         data-price="{{ pkg.price_per_guest }}"
+                         data-min="{{ pkg.minimum_guests }}">
+                      <div class="icon">{{ pkg.icon }}</div>
+                      <h6 class="fw-bold">{{ pkg.name }}</h6>
+                      {% if pkg.price_per_guest == 0 %}
                         <div class="price">Tailored</div>
-                        <ul><li>Fully Customizable</li><li>Any Flavour Combinations</li><li>Dedicated Coordinator</li></ul>
+                      {% else %}
+                        <div class="price">₹{{ pkg.price_per_guest|floatformat:0 }}/head</div>
                       {% endif %}
+                      <ul>
+                        {% for feature in pkg.features %}
+                        <li>{{ feature }}</li>
+                        {% endfor %}
+                      </ul>
+                      <div class="text-muted small mt-2">Min {{ pkg.minimum_guests }} guests</div>
                     </div>
+                  </div>
+                  {% empty %}
+                  <div class="col-12">
+                    <div class="alert alert-warning mb-0">No catering packages are currently available. Please contact us at +91 9692244008.</div>
                   </div>
                   {% endfor %}
                 </div>
                 {{ form.catering_package }}
-                <div class="row g-3">
-                  <div class="col-md-6">
-                    <label class="form-label fw-semibold">{{ form.budget.label }}</label>
-                    {{ form.budget }}
-                    <div class="invalid-feedback"></div>
-                    <div class="form-text">Approximate total budget</div>
-                  </div>
-                </div>
                 <div class="d-flex justify-content-between mt-4">
                   <button type="button" class="btn btn-outline-secondary rounded-pill px-4 prev-step" data-prev="2"><i class="bi bi-arrow-left"></i> Back</button>
                   <button type="button" class="btn btn-primary rounded-pill px-4 next-step" data-next="4">Next <i class="bi bi-arrow-right"></i></button>
@@ -189,12 +197,6 @@
                     {{ form.message }}
                     <div class="invalid-feedback"></div>
                   </div>
-                  <div class="col-md-6">
-                    <label class="form-label fw-semibold">{{ form.reference_image.label }}</label>
-                    {{ form.reference_image }}
-                    <div class="invalid-feedback"></div>
-                    <div class="form-text">Max 5 MB. JPG, PNG, WebP, or GIF.</div>
-                  </div>
                 </div>
                 <div class="d-flex justify-content-between mt-4">
                   <button type="button" class="btn btn-outline-secondary rounded-pill px-4 prev-step" data-prev="3"><i class="bi bi-arrow-left"></i> Back</button>
@@ -208,6 +210,7 @@
           </div>
         </div>
 
+        <!-- Info tiles -->
         <div class="row g-3 mt-4 text-center">
           <div class="col-md-3 col-6">
             <div class="p-3 rounded-3" style="background:var(--border-light)">
@@ -239,6 +242,19 @@
           </div>
         </div>
       </div>
+
+      <!-- Estimate Summary Column -->
+      <div class="col-lg-4 order-first order-lg-last">
+        <div class="card border-0 shadow-lg estimate-summary">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-calculator text-primary"></i> Live Estimate</h5>
+            <div id="estimate-body">
+              <p class="text-muted small mb-0">Select a package and enter your guest count to see a live budget estimate.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
@@ -258,22 +274,151 @@
   const formErrors = document.getElementById('form-errors');
   const errorText = document.getElementById('error-text');
   const packageCards = document.querySelectorAll('.package-card');
-  const packageSelect = document.getElementById('{{ form.catering_package.id_for_label }}');
+  const packageInput = document.getElementById('id_catering_package');
+  const guestsInput = document.getElementById('id_guests');
   const submitBtn = document.getElementById('submit-btn');
+  const estimateBody = document.getElementById('estimate-body');
+  const estimateUrl = '{% url "catering_estimate" %}';
 
   let currentStep = 1;
+  let debounceTimer = null;
 
-  // Hide the actual select
-  if (packageSelect) packageSelect.style.display = 'none';
-
-  // Package card selection
-  packageCards.forEach(function(card) {
-    card.addEventListener('click', function() {
-      packageCards.forEach(function(c) { c.classList.remove('selected'); });
-      card.classList.add('selected');
-      if (packageSelect) packageSelect.value = card.dataset.value;
+  // ── Helpers ──
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
     });
+  }
+  function fmt(n) {
+    return '₹' + Number(n).toLocaleString('en-IN', {minimumFractionDigits: 0, maximumFractionDigits: 2});
+  }
+
+  // ── Estimate ──
+  function selectPackage(card) {
+    packageCards.forEach(function(c) { c.classList.remove('selected'); });
+    card.classList.add('selected');
+    if (packageInput) packageInput.value = card.dataset.value;
+    fetchEstimate();
+  }
+
+  packageCards.forEach(function(card) {
+    card.addEventListener('click', function() { selectPackage(card); });
   });
+
+  if (guestsInput) {
+    guestsInput.addEventListener('input', function() {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(fetchEstimate, 350);
+    });
+  }
+
+  function fetchEstimate() {
+    if (!estimateBody) return;
+    var slug = packageInput ? packageInput.value : '';
+    if (!slug) {
+      estimateBody.innerHTML = '<p class="text-muted small mb-0">Select a package to see your estimate.</p>';
+      return;
+    }
+    estimateBody.innerHTML = '<div class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary mb-2"></div><p class="text-muted small mb-0">Calculating…</p></div>';
+
+    var body = new URLSearchParams();
+    body.append('package', slug);
+    body.append('guests', guestsInput ? (guestsInput.value.trim() || '0') : '0');
+
+    fetch(estimateUrl, {
+      method: 'POST',
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: body.toString()
+    })
+    .then(function(response) {
+      return response.json().then(function(data) {
+        return { status: response.status, data: data };
+      });
+    })
+    .then(function(result) { renderEstimate(result.data); })
+    .catch(function() {
+      estimateBody.innerHTML = '<p class="text-muted small mb-0">Could not load the estimate. Please try again.</p>';
+    });
+  }
+
+  function renderEstimate(d) {
+    if (!estimateBody) return;
+    if (!d || !d.success) {
+      estimateBody.innerHTML = '<p class="text-muted small mb-0">Could not load the estimate. Please try again.</p>';
+      return;
+    }
+
+    var guests = Number(d.guests) || 0;
+    var html = [];
+    html.push('<div class="estimate-row">');
+    html.push('  <span class="text-muted small">Package</span>');
+    html.push('  <span class="fw-semibold text-end">' + esc(d.icon) + ' ' + esc(d.name) + '</span>');
+    html.push('</div>');
+    html.push('<div class="estimate-row">');
+    html.push('  <span class="text-muted small">Guests</span>');
+    html.push('  <span class="fw-semibold">' + (guests ? guests.toLocaleString('en-IN') : '—') + '</span>');
+    html.push('</div>');
+
+    if (d.is_custom) {
+      html.push('<hr class="my-2">');
+      html.push('<div class="alert alert-info py-2 small mb-0"><i class="bi bi-info-circle"></i> Custom packages are tailored to your event. Our team will share a detailed quote after reviewing your requirements.</div>');
+      estimateBody.innerHTML = html.join('');
+      return;
+    }
+
+    if (!guests) {
+      html.push('<hr class="my-2">');
+      html.push('<p class="text-muted small mb-0">Enter your estimated guest count to see the live budget.</p>');
+      estimateBody.innerHTML = html.join('');
+      return;
+    }
+
+    html.push('<hr class="my-2">');
+    html.push('<div class="estimate-row">');
+    html.push('  <span class="text-muted small">' + fmt(d.price_per_guest) + ' × ' + guests.toLocaleString('en-IN') + '</span>');
+    html.push('  <span>' + fmt(d.subtotal) + '</span>');
+    html.push('</div>');
+    html.push('<div class="estimate-row">');
+    html.push('  <span class="text-muted small">GST (' + d.gst_percent + '%)</span>');
+    html.push('  <span>' + fmt(d.gst) + '</span>');
+    html.push('</div>');
+    if (d.additional_charges > 0) {
+      html.push('<div class="estimate-row">');
+      html.push('  <span class="text-muted small">' + esc(d.additional_charges_label || 'Additional Charges') + '</span>');
+      html.push('  <span>' + fmt(d.additional_charges) + '</span>');
+      html.push('</div>');
+    }
+    html.push('<hr class="my-2">');
+    html.push('<div class="estimate-row">');
+    html.push('  <span class="fw-bold">Estimated Total</span>');
+    html.push('  <span class="fw-bold fs-5 text-primary">' + fmt(d.grand_total) + '</span>');
+    html.push('</div>');
+    if (d.below_minimum) {
+      html.push('<div class="alert alert-warning py-2 small mt-3 mb-0"><i class="bi bi-exclamation-triangle"></i> This package requires a minimum of ' + d.minimum_guests + ' guests.</div>');
+    }
+    estimateBody.innerHTML = html.join('');
+  }
+
+  // Preselect default package on load
+  (function preselectDefault() {
+    if (!packageInput) return;
+    var selected = packageInput.value;
+    var target = null;
+    packageCards.forEach(function(card) {
+      if (card.dataset.value === selected) target = card;
+    });
+    if (!target && packageCards.length) target = packageCards[0];
+    if (target) {
+      packageCards.forEach(function(c) { c.classList.remove('selected'); });
+      target.classList.add('selected');
+      packageInput.value = target.dataset.value;
+    }
+    fetchEstimate();
+  })();
 
   // Show step
   function showStep(step) {
@@ -295,6 +440,7 @@
     var inputs = section.querySelectorAll('input, select, textarea');
     var valid = true;
     inputs.forEach(function(input) {
+      if (input.type === 'hidden') return;
       if (input.hasAttribute('required') && !input.value.trim()) {
         input.classList.add('is-invalid');
         var fb = input.closest('.col-md-6, .col-md-3, .col-12');
@@ -342,7 +488,7 @@
 
   document.querySelectorAll('.prev-step').forEach(function(btn) {
     btn.addEventListener('click', function() {
-      showStep(parseInt(this.dataset.preview));
+      showStep(parseInt(this.dataset.prev));
     });
   });
 

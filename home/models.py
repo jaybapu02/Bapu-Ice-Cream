@@ -104,13 +104,6 @@ class Contact(models.Model):
 
 
 class CateringEnquiry(models.Model):
-    PACKAGE_CHOICES = [
-        ("basic", "Basic — Ice Cream Tub Service"),
-        ("standard", "Standard — Ice Cream + Toppings Bar"),
-        ("premium", "Premium — Full Dessert Catering"),
-        ("custom", "Custom — Tailored Package"),
-    ]
-
     name = models.CharField(max_length=100)
     phone = models.CharField(validators=[phone_regex], max_length=17)
     email = models.EmailField(blank=True, help_text="We'll send a confirmation to this email")
@@ -128,7 +121,8 @@ class CateringEnquiry(models.Model):
         null=True, blank=True, validators=[MinValueValidator(1)]
     )
     catering_package = models.CharField(
-        max_length=20, choices=PACKAGE_CHOICES, default="basic"
+        max_length=50, default="basic",
+        help_text="Slug of the selected CateringPackage"
     )
     budget = models.DecimalField(
         max_digits=10, decimal_places=2, null=True, blank=True,
@@ -155,6 +149,83 @@ class CateringEnquiry(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.get_event_type_display()} on {self.event_date}"
+
+    def get_catering_package_display(self):
+        """Prefer the admin-configured package name, fall back to raw slug."""
+        if self.catering_package:
+            pkg = CateringPackage.objects.filter(slug=self.catering_package).first()
+            if pkg:
+                return pkg.name
+        return self.catering_package
+
+
+class CateringPackage(models.Model):
+    name = models.CharField(max_length=100, help_text="Display name shown on the booking page")
+    slug = models.SlugField(max_length=100, unique=True, help_text="Stored on catering enquiries (e.g. basic, standard)")
+    short_description = models.CharField(max_length=200, blank=True)
+    description = models.TextField(blank=True)
+    icon = models.CharField(max_length=20, blank=True, help_text="Emoji icon shown on the package card (e.g. 🍦)")
+    price_per_guest = models.DecimalField(
+        max_digits=8, decimal_places=2, default=Decimal("0.00"),
+        validators=[MinValueValidator(Decimal("0.00"))],
+        help_text="Base price per guest in INR"
+    )
+    minimum_guests = models.PositiveIntegerField(
+        default=20, help_text="Minimum guest count required for this package"
+    )
+    gst_percent = models.DecimalField(
+        max_digits=5, decimal_places=2, default=Decimal("5.00"),
+        validators=[MinValueValidator(Decimal("0.00")), MaxValueValidator(Decimal("100.00"))],
+        help_text="GST percentage applied to the subtotal"
+    )
+    additional_charges = models.DecimalField(
+        max_digits=10, decimal_places=2, default=Decimal("0.00"),
+        validators=[MinValueValidator(Decimal("0.00"))],
+        help_text="Fixed add-on charge (e.g. setup fee) in INR"
+    )
+    additional_charges_label = models.CharField(
+        max_length=100, blank=True, default="",
+        help_text="Label for the add-on charge (e.g. 'Setup & Service Fee')"
+    )
+    features = models.JSONField(
+        default=list, blank=True, help_text="List of features shown on the package card"
+    )
+    is_active = models.BooleanField(default=True)
+    sort_order = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Catering Package"
+        verbose_name_plural = "Catering Packages"
+        ordering = ["sort_order", "name"]
+        indexes = [
+            models.Index(fields=["slug"]),
+            models.Index(fields=["is_active"]),
+        ]
+
+    def __str__(self):
+        return self.name
+
+    def get_estimate(self, guests):
+        """Compute a full budget breakdown for a given guest count."""
+        guests = max(int(guests or 0), 0)
+        price = self.price_per_guest or Decimal("0.00")
+        subtotal = (price * Decimal(guests)).quantize(Decimal("0.01"))
+        gst = (subtotal * self.gst_percent / Decimal("100")).quantize(Decimal("0.01"))
+        additional = self.additional_charges or Decimal("0.00")
+        grand_total = (subtotal + gst + additional).quantize(Decimal("0.01"))
+        return {
+            "guests": guests,
+            "minimum_guests": self.minimum_guests,
+            "price_per_guest": price,
+            "subtotal": subtotal,
+            "gst_percent": self.gst_percent,
+            "gst": gst,
+            "additional_charges": additional,
+            "additional_charges_label": self.additional_charges_label,
+            "grand_total": grand_total,
+        }
 
 
 class Order(models.Model):

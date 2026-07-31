@@ -13,7 +13,7 @@ from django.urls import reverse
 from django.db.models import Q, Count
 
 from .models import (
-    Contact, CateringEnquiry, Order, OrderItem,
+    Contact, CateringEnquiry, CateringPackage, Order, OrderItem,
     Product, Category, ProductImage, Review, Newsletter, Wishlist,
     Service, ServiceCategory, ServiceTestimonial, ServiceFAQ,
 )
@@ -645,7 +645,7 @@ class ContactAdmin(admin.ModelAdmin):
 class CateringEnquiryAdmin(admin.ModelAdmin):
     list_display = [
         "name", "phone", "email", "event_type", "event_date",
-        "venue", "guests", "catering_package", "budget_display",
+        "venue", "guests", "package_name", "budget_display",
         "reference_thumbnail", "created_at"
     ]
     list_filter = ["event_type", "catering_package", "event_date", "created_at"]
@@ -686,6 +686,12 @@ class CateringEnquiryAdmin(admin.ModelAdmin):
     budget_display.short_description = "Budget"
     budget_display.admin_order_field = "budget"
 
+    def package_name(self, obj):
+        name = obj.get_catering_package_display()
+        return name if name else format_html('<span class="text-muted">—</span>')
+    package_name.short_description = "Package"
+    package_name.admin_order_field = "catering_package"
+
     def reference_thumbnail(self, obj):
         if obj.reference_image:
             return format_html(
@@ -696,6 +702,44 @@ class CateringEnquiryAdmin(admin.ModelAdmin):
             )
         return format_html('<span class="text-muted">—</span>')
     reference_thumbnail.short_description = "Reference Image"
+
+
+# ──────────────────────────────────────────────
+# CateringPackage Admin
+# ──────────────────────────────────────────────
+
+@admin.register(CateringPackage, site=custom_admin_site)
+class CateringPackageAdmin(admin.ModelAdmin):
+    list_display = [
+        "sort_order", "name", "slug", "price_per_guest", "minimum_guests",
+        "gst_percent", "additional_charges", "is_active",
+    ]
+    list_editable = ["price_per_guest", "minimum_guests", "gst_percent", "additional_charges", "is_active"]
+    list_filter = ["is_active"]
+    search_fields = ["name", "slug", "short_description", "description"]
+    ordering = ["sort_order", "name"]
+    list_per_page = 25
+
+    fieldsets = [
+        (None, {
+            "fields": ["name", "slug", "icon", "is_active", "sort_order"]
+        }),
+        ("Pricing", {
+            "fields": [
+                "price_per_guest", "minimum_guests", "gst_percent",
+                "additional_charges", "additional_charges_label",
+            ]
+        }),
+        ("Content", {
+            "fields": ["short_description", "description", "features"],
+            "classes": ["collapse"]
+        }),
+        ("Timestamps", {
+            "fields": ["created_at", "updated_at"],
+            "classes": ["collapse"]
+        }),
+    ]
+    readonly_fields = ["created_at", "updated_at"]
 
 
 # ──────────────────────────────────────────────

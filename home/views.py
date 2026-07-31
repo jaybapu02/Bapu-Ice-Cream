@@ -25,6 +25,7 @@ from django_ratelimit.decorators import ratelimit
 from .models import (
     Order, OrderItem, Product, Category, Review, Newsletter, Wishlist,
     Service, ServiceCategory, ServiceTestimonial, ServiceFAQ,
+    CateringPackage,
 )
 from .forms import (
     ContactForm, CateringEnquiryForm, OrderCustomerForm,
@@ -267,9 +268,28 @@ class CateringView(LoginRequiredPostMixin, FormView):
     form_class = CateringEnquiryForm
     success_url = reverse_lazy("catering")
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['packages'] = CateringPackage.objects.filter(is_active=True)
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['packages'] = CateringPackage.objects.filter(is_active=True)
+        return context
+
     def form_valid(self, form):
         try:
-            enquiry = form.save()
+            enquiry = form.save(commit=False)
+
+            package = None
+            if enquiry.catering_package:
+                package = CateringPackage.objects.filter(
+                    slug=enquiry.catering_package, is_active=True
+                ).first()
+            if package and enquiry.guests:
+                enquiry.budget = package.get_estimate(enquiry.guests)['grand_total']
+            enquiry.save()
 
             if self.request.headers.get("X-Requested-With") == "XMLHttpRequest":
                 return JsonResponse({
@@ -366,6 +386,37 @@ class CateringView(LoginRequiredPostMixin, FormView):
 
         except Exception as e:
             logger.warning(f"Failed to send catering notification emails: {e}")
+
+
+@method_decorator(ratelimit(key='ip', rate='60/m', block=True), name='dispatch')
+class CateringEstimateView(View):
+    """AJAX endpoint returning a live budget estimate for a package + guest count."""
+
+    def post(self, request):
+        try:
+            guests = int(request.POST.get('guests', 0))
+        except (ValueError, TypeError):
+            guests = 0
+
+        package_slug = request.POST.get('package', '')
+        package = CateringPackage.objects.filter(slug=package_slug, is_active=True).first()
+        if not package:
+            return JsonResponse({"success": False, "message": "Invalid package."}, status=400)
+
+        estimate = package.get_estimate(guests)
+        estimate["success"] = True
+        estimate["name"] = package.name
+        estimate["slug"] = package.slug
+        estimate["icon"] = package.icon
+        estimate["is_custom"] = (package.price_per_guest or 0) == 0
+        estimate["below_minimum"] = bool(guests) and guests < package.minimum_guests
+
+        for key in (
+            "price_per_guest", "subtotal", "gst_percent", "gst",
+            "additional_charges", "grand_total",
+        ):
+            estimate[key] = float(estimate[key])
+        return JsonResponse(estimate)
 
 
 PRICE_TABLE = {
