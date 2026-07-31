@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator, RegexValidator
+from django.core.exceptions import ValidationError
 from django.conf import settings
 from decimal import Decimal
 
@@ -149,6 +150,15 @@ class CateringEnquiry(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.get_event_type_display()} on {self.event_date}"
+
+    def clean(self):
+        """Reject today's date or any past date for the event."""
+        if self.event_date:
+            from datetime import date as dt_date
+            if self.event_date <= dt_date.today():
+                raise ValidationError({
+                    "event_date": "Please select an event date from tomorrow onwards."
+                })
 
     def get_catering_package_display(self):
         """Prefer the admin-configured package name, fall back to raw slug."""

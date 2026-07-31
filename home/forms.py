@@ -111,7 +111,7 @@ class CateringEnquiryForm(forms.ModelForm):
                 'class': 'form-select', 'required': True,
             }),
             'event_date': forms.DateInput(attrs={
-                'class': 'form-control', 'type': 'date',
+                'class': 'form-control', 'type': 'date', 'required': True,
             }),
             'venue': forms.TextInput(attrs={
                 'class': 'form-control', 'placeholder': 'Venue name or address',
@@ -141,6 +141,14 @@ class CateringEnquiryForm(forms.ModelForm):
         if not self.packages:
             self.fields['catering_package'].required = False
 
+        from datetime import date as dt_date, timedelta
+        tomorrow = dt_date.today() + timedelta(days=1)
+        self.fields['event_date'].required = True
+        self.fields['event_date'].widget.attrs.update({
+            'required': True,
+            'min': tomorrow.isoformat(),
+        })
+
     def clean_name(self):
         name = self.cleaned_data.get('name', '').strip()
         if not name:
@@ -157,8 +165,8 @@ class CateringEnquiryForm(forms.ModelForm):
         date = self.cleaned_data.get('event_date')
         if date:
             from datetime import date as dt_date
-            if date < dt_date.today():
-                raise forms.ValidationError("Event date cannot be in the past.")
+            if date <= dt_date.today():
+                raise forms.ValidationError("Please select an event date from tomorrow onwards.")
         return date
 
     def clean_catering_package(self):
