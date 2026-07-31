@@ -45,6 +45,7 @@
   --input-focus: #FF4F9A;
   --rating: #F59E0B;
   --hero-overlay: rgba(0,0,0,0.5);
+  --section-alt-bg: #faf5ff;
 }
 
 /* ============================
@@ -90,6 +91,7 @@
   --input-border: #3D3538;
   --input-focus: #FF5CA8;
   --hero-overlay: rgba(0,0,0,0.6);
+  --section-alt-bg: #1D191C;
 }
 
 /* ============================
@@ -2168,6 +2170,12 @@ footer .border-secondary {
   letter-spacing: 1.5px;
   color: var(--primary);
   margin-bottom: 0.5rem;
+}
+
+/* Alternate section background (theme-aware: light lavender in light theme,
+   dark in dark theme) so headings using var(--text) stay high-contrast. */
+.section-best-sellers {
+  background: var(--section-alt-bg);
 }
 
 /* ============================
