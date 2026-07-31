@@ -1,4 +1,4 @@
-# 🍦 Bapu Ice Cream
+# 🍦 Jay's Creamery
 
 A full-stack **Django-based web application** for an ice cream business, featuring product browsing, ordering system, user authentication, and catering services.
 
@@ -19,7 +19,7 @@ A full-stack **Django-based web application** for an ice cream business, featuri
 ## 🏗️ Project Structure
 
 ```
-Bapu-Ice-Cream/
+Jay-s-Creamery/
 │
 ├── manage.py
 ├── db.sqlite3
@@ -74,8 +74,8 @@ Bapu-Ice-Cream/
 ### 1️⃣ Clone the repository
 
 ```bash
-git clone https://github.com/your-username/Bapu-Ice-Cream.git
-cd Bapu-Ice-Cream
+git clone https://github.com/your-username/Jay-s-Creamery.git
+cd Jay-s-Creamery
 ```
 
 ### 2️⃣ Create virtual environment

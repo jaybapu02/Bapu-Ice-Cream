@@ -15,9 +15,9 @@ logger = logging.getLogger(__name__)
 
 
 class CustomAdminSite(AdminSite):
-    site_header = "Bapu Ice Cream Admin"
-    site_title = "Bapu Ice Cream Admin Portal"
-    index_title = "Welcome to Bapu Ice Cream Admin"
+    site_header = "Jay's Creamery Admin"
+    site_title = "Jay's Creamery Admin Portal"
+    index_title = "Welcome to Jay's Creamery Admin"
 
     def get_dashboard_stats(self):
         ctx = {}

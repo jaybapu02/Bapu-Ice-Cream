@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Payment — Bapu Ice Cream{% endblock %}
+{% block title %}Payment — Jay's Creamery{% endblock %}
 {% block body %}
 
 <section class="py-5">
@@ -48,7 +48,7 @@
     "key": "{{ razorpay_key }}",
     "amount": "{{ amount }}",
     "currency": "INR",
-    "name": "Bapu Ice Cream",
+    "name": "Jay's Creamery",
     "description": "Ice Cream Order Payment",
     "order_id": "{{ razorpay_order_id }}",
     "handler": function (response) {

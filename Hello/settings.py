@@ -191,16 +191,16 @@ LOGGING = {
 # Django Jazzmin Admin Theme Configuration
 # ──────────────────────────────────────────────
 JAZZMIN_SETTINGS = {
-    "site_title": "Bapu Ice Cream Admin",
-    "site_header": "Bapu Ice Cream",
-    "site_brand": "🍦 Bapu Ice-Cream",
+    "site_title": "Jay's Creamery Admin",
+    "site_header": "Jay's Creamery",
+    "site_brand": "🍦 Jay's Creamery",
     "site_logo": None,
     "login_logo": None,
     "login_logo_dark": None,
     "site_logo_classes": "img-circle",
     "site_icon": None,
-    "welcome_sign": "Welcome to Bapu Ice Cream Admin",
-    "copyright": "Bapu Ice-Cream",
+    "welcome_sign": "Welcome to Jay's Creamery Admin",
+    "copyright": "Jay's Creamery",
     "search_model": ["home.Product", "home.Order", "auth.User"],
     "user_avatar": None,
     "topmenu_links": [

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}Checkout — Bapu Ice Cream{% endblock %}
+{% block title %}Checkout — Jay's Creamery{% endblock %}
 {% block extra_head %}
 <style>
 .back-to-cart {
@@ -216,7 +216,7 @@
               key: data.razorpay_key,
               amount: data.amount,
               currency: 'INR',
-              name: 'Bapu Ice Cream',
+              name: 'Jay\'s Creamery',
               description: 'Ice Cream Order',
               order_id: data.razorpay_order_id,
               prefill: { name: data.customer.name, contact: data.customer.phone },

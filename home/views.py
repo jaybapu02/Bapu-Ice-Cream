@@ -337,7 +337,7 @@ class CateringView(LoginRequiredPostMixin, FormView):
             subject = f"Catering Enquiry Confirmation — {enquiry.name}"
             customer_message = (
                 f"Dear {enquiry.name},\n\n"
-                f"Thank you for your catering enquiry with Bapu Ice Cream!\n\n"
+                f"Thank you for your catering enquiry with Jay's Creamery!\n\n"
                 f"Event: {enquiry.get_event_type_display()}\n"
                 f"Date: {enquiry.event_date or 'To be decided'}\n"
                 f"Venue: {enquiry.venue or 'To be decided'}\n"
@@ -346,7 +346,7 @@ class CateringView(LoginRequiredPostMixin, FormView):
                 f"We will review your requirements and contact you at {enquiry.phone} "
                 f"within 30 minutes during business hours (10 AM – 10 PM).\n\n"
                 f"If you have any urgent requests, please call us at +91 9692244008.\n\n"
-                f"Warm regards,\nBapu Ice-Cream Team"
+                f"Warm regards,\nJay's Creamery Team"
             )
 
             if enquiry.email:
@@ -489,8 +489,8 @@ def _send_order_notifications(order):
             f"Delivery: {order.delivery_type}\n"
             f"Address: {order.address}\n\n"
             f"Track your order: {settings.BASE_DIR}/order/track/?order_id={order.order_id}\n\n"
-            f"Thank you for choosing Bapu Ice Cream!\n"
-            f"— Bapu Ice-Cream Team"
+            f"Thank you for choosing Jay's Creamery!\n"
+            f"— Jay's Creamery Team"
         )
 
         if order.email:
@@ -965,7 +965,7 @@ def ping(request):
     from django.db import connection
     from django.contrib.auth import get_user_model
     from django.conf import settings
-    ctx = {"status": "ok", "app": "Bapu Ice Cream"}
+    ctx = {"status": "ok", "app": "Jay's Creamery"}
     ctx["db_vendor"] = connection.vendor
     ctx["has_db_url"] = bool(os.environ.get("DATABASE_URL"))
     try:
