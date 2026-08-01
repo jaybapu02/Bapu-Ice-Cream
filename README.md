@@ -19,7 +19,7 @@ A full-stack **Django-based web application** for an ice cream business, featuri
 ## 🏗️ Project Structure
 
 ```
-Jay-s-Creamery/
+DJANGO(ICE_CREAM)/
 │
 ├── manage.py
 ├── db.sqlite3
@@ -74,7 +74,7 @@ Jay-s-Creamery/
 ### 1️⃣ Clone the repository
 
 ```bash
-git clone https://github.com/your-username/Jay-s-Creamery.git
+git clone https://github.com/jaybapu02/Bapu-Ice-Cream.git
 cd Jay-s-Creamery
 ```
 
